@@ -2,6 +2,15 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
+## 0.1.1 — 2026-10-16
+
+Só repositório e README; nada muda no que o projeto recebe.
+
+- `.gitignore` cobre editores, estado local de agentes, `.env*` e saídas de teste.
+- README: lacres simétricos em `selos.svg` e espadas com lâmina, guarda e pomo em `hero.svg`.
+
+**Ao atualizar:** só o `toolkit.lock` muda (versão); os arquivos instalados são os mesmos da 0.1.0.
+
 ## 0.1.0 — 2026-10-16
 
 Primeira versão: o core do pipeline sai de dentro de um projeto e vira fonte única.
