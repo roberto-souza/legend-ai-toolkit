@@ -78,7 +78,8 @@ O `install.mjs`:
 
 - copia `core/` para `.claude/pipeline/core/`, `skills/pipeline-*` para `.claude/skills/` e `agents/pipeline-*.md` para `.claude/agents/`;
 - grava `.claude/pipeline/toolkit.lock` com a versão e o sha256 de cada arquivo;
-- remove o que a versão anterior instalou e a nova não traz mais;
+- remove do espaço do toolkit (`.claude/pipeline/core/`, `.claude/skills/pipeline-*`, `.claude/agents/pipeline-*.md`) tudo o que ele não traz, inclusive sobra de um core copiado à mão;
+- recusa escrever através de link simbólico e confere o `settings.json` antes de escrever qualquer coisa;
 - mescla os três ganchos do gate no `.claude/settings.json`, sem duplicar e sem apagar o que já está lá;
 - **nunca toca** em `profile.yml`, nas extensões nem em skill que não seja `pipeline-*`.
 
@@ -122,20 +123,20 @@ Opcional. Com a chave `team:` no profile, a skill `pipeline-maestro` monta um ti
 
 | Camada | Onde vive | Quem muda |
 | --- | --- | --- |
-| **Core** — contrato, formato do laudo, princípios, gate de selos | `.claude/pipeline/core/` | só o toolkit |
-| **Skills e agents `pipeline-*`** | `.claude/skills/`, `.claude/agents/` | só o toolkit |
+| **Core** — contrato, formato dos arquivos, princípios, gate de selos, guarda de deriva | `.claude/pipeline/core/` | só o toolkit |
+| **Skills e agents `pipeline-*`** | `.claude/skills/pipeline-*`, `.claude/agents/pipeline-*.md` | só o toolkit |
 | **Profile** — repositório, board, gate, idioma, stack, time | `.claude/pipeline/profile.yml` | o projeto |
 | **Extensões** — `rules.md`, `ticket.md`, `security.md`, `verification.md` | `.claude/pipeline/` | o projeto |
 | **Skills de stack e as demais** | `.claude/skills/<outra>` | o projeto |
 
-**Extensão acrescenta regra, nunca remove gate do core.** O schema do profile está em [`core/profile-schema.md`](core/profile-schema.md), e os templates em branco, em [`templates/pipeline/`](templates/pipeline/).
+O prefixo `pipeline-` é do toolkit: o instalador remove dali o que ele não traz. **Extensão acrescenta regra, nunca remove gate do core.** O schema do profile está em [`core/profile-schema.md`](core/profile-schema.md), e os templates em branco, em [`templates/pipeline/`](templates/pipeline/).
 
 ## 07 / Mude o códice
 
 **Mudar uma regra.** Toda mudança no core, numa skill ou num agent nasce **aqui**, nunca no projeto: o `verify.mjs` que o projeto roda no gate falha quando um arquivo do lock é editado à mão. O ciclo:
 
 1. PR neste repositório, com `npm test` e `npm run guard` verdes;
-2. versão nova em `VERSION`, `package.json` e `CHANGELOG.md` — quebra do contrato do profile sobe o major, recurso novo sobe o minor, correção sobe o patch;
+2. versão nova em `VERSION`, `package.json`, `CHANGELOG.md` e no badge do README — quebra do contrato do profile sobe o major, recurso novo sobe o minor, correção sobe o patch;
 3. tag `vX.Y.Z`.
 
 **Atualizar um reino.** Na raiz do projeto, cole na sessão do agente:
@@ -151,11 +152,11 @@ O agente confere a deriva, lê o changelog entre as versões, reinstala, roda o 
 ## 08 / Conte o tesouro
 
 ```bash
-node ~/caminho/do/legend-ai-toolkit/scripts/token-usage.mjs --since 2026-10-16T09:00
+node ~/caminho/do/legend-ai-toolkit/scripts/token-usage.mjs --since 2026-10-16T09:00   # na raiz do projeto
 node ~/caminho/do/legend-ai-toolkit/scripts/token-usage.mjs --project meu-projeto --days 7
 ```
 
-Estima o custo dos transcritos locais do Claude Code por papel (sessão principal, implementer, reviewer…), por sessão e por ticket. Sem `--project`, usa o nome da pasta atual. É estimativa, pelos preços públicos por milhão de tokens; não é guarda.
+Estima o custo dos transcritos locais do Claude Code por papel (sessão principal, implementer, reviewer…), por sessão e por ticket. Sem `--project`, usa o projeto da pasta atual (e os worktrees dele). É estimativa, pelos preços públicos por milhão de tokens; não é guarda.
 
 ---
 

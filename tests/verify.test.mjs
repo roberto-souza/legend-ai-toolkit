@@ -3,7 +3,7 @@
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync, copyFileSync } from 'node:fs';
+import { chmodSync, copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import * as path from 'node:path';
 import test from 'node:test';
@@ -39,6 +39,26 @@ test('a hand-edited or deleted file fails and is named', t => {
   assert.match(result.stderr, /\.claude\/pipeline\/core\/seals\.md/);
   assert.match(result.stderr, /pipeline-reviewer\.md \(missing\)/);
   assert.match(result.stderr, /Change them in the Legend AI Toolkit/);
+});
+
+test('a file added to the namespace or a lost executable bit fails', t => {
+  const directory = installed(t);
+  writeFileSync(path.join(directory, '.claude/pipeline/core/extra.md'), 'added by hand\n');
+  chmodSync(path.join(directory, '.claude/skills/pipeline-maestro/maestro-sentinel.sh'), 0o644);
+
+  const result = verify(directory);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /extra\.md \(not in the toolkit\)/);
+  assert.match(result.stderr, /maestro-sentinel\.sh \(executable bit\)/);
+});
+
+test('a malformed lock fails with a clear message', t => {
+  const directory = installed(t);
+  writeFileSync(path.join(directory, '.claude/pipeline/toolkit.lock'), 'null');
+
+  const result = verify(directory);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /toolkit\.lock is malformed/);
 });
 
 test('a project without a lock passes with a warning', t => {

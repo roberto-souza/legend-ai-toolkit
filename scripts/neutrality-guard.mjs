@@ -3,10 +3,10 @@
  * Neutrality guard: the toolkit ships to every project, so no file in it may name one of them.
  *
  * Reads `scripts/neutrality.json` (`terms`, `allow`) and fails, with file and line, on every whole-word match of a
- * term in any file of the repository outside `.git`, `node_modules` and the `allow` list. Matching ignores case and
+ * term in any file name or file of the repository outside `.git`, `node_modules` and the `allow` list. Matching ignores case and
  * accents. `findLeaks(root, config)` is exported for the spec.
  */
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, realpathSync } from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -32,10 +32,13 @@ function walk(root, directory = root) {
 }
 
 export function findLeaks(root, { terms, allow = [] }) {
-  const pattern = new RegExp(`(?<![\\p{L}\\p{N}_])(?:${terms.map(fold).join('|')})(?![\\p{L}\\p{N}_])`, 'u');
+  const pattern = new RegExp(`(?<![\\p{L}\\p{N}_])(?:${terms.map(term => fold(term).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?![\\p{L}\\p{N}_])`, 'u');
   const leaks = [];
 
   for (const file of walk(root).filter(name => !allow.includes(name)).sort()) {
+    const named = pattern.exec(fold(file));
+    if (named) leaks.push(`${file}: ${named[0]} (file name)`);
+
     const lines = readFileSync(path.join(root, file), 'utf8').split('\n');
 
     lines.forEach((line, index) => {
@@ -47,7 +50,7 @@ export function findLeaks(root, { terms, allow = [] }) {
   return leaks;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href) {
   const config = JSON.parse(readFileSync(path.join(TOOLKIT, 'scripts', 'neutrality.json'), 'utf8'));
   const leaks = findLeaks(TOOLKIT, config);
 

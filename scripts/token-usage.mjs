@@ -2,8 +2,9 @@
 /**
  * Estimate the cost of local Claude Code transcripts for one project, by agent role and by ticket.
  *
- * Reads `~/.claude/projects/<dir>` for every directory whose name contains `--project <text>` (default: the
- * name of the current directory, since Claude Code names that directory after the project path), takes the `*.jsonl`
+ * Reads `~/.claude/projects/<dir>` for the current project (Claude Code names that directory after the project path,
+ * with every character other than a letter or digit turned into `-`; worktrees share its prefix), or for every directory
+ * whose name contains `--project <text>`, encoded the same way, and takes the `*.jsonl`
  * files modified in the last `--days N` (default 14) or after `--since <ISO date-time, local time>`, recursively,
  * keeps only the lines whose `timestamp` falls in that window, and deduplicates the assistant messages by
  * `message.id`. A transcript under `subagents/agent-X.jsonl` is typed by the `agentType` of its
@@ -53,14 +54,22 @@ function readWindow() {
   return { since: Date.now() - days * 24 * 60 * 60 * 1000, label: `last ${days} days` };
 }
 
+function encode(text) {
+  return text.replace(/[^a-zA-Z0-9]/g, '-');
+}
+
 function readProject() {
   const index = process.argv.indexOf('--project');
-  if (index === -1) return basename(process.cwd());
+
+  if (index === -1) {
+    const prefix = encode(process.cwd());
+    return { label: basename(process.cwd()), matches: name => name.startsWith(prefix) };
+  }
 
   const value = process.argv[index + 1] ?? '';
   if (!value || value.startsWith('--')) usage();
 
-  return value;
+  return { label: value, matches: name => name.includes(encode(value)) };
 }
 
 function listTranscripts(directory, since) {
@@ -196,7 +205,7 @@ function main() {
   const { since, label } = readWindow();
   const project = readProject();
   const root = join(homedir(), '.claude', 'projects');
-  const directories = existsSync(root) ? readdirSync(root).filter(name => name.includes(project)) : [];
+  const directories = existsSync(root) ? readdirSync(root).filter(project.matches) : [];
   const seen = new Set();
   const transcripts = [];
 
@@ -213,7 +222,7 @@ function main() {
   const summaries = transcripts.map(transcript => ({ transcript, ...summarize(transcript) }));
   const total = summaries.reduce((sum, item) => sum + item.cost, 0);
 
-  write(`Estimated total (${project}, ${label}, ${transcripts.length} transcripts): ${money(total)}`);
+  write(`Estimated total (${project.label}, ${label}, ${transcripts.length} transcripts): ${money(total)}`);
   write();
 
   const byAgent = new Map();

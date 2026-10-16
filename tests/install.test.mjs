@@ -4,7 +4,7 @@
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import * as path from 'node:path';
 import test from 'node:test';
@@ -102,26 +102,52 @@ test('the hook merge keeps other settings and hooks and leaves an existing gate 
   assert.doesNotMatch(result.stdout, /HOOK PreToolUse Bash/);
 });
 
-test('an install removes a file the previous lock owned, and only that', t => {
+test('an install removes every other entry of the toolkit namespace, even without a previous lock, and only those', t => {
   const directory = project(t);
-  install(directory);
-  const orphan = '.claude/skills/pipeline-gone/SKILL.md';
-  write(directory, orphan, 'old');
+  const orphans = ['.claude/pipeline/core/old-contract.md', '.claude/skills/pipeline-gone/SKILL.md', '.claude/agents/pipeline-old.md'];
+  for (const file of orphans) write(directory, file, 'hand copied');
   write(directory, '.claude/skills/other/SKILL.md', 'project skill');
+  write(directory, '.claude/agents/helper.md', 'project agent');
   write(directory, 'README.md', 'project readme');
-  const lock = JSON.parse(read(directory, LOCK));
-  lock.files[orphan] = 'x';
-  lock.files['README.md'] = 'x';
-  lock.files['.claude/skills/pipeline-x/../../../README.md'] = 'x';
-  write(directory, LOCK, JSON.stringify(lock));
 
-  assert.equal(install(directory, '--check').status, 1);
+  const check = install(directory, '--check');
+  assert.equal(check.status, 1);
+  for (const file of orphans) assert.match(check.stdout, new RegExp(`REMOVE ${file.replaceAll('.', '\\.')}`));
+
   const result = install(directory);
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /REMOVE \.claude\/skills\/pipeline-gone\/SKILL\.md/);
+  for (const file of orphans) assert.ok(!existsSync(path.join(directory, file)), file);
   assert.ok(!existsSync(path.join(directory, '.claude/skills/pipeline-gone')));
   assert.equal(read(directory, '.claude/skills/other/SKILL.md'), 'project skill');
+  assert.equal(read(directory, '.claude/agents/helper.md'), 'project agent');
   assert.equal(read(directory, 'README.md'), 'project readme');
+});
+
+test('an install restores a lost executable bit and check reports it', t => {
+  const directory = project(t);
+  install(directory);
+  const script = path.join(directory, '.claude/skills/pipeline-maestro/maestro-sentinel.sh');
+  chmodSync(script, 0o644);
+
+  const check = install(directory, '--check');
+  assert.equal(check.status, 1);
+  assert.match(check.stdout, /MODE \.claude\/skills\/pipeline-maestro\/maestro-sentinel\.sh/);
+  install(directory);
+  assert.ok(statSync(script).mode & 0o100);
+});
+
+test('an install refuses to write through a symbolic link, before writing anything', t => {
+  const directory = project(t);
+  const outside = mkdtempSync(path.join(tmpdir(), 'legend-outside-'));
+  t.after(() => rmSync(outside, { recursive: true, force: true }));
+  mkdirSync(path.join(directory, '.claude/skills'), { recursive: true });
+  symlinkSync(outside, path.join(directory, '.claude/skills/pipeline-doctor'));
+
+  const result = install(directory);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /symbolic link \.claude\/skills\/pipeline-doctor/);
+  assert.ok(!existsSync(path.join(directory, LOCK)));
+  assert.deepEqual(readdirSync(outside), []);
 });
 
 test('check reports a hand-edited core file without writing, and install restores it', t => {
@@ -151,6 +177,24 @@ test('an install never touches the profile, the extensions or a skill outside pi
   install(directory);
   for (const [file, content] of Object.entries(own)) assert.equal(read(directory, file), content, file);
   assert.ok(!Object.keys(JSON.parse(read(directory, LOCK)).files).some(file => file in own));
+});
+
+test('check on a project without the toolkit exits 1 and writes nothing', t => {
+  const directory = project(t);
+  const result = install(directory, '--check');
+  assert.equal(result.status, 1);
+  assert.ok(!existsSync(path.join(directory, '.claude')));
+});
+
+test('an install refuses a settings file whose hooks have an unexpected shape', t => {
+  for (const hooks of [[], 'x', { PreToolUse: {} }, { UserPromptSubmit: ['x'] }]) {
+    const directory = project(t);
+    write(directory, SETTINGS, JSON.stringify({ hooks }));
+    const result = install(directory);
+    assert.equal(result.status, 1, JSON.stringify(hooks));
+    assert.match(result.stderr, /must be/);
+    assert.ok(!existsSync(path.join(directory, LOCK)));
+  }
 });
 
 test('an install refuses a directory that is not a git root and a malformed settings file', t => {

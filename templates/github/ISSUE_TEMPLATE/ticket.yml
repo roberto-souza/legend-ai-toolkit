@@ -1,0 +1,135 @@
+name: Ticket de desenvolvimento
+description: Unidade de trabalho executável por um agente, sem contexto implícito.
+title: "[<app>] "
+labels: ["ticket"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Antes de abrir
+
+        Este ticket vai virar **o prompt de um agente**. Ele não vai te perguntar nada,
+        não vai ler outros tickets e não vai adivinhar. O que não estiver aqui, não existe.
+
+        - **Os quatro princípios** (`.claude/pipeline/core/principles.md`): diga o que
+          reusar e ponha no "Out" o que fica de fora.
+        - **Um ticket, uma unidade.** Atravessou fronteira de app, divide.
+        - Nunca ticket separado para testes. Teste é parte do ticket.
+        - Cada ticket produz **um PR revisável**. Acima de ~400 linhas, quebre.
+        - O grafo de dependências é **declarado**, nunca inferido do título.
+
+  # Troque as opções pelas unidades reais do repositório (issues.titleUnit).
+  - type: dropdown
+    id: app
+    attributes:
+      label: App
+      description: Onde o trabalho acontece. Define qual skill de stack o agente carrega.
+      options:
+        - <app>
+        - repo (raiz, tooling, CI, docs)
+    validations:
+      required: true
+
+  - type: input
+    id: module
+    attributes:
+      label: Module
+      description: Módulo tocado; com module maps, casa com o nome do mapa. Módulo novo, `NEW: <nome>`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Qual é o problema e **por que** ele precisa ser resolvido. Não descreva a solução aqui.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: O que entra **e o que está explicitamente fora**. O "fora" é o que impede o agente de inventar.
+      placeholder: |
+        In: <o que entra>
+        Out: <o que fica de fora, e qual ticket cuida>
+    validations:
+      required: true
+
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected behavior
+      description: O que o sistema passa a fazer, do ponto de vista de quem usa.
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical
+    attributes:
+      label: Technical details
+      description: Decisões já tomadas (nomes, contratos, invariantes). O que aqui não estiver, o agente decide sozinho.
+    validations:
+      required: true
+
+  - type: textarea
+    id: files
+    attributes:
+      label: Affected files
+      description: Um por linha. É contra esta lista que o revisor mede desvio de escopo.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Checkboxes **binários e verificáveis**; o agente precisa saber quando parar.
+      value: |
+        - [ ]
+        - [ ] O gate do repositório passa
+    validations:
+      required: true
+
+  - type: textarea
+    id: tests
+    attributes:
+      label: Test scenarios
+      description:
+        Os casos que a spec precisa cobrir, incluindo os de erro. O que a política de testes não cobre com spec leva o
+        marcador (verificação) no início da linha.
+    validations:
+      required: true
+
+  - type: textarea
+    id: blocked_by
+    attributes:
+      label: Blocked by
+      description: >
+        Issues que precisam estar mergeadas antes deste ticket começar, uma por linha (`#42`). Vazio se não houver.
+        Marque também a dependência nativa do GitHub (Relationships → Blocked by).
+      render: text
+
+  - type: textarea
+    id: rollout
+    attributes:
+      label: Rollout and kill switch
+      description: Só quando existe risco. Como reverter, o que fica desligado por padrão, o que precisa de backfill.
+
+  - type: textarea
+    id: observability
+    attributes:
+      label: Observability
+      description: Eventos e logs que dizem se a feature funciona em produção.
+
+  # Troque pelas checagens do repositório; o rules.md diz o que cada uma exige.
+  - type: checkboxes
+    id: gates
+    attributes:
+      label: Repository checks
+      description: Marque o que se aplica. O agente trata cada marcado como obrigatório.
+      options:
+        - label: Muda estrutura (pasta, comando, tooling → atualiza README e instruções do repositório)
+        - label: Adiciona variável de ambiente

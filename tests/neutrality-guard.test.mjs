@@ -18,6 +18,7 @@ test('a whole-word project name is a leak, whatever the case or accent', t => {
   writeFileSync(path.join(root, 'b.md'), 'by João\n');
   writeFileSync(path.join(root, 'c.md'), 'acmeville and preacme are fine\n');
   writeFileSync(path.join(root, 'allowed.md'), 'acme\n');
+  writeFileSync(path.join(root, 'acme-notes.md'), 'neutral\n');
 
-  assert.deepEqual(findLeaks(root, CONFIG), ['a.md:2: acme', 'b.md:1: joao']);
+  assert.deepEqual(findLeaks(root, CONFIG), ['a.md:2: acme', 'acme-notes.md: acme (file name)', 'b.md:1: joao']);
 });
