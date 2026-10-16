@@ -51,7 +51,7 @@ function repository(t) {
   };
   const run = () => spawnSync(process.execPath, [path.join(directory, 'scripts/version-guard.mjs'), 'main'], { encoding: 'utf8' });
 
-  return { commit, run };
+  return { commit, directory, git, run };
 }
 
 test('the CLI refuses a core change without a new version and accepts it with one', t => {
@@ -69,4 +69,16 @@ test('the CLI refuses a core change without a new version and accepts it with on
   const accepted = run();
   assert.equal(accepted.status, 0, accepted.stderr);
   assert.match(accepted.stdout, /0\.2\.0 -> 0\.2\.1/);
+});
+
+test('the CLI sees a file moved out of core as a core change', t => {
+  const { directory, git, run } = repository(t);
+
+  mkdirSync(path.join(directory, 'docs'));
+  git('mv', 'core/seals.md', 'docs/seals.md');
+  git('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '-m', 'move');
+
+  const refused = run();
+  assert.equal(refused.status, 1);
+  assert.match(refused.stderr, /core\/seals\.md/);
 });

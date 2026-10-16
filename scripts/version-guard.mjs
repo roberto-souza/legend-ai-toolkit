@@ -44,7 +44,7 @@ function main(argv) {
     return 1;
   }
 
-  const shipped = needsBump(git(['diff', '--name-only', `${base}...HEAD`]).split('\n').filter(Boolean));
+  const shipped = needsBump(git(['diff', '--name-only', '--no-renames', `${base}...HEAD`]).split('\n').filter(Boolean));
   if (shipped.length === 0) {
     process.stdout.write('version-guard: nothing that projects receive changed\n');
     return 0;
