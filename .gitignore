@@ -1,3 +1,28 @@
+# Dependências e pacotes
 node_modules/
+*.tgz
+
+# Sistema e editores
 .DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Estado local de agentes (o toolkit é a fonte; não instala em si mesmo)
+.claude/
+.agents/
+.gemini/
+.grok/
+.codex/
+.cursor/
+
+# Ambiente e segredos
+.env
+.env.*
+
+# Saídas de execução e testes
 *.log
+coverage/
+tmp/
+.cache/
