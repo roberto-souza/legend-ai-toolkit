@@ -18,7 +18,7 @@ Com um clone local do toolkit, troque a URL pelo caminho dele. Nos passos abaixo
 
 1. **Confira o terreno.** Raiz do repositório, branch nova (`chore/<n>-atualiza-legend-ai-toolkit`), árvore limpa.
 2. **Deriva primeiro.** Rode `node .claude/pipeline/core/verify.mjs`. Se falhar, alguém editou o core aqui: leve a mudança para o toolkit (PR lá) ou descarte-a, com o humano decidindo; nunca a apague em silêncio.
-3. **Veja a diferença.** Leia, no `CHANGELOG.md` do toolkit, as entradas entre a `version` do lock e o `VERSION` novo. Major novo quebra o contrato do profile: ajuste o `profile.yml` como a entrada manda, no mesmo PR.
+3. **Veja a diferença.** Leia, no `CHANGELOG.md` do toolkit, as entradas entre a `version` do lock e o `VERSION` novo (as mesmas estão nas releases: https://github.com/roberto-souza/legend-ai-toolkit/releases). Major novo quebra o contrato do profile: ajuste o `profile.yml` como a entrada manda, no mesmo PR.
 4. **Atualize.** `node <TOOLKIT>/scripts/install.mjs --to . --check`, depois `node <TOOLKIT>/scripts/install.mjs --to .`. Revise o `git diff`: só arquivos do toolkit, o lock e, se faltava, um gancho.
 5. **Confira.** `/pipeline-doctor` e o gate do projeto, os dois verdes.
-6. **Entregue.** Commit `chore: atualiza o Legend AI Toolkit para <versão>` e PR com as entradas do changelog. O merge é do humano.
+6. **Entregue.** Commit `chore: atualiza o Legend AI Toolkit para <versão>` e PR com as entradas do changelog e o link de cada release. O merge é do humano.
