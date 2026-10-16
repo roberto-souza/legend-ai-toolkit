@@ -131,12 +131,16 @@ test('an install removes a pipeline-* symbolic link without touching its target,
   mkdirSync(path.join(directory, '.claude/skills'), { recursive: true });
   symlinkSync(outside, path.join(directory, '.claude/skills/pipeline-mine'));
   write(directory, '.claude/pipeline/core/seals.md/inner.md', 'directory in place of a file');
+  write(directory, '.claude/pipeline/core/seals.md/.DS_Store', 'finder');
+  mkdirSync(path.join(directory, '.claude/pipeline/core/format.md/empty'), { recursive: true });
 
   const result = install(directory);
   assert.equal(result.status, 0, result.stderr);
   assert.ok(!existsSync(path.join(directory, '.claude/skills/pipeline-mine')));
   assert.equal(read(outside, 'SKILL.md'), 'kept');
   assert.equal(read(directory, '.claude/pipeline/core/seals.md'), read(TOOLKIT, 'core/seals.md'));
+  assert.equal(read(directory, '.claude/pipeline/core/format.md'), read(TOOLKIT, 'core/format.md'));
+  assert.equal(install(directory, '--check').status, 0);
 });
 
 test('an install restores a lost executable bit and check reports it', t => {

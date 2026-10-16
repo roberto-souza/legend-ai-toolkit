@@ -189,13 +189,17 @@ function plan(project) {
     assertNoLink(project, target);
 
     if (!existsSync(destination)) changes.push({ action: 'ADD', target, source });
-    else if (lstatSync(destination).isDirectory()) changes.push({ action: 'ADD', target, source });
+    else if (lstatSync(destination).isDirectory()) {
+      changes.push({ action: 'REMOVE', target }, { action: 'ADD', target, source });
+    }
     else if (sha256(destination) !== sha256(source)) changes.push({ action: 'CHANGE', target, source });
     else if (isExecutable(destination) !== isExecutable(source)) changes.push({ action: 'MODE', target, source });
   }
 
+  const replaced = changes.filter(change => change.action === 'REMOVE').map(change => `${change.target}/`);
+
   for (const target of ownedFiles(project)) {
-    if (files.has(target)) continue;
+    if (files.has(target) || replaced.some(prefix => target.startsWith(prefix))) continue;
     assertNoLink(project, target, { allowLeaf: true });
     changes.push({ action: 'REMOVE', target });
   }
