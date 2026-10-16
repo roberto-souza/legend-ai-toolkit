@@ -157,3 +157,4 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23 e 24 rodam as recus
     ```
 
     Nenhuma linha `FALHA` → (a) `OK`.
+26. **Toolkit.** `.claude/pipeline/toolkit.lock` ausente → `AVISO` ("core copiado à mão; instale pelo Legend AI Toolkit, `prompts/01-instalar.md`"). Presente: `node .claude/pipeline/core/verify.mjs` sai 0 → `OK` com a versão; senão `FALHA` com os arquivos que ele lista e a ação "desfaça a edição local ou leve a mudança ao toolkit e reinstale pelo `prompts/02-atualizar.md`". O `<gate.final>` roda o `verify.mjs`, direto ou por um script do projeto → senão `AVISO` ("ponha o `verify.mjs` no gate").

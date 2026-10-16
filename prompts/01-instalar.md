@@ -25,7 +25,7 @@ Com um clone local do toolkit, troque a URL pelo caminho dele (`<clone>/prompts/
    - se a label `issues.label` não existe em `gh label list`, crie com `gh label create <label>`.
 6. **Extensões.** `rules.md`, `ticket.md` e `verification.md` entram se o projeto quiser (`verification.md` é obrigatória com `team:`); o template de cada uma está ao lado do profile. O revisor de segurança do gate exige `security.md` com `## Triggers` e `security.baseline`: sem eles, deixe `security.diffGate: false`, como o template já traz.
 7. **Outros agentes.** Se o projeto usa Codex, Gemini ou Grok, crie os symlinks `.agents/skills`, `.gemini/skills` e `.grok/skills` apontando para `../.claude/skills`.
-8. **Deriva no gate.** Ponha `node .claude/pipeline/core/verify.mjs` no gate final do projeto (o comando de `gate.final`), para que edição à mão no core falhe.
+8. **Deriva no gate.** Ponha `node .claude/pipeline/core/verify.mjs` no gate final do projeto (o comando de `gate.final`), para que edição à mão no core falhe. Se o projeto tem formatador ou linter, exclua deles `.claude/pipeline/core/` e `.claude/pipeline/toolkit.lock`: reformatar um arquivo do toolkit quebra o hash.
 9. **Instruções.** No `CLAUDE.md` (ou `AGENTS.md`) do projeto, registre: o core, as skills e os agents `pipeline-*` vêm do Legend AI Toolkit na versão do lock; não se editam aqui; atualização pelo `prompts/02-atualizar.md` do toolkit.
 10. **Confira.** Rode `/pipeline-doctor` e o gate do projeto; os dois verdes.
 11. **Entregue.** Commit convencional (`chore: instala o Legend AI Toolkit <versão>`) e PR com o resumo do passo 3 e a deriva anotada no passo 2 (inclusive o que o `REMOVE` apagou de um core copiado à mão). O merge é do humano.
