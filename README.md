@@ -140,11 +140,11 @@ O prefixo `pipeline-` é do toolkit: o instalador remove dali o que ele não tra
 3. depois do merge, uma [release do GitHub](https://github.com/roberto-souza/legend-ai-toolkit/releases) `vX.Y.Z`, com a seção do changelog como notas:
 
 ```bash
-node scripts/release-notes.mjs 0.2.1 > notas.md
-gh release create v0.2.1 --target main --title v0.2.1 --notes-file notas.md
+node scripts/release-notes.mjs X.Y.Z > notas.md
+gh release create vX.Y.Z --target main --title vX.Y.Z --notes-file notas.md
 ```
 
-O workflow `Release` recusa a release fora de `vX.Y.Z`, fora da `main`, com `VERSION` diferente ou sem seção no changelog.
+O workflow `Release` roda depois da publicação e fica vermelho com a release fora de `vX.Y.Z`, fora da `main`, com `VERSION` diferente ou sem seção no changelog; aí apague a release e a tag e refaça.
 
 **Atualizar um reino.** Na raiz do projeto, cole na sessão do agente:
 
