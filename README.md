@@ -19,7 +19,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-7a1f2b" alt="Licença MIT"></a>
-  <img src="https://img.shields.io/badge/vers%C3%A3o-0.2.0-c9a227" alt="Versão 0.2.0">
+  <img src="https://img.shields.io/badge/vers%C3%A3o-0.2.1-c9a227" alt="Versão 0.2.1">
   <img src="https://img.shields.io/badge/node-%E2%89%A522-3b2a1a" alt="Node 22 ou mais novo">
   <img src="https://img.shields.io/badge/idioma-pt--BR-2f5d50" alt="Em português do Brasil">
 </p>
@@ -135,9 +135,16 @@ O prefixo `pipeline-` é do toolkit: o instalador remove dali o que ele não tra
 
 **Mudar uma regra.** Toda mudança no core, numa skill ou num agent nasce **aqui**, nunca no projeto: o `verify.mjs` que o projeto roda no gate falha quando um arquivo do lock é editado à mão. O ciclo:
 
-1. PR neste repositório, com `npm test` e `npm run guard` verdes;
+1. PR neste repositório, com `npm test` e `npm run guard` verdes (o workflow `Validate` confere de novo);
 2. versão nova em `VERSION`, `package.json`, `CHANGELOG.md` e no badge do README — quebra do contrato do profile sobe o major, recurso novo sobe o minor, correção sobe o patch;
-3. tag `vX.Y.Z`.
+3. depois do merge, uma [release do GitHub](https://github.com/roberto-souza/legend-ai-toolkit/releases) `vX.Y.Z`, com a seção do changelog como notas:
+
+```bash
+node scripts/release-notes.mjs 0.2.1 > notas.md
+gh release create v0.2.1 --target main --title v0.2.1 --notes-file notas.md
+```
+
+O workflow `Release` recusa a release fora de `vX.Y.Z`, fora da `main`, com `VERSION` diferente ou sem seção no changelog.
 
 **Atualizar um reino.** Na raiz do projeto, cole na sessão do agente:
 

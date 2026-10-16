@@ -1,0 +1,26 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: test e guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Configura Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Testes
+        run: npm test
+      - name: Guarda de neutralidade
+        run: npm run guard
