@@ -189,7 +189,7 @@ function plan(project) {
     assertNoLink(project, target);
 
     if (!existsSync(destination)) changes.push({ action: 'ADD', target, source });
-    else if (!lstatSync(destination).isFile()) throw new Error(`${target} exists and is not a file`);
+    else if (lstatSync(destination).isDirectory()) changes.push({ action: 'ADD', target, source });
     else if (sha256(destination) !== sha256(source)) changes.push({ action: 'CHANGE', target, source });
     else if (isExecutable(destination) !== isExecutable(source)) changes.push({ action: 'MODE', target, source });
   }

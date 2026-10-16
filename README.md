@@ -59,15 +59,15 @@ Antes de chamar os agentes, o reino precisa de:
   <img src="docs/assets/readme/instalacao.svg" alt="Do códice ao reino: o repositório do toolkit, o install.mjs que copia e mescla os ganchos, o projeto com toolkit.lock e o verify.mjs que falha se o core for editado à mão" width="100%">
 </p>
 
-**Pelo agente (recomendado).** Clone o toolkit uma vez e, na raiz do seu projeto, cole na sessão do agente:
+**Pelo agente (recomendado).** Na raiz do seu projeto, cole na sessão do agente:
 
 ```text
-Leia ~/caminho/do/legend-ai-toolkit/prompts/01-instalar.md e execute a seção "O que o agente faz" neste repositório.
+Leia https://raw.githubusercontent.com/roberto-souza/legend-ai-toolkit/main/prompts/01-instalar.md e execute a seção "O que o agente faz" neste repositório.
 ```
 
-O agente confere o terreno, mostra o que vai mudar, instala, monta o `profile.yml` **lendo os fatos reais do projeto** (perguntando o que não souber), põe a guarda de deriva no seu gate, roda o `/pipeline-doctor` e abre o PR. O merge é seu. O roteiro completo está em [`prompts/01-instalar.md`](prompts/01-instalar.md).
+O agente confere o terreno, mostra o que vai mudar, instala, monta o `profile.yml` **lendo os fatos reais do projeto** (perguntando o que não souber), põe a guarda de deriva no seu gate, roda o `/pipeline-doctor` e abre o PR. O merge é seu. O agente clona o toolkit numa pasta temporária; com um clone seu, troque a URL pelo caminho local. O roteiro completo está em [`prompts/01-instalar.md`](prompts/01-instalar.md).
 
-**Direto pelo script.** Se você só quer os arquivos:
+**Direto pelo script.** Se você só quer os arquivos, com um clone de `https://github.com/roberto-souza/legend-ai-toolkit`:
 
 ```bash
 node ~/caminho/do/legend-ai-toolkit/scripts/install.mjs --to . --check   # mostra o que mudaria, sem escrever
@@ -142,7 +142,7 @@ O prefixo `pipeline-` é do toolkit: o instalador remove dali o que ele não tra
 **Atualizar um reino.** Na raiz do projeto, cole na sessão do agente:
 
 ```text
-Leia ~/caminho/do/legend-ai-toolkit/prompts/02-atualizar.md e execute a seção "O que o agente faz" neste repositório.
+Leia https://raw.githubusercontent.com/roberto-souza/legend-ai-toolkit/main/prompts/02-atualizar.md e execute a seção "O que o agente faz" neste repositório.
 ```
 
 O agente confere a deriva, lê o changelog entre as versões, reinstala, roda o doctor e abre o PR. Roteiro: [`prompts/02-atualizar.md`](prompts/02-atualizar.md).
@@ -156,7 +156,7 @@ node ~/caminho/do/legend-ai-toolkit/scripts/token-usage.mjs --since 2026-10-16T0
 node ~/caminho/do/legend-ai-toolkit/scripts/token-usage.mjs --project meu-projeto --days 7
 ```
 
-Estima o custo dos transcritos locais do Claude Code por papel (sessão principal, implementer, reviewer…), por sessão e por ticket. Sem `--project`, usa o projeto da pasta atual (e os worktrees dele). É estimativa, pelos preços públicos por milhão de tokens; não é guarda.
+Estima o custo dos transcritos locais do Claude Code por papel (sessão principal, implementer, reviewer…), por sessão e por ticket. Sem `--project`, usa o projeto da pasta atual e os worktrees dele em `.claude/worktrees/`. É estimativa, pelos preços públicos por milhão de tokens; não é guarda.
 
 ---
 

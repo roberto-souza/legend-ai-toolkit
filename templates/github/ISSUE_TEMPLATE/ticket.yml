@@ -1,7 +1,7 @@
 name: Ticket de desenvolvimento
 description: Unidade de trabalho executável por um agente, sem contexto implícito.
 title: "[<app>] "
-labels: ["ticket"]
+labels: ["ticket"] # igual a issues.label do profile
 body:
   - type: markdown
     attributes:
@@ -34,7 +34,8 @@ body:
     id: module
     attributes:
       label: Module
-      description: Módulo tocado; com module maps, casa com o nome do mapa. Módulo novo, `NEW: <nome>`.
+      description: >
+        Módulo tocado; com module maps, casa com o nome do mapa. Módulo novo, `NEW: <nome>`.
     validations:
       required: true
 

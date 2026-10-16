@@ -123,6 +123,22 @@ test('an install removes every other entry of the toolkit namespace, even withou
   assert.equal(read(directory, 'README.md'), 'project readme');
 });
 
+test('an install removes a pipeline-* symbolic link without touching its target, and replaces a directory with a file', t => {
+  const directory = project(t);
+  const outside = mkdtempSync(path.join(tmpdir(), 'legend-outside-'));
+  t.after(() => rmSync(outside, { recursive: true, force: true }));
+  write(outside, 'SKILL.md', 'kept');
+  mkdirSync(path.join(directory, '.claude/skills'), { recursive: true });
+  symlinkSync(outside, path.join(directory, '.claude/skills/pipeline-mine'));
+  write(directory, '.claude/pipeline/core/seals.md/inner.md', 'directory in place of a file');
+
+  const result = install(directory);
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(!existsSync(path.join(directory, '.claude/skills/pipeline-mine')));
+  assert.equal(read(outside, 'SKILL.md'), 'kept');
+  assert.equal(read(directory, '.claude/pipeline/core/seals.md'), read(TOOLKIT, 'core/seals.md'));
+});
+
 test('an install restores a lost executable bit and check reports it', t => {
   const directory = project(t);
   install(directory);

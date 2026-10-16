@@ -17,7 +17,7 @@ Primeira versão: o core do pipeline sai de dentro de um projeto e vira fonte ú
 
 **Verificação:**
 
-- `npm test` 28/28 e `npm run guard` verdes.
+- `npm test` 29/29 e `npm run guard` verdes.
 - Ensaio num clone local do projeto de origem:
   - `install --check` listou só `ADD .claude/pipeline/core/verify.mjs` e o lock novo;
   - `install` resultou em 1 arquivo adicionado, 0 alterados, 0 removidos e 0 ganchos novos; o `settings.json` ficou intacto;

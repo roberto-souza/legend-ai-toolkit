@@ -3,7 +3,7 @@
  * Estimate the cost of local Claude Code transcripts for one project, by agent role and by ticket.
  *
  * Reads `~/.claude/projects/<dir>` for the current project (Claude Code names that directory after the project path,
- * with every character other than a letter or digit turned into `-`; worktrees share its prefix), or for every directory
+ * with every character other than a letter or digit turned into `-`, plus its `.claude/worktrees/*`), or for every directory
  * whose name contains `--project <text>`, encoded the same way, and takes the `*.jsonl`
  * files modified in the last `--days N` (default 14) or after `--since <ISO date-time, local time>`, recursively,
  * keeps only the lines whose `timestamp` falls in that window, and deduplicates the assistant messages by
@@ -63,7 +63,7 @@ function readProject() {
 
   if (index === -1) {
     const prefix = encode(process.cwd());
-    return { label: basename(process.cwd()), matches: name => name.startsWith(prefix) };
+    return { label: basename(process.cwd()), matches: name => name === prefix || name.startsWith(`${prefix}--claude-worktrees-`) };
   }
 
   const value = process.argv[index + 1] ?? '';

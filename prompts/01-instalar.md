@@ -9,19 +9,19 @@ O projeto ainda não tem `.claude/pipeline/toolkit.lock`. Pode já ter um core c
 Cole na sessão do agente, na raiz do projeto:
 
 ```text
-Leia <TOOLKIT>/prompts/01-instalar.md e execute a seção "O que o agente faz" neste repositório.
+Leia https://raw.githubusercontent.com/roberto-souza/legend-ai-toolkit/main/prompts/01-instalar.md e execute a seção "O que o agente faz" neste repositório.
 ```
 
-`<TOOLKIT>` é o caminho do clone local do toolkit (por exemplo `~/Development/Utils/legend-ai-toolkit`). Quando o repositório tiver remoto, troque por `<URL-DO-REPO>/raw/main` e clone o toolkit numa pasta temporária no primeiro passo.
+Com um clone local do toolkit, troque a URL pelo caminho dele (`<clone>/prompts/01-instalar.md`). Nos passos abaixo, `<TOOLKIT>` é esse clone.
 
 ## O que o agente faz
 
-1. **Confira o terreno.** Esteja na raiz de um repositório git, numa branch nova (`chore/<n>-legend-ai-toolkit` ou a convenção do projeto), com a árvore limpa. Se o toolkit veio por URL, clone com `git clone --depth 1 <URL-DO-REPO> <pasta temporária>` e use essa pasta como `<TOOLKIT>`.
+1. **Confira o terreno.** Esteja na raiz de um repositório git, numa branch nova (`chore/<n>-legend-ai-toolkit` ou a convenção do projeto), com a árvore limpa. Sem clone local do toolkit, clone com `git clone --depth 1 https://github.com/roberto-souza/legend-ai-toolkit <pasta temporária>` e use essa pasta como `<TOOLKIT>`.
 2. **Veja antes de escrever.** Rode `node <TOOLKIT>/scripts/install.mjs --to . --check` e mostre o que vai mudar (`ADD`, `CHANGE`, `MODE`, `REMOVE`, `HOOK`, `LOCK`). `CHANGE` num core copiado à mão é deriva: anote para o PR. `REMOVE` apaga tudo no espaço do toolkit que ele não traz; se ali houver uma skill `pipeline-*` própria do projeto, pare e pergunte ao humano (o prefixo é do toolkit, e a skill precisa de outro nome).
 3. **Instale.** Rode `node <TOOLKIT>/scripts/install.mjs --to .`. O script copia o core, as skills e os agents `pipeline-*`, grava `.claude/pipeline/toolkit.lock` e mescla os ganchos do gate em `.claude/settings.json`. Não toca em `profile.yml`, nas extensões nem em outra skill.
 4. **Profile.** Se `.claude/pipeline/profile.yml` não existe, copie `<TOOLKIT>/templates/pipeline/profile.yml` e preencha **com fatos lidos do projeto**: `repo` pelo `gh repo view`, `board.projectId` pelo `gh project view <n> --owner <owner> --format json --jq .id`, `statusField` e `statusOptions` pelo `gh project field-list`, `gate.loop` e `gate.final` pelos scripts reais do projeto, `knowledge` pelos arquivos que existem. Chave sem fato conhecido: pergunte ao humano, nunca invente.
 5. **Board e issue.** Com board:
-   - se `issues.template` não existe, copie `<TOOLKIT>/templates/github/ISSUE_TEMPLATE/ticket.yml` para ele e troque as opções de `App` e as checagens pelas do projeto (os cabeçalhos `###` ficam como estão: as skills os leem);
+   - se `issues.template` não existe, copie `<TOOLKIT>/templates/github/ISSUE_TEMPLATE/ticket.yml` para ele e troque as opções de `App`, a label (`labels:`, igual a `issues.label`) e as checagens pelas do projeto (os cabeçalhos `###` ficam como estão: as skills os leem);
    - se a label `issues.label` não existe em `gh label list`, crie com `gh label create <label>`.
 6. **Extensões.** `rules.md`, `ticket.md` e `verification.md` entram se o projeto quiser (`verification.md` é obrigatória com `team:`); o template de cada uma está ao lado do profile. O revisor de segurança do gate exige `security.md` com `## Triggers` e `security.baseline`: sem eles, deixe `security.diffGate: false`, como o template já traz.
 7. **Outros agentes.** Se o projeto usa Codex, Gemini ou Grok, crie os symlinks `.agents/skills`, `.gemini/skills` e `.grok/skills` apontando para `../.claude/skills`.

@@ -9,10 +9,10 @@ O projeto já tem `.claude/pipeline/toolkit.lock` e o toolkit tem versão nova (
 Cole na sessão do agente, na raiz do projeto:
 
 ```text
-Leia <TOOLKIT>/prompts/02-atualizar.md e execute a seção "O que o agente faz" neste repositório.
+Leia https://raw.githubusercontent.com/roberto-souza/legend-ai-toolkit/main/prompts/02-atualizar.md e execute a seção "O que o agente faz" neste repositório.
 ```
 
-`<TOOLKIT>` é o caminho do clone local do toolkit, atualizado (`git -C <TOOLKIT> pull`). Com remoto, troque por `<URL-DO-REPO>/raw/main` e clone numa pasta temporária.
+Com um clone local do toolkit, troque a URL pelo caminho dele. Nos passos abaixo, `<TOOLKIT>` é esse clone, atualizado (`git -C <TOOLKIT> pull`); sem clone, `git clone --depth 1 https://github.com/roberto-souza/legend-ai-toolkit <pasta temporária>`.
 
 ## O que o agente faz
 
