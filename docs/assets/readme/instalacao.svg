@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240" role="img" aria-labelledby="t d">
+  <title id="t">Do códice ao reino</title>
+  <desc id="d">Quatro etapas ligadas por setas: o códice, que é este repositório; install.mjs, que copia os arquivos e mescla os ganchos; o reino, que é o projeto, com toolkit.lock; e verify.mjs, que falha se alguém editar o core à mão.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#c9a227"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="240" rx="14" fill="#2a1d14"/>
+  <rect x="10" y="10" width="1180" height="220" rx="10" fill="none" stroke="#c9a227" stroke-width="2" opacity=".6"/>
+  <g stroke="#c9a227" stroke-width="4" marker-end="url(#arrow)">
+    <line x1="270" y1="120" x2="330" y2="120"/>
+    <line x1="570" y1="120" x2="630" y2="120"/>
+    <line x1="870" y1="120" x2="930" y2="120"/>
+  </g>
+  <g font-family="Georgia, serif" text-anchor="middle">
+    <g transform="translate(150 120)">
+      <rect x="-110" y="-70" width="220" height="140" rx="10" fill="#f3e7c9" stroke="#c9a227" stroke-width="4"/>
+      <rect x="-24" y="-52" width="48" height="58" rx="3" fill="#7a1f2b"/>
+      <line x1="-14" y1="-52" x2="-14" y2="6" stroke="#f1d27a" stroke-width="3"/>
+      <text y="34" font-size="20" font-weight="700" fill="#5e1520">o códice</text>
+      <text y="56" font-size="14" fill="#3b2a1a">este repositório</text>
+    </g>
+    <g transform="translate(450 120)">
+      <rect x="-110" y="-70" width="220" height="140" rx="10" fill="#f3e7c9" stroke="#c9a227" stroke-width="4"/>
+      <text y="-20" font-size="17" font-family="Menlo, Consolas, monospace" font-weight="700" fill="#5e1520">install.mjs</text>
+      <text y="10" font-size="14" fill="#3b2a1a">copia core, skills, agents</text>
+      <text y="32" font-size="14" fill="#3b2a1a">mescla os ganchos</text>
+      <text y="54" font-size="14" fill="#3b2a1a">remove o que saiu</text>
+    </g>
+    <g transform="translate(750 120)">
+      <rect x="-110" y="-70" width="220" height="140" rx="10" fill="#f3e7c9" stroke="#c9a227" stroke-width="4"/>
+      <path d="M-30 -10 v-30 h12 v8 h10 v-8 h16 v8 h10 v-8 h12 v30 z" fill="#7a1f2b"/>
+      <text y="22" font-size="20" font-weight="700" fill="#5e1520">o reino</text>
+      <text y="46" font-size="14" font-family="Menlo, Consolas, monospace" fill="#3b2a1a">toolkit.lock</text>
+    </g>
+    <g transform="translate(1050 120)">
+      <rect x="-110" y="-70" width="220" height="140" rx="10" fill="#f3e7c9" stroke="#c9a227" stroke-width="4"/>
+      <circle cy="-28" r="20" fill="#7a1f2b" stroke="#f1d27a" stroke-width="3"/>
+      <path d="M-9 -28 l6 6 l12 -13" fill="none" stroke="#f1d27a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <text y="16" font-size="17" font-family="Menlo, Consolas, monospace" font-weight="700" fill="#5e1520">verify.mjs</text>
+      <text y="40" font-size="14" fill="#3b2a1a">falha se editarem</text>
+      <text y="58" font-size="14" fill="#3b2a1a">o core à mão</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,13 @@
+{
+  "name": "legend-ai-toolkit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pipeline de agentes de IA, do ticket ao merge, instalável em qualquer repositório.",
+  "license": "MIT",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test \"tests/*.test.mjs\"",
+    "guard": "node scripts/neutrality-guard.mjs"
+  }
+}

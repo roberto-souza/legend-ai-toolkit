@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="t d">
+  <title id="t">A campanha: do pedido ao merge</title>
+  <desc id="d">Mapa em pergaminho com uma trilha tracejada que liga cinco marcos: 1 Ticket, pelo /pipeline-ticket; 2 Execução, pelo /pipeline-execute; 3 Revisão em contexto limpo, antes do PR; 4 Selos pipeline no commit; 5 Merge pedido pelo humano.</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6ecd2"/>
+      <stop offset="1" stop-color="#e6d3a6"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="360" rx="14" fill="url(#paper)"/>
+  <rect x="10" y="10" width="1180" height="340" rx="10" fill="none" stroke="#7a1f2b" stroke-width="2" stroke-dasharray="2 6"/>
+  <text x="600" y="54" text-anchor="middle" font-family="Georgia, serif" font-size="30" font-weight="700" fill="#5e1520">A campanha</text>
+
+  <path d="M130 190 C 230 110, 300 270, 365 190 S 520 110, 600 190 S 760 270, 840 190 S 1000 110, 1070 190" fill="none" stroke="#3b2a1a" stroke-width="3" stroke-dasharray="10 9" opacity=".6"/>
+
+  <g font-family="Georgia, serif" text-anchor="middle">
+    <g transform="translate(130 190)">
+      <circle r="44" fill="#7a1f2b" stroke="#c9a227" stroke-width="5"/>
+      <rect x="-18" y="-22" width="36" height="44" rx="3" fill="#f3e7c9"/>
+      <g stroke="#7a1f2b" stroke-width="2.5"><line x1="-10" y1="-10" x2="10" y2="-10"/><line x1="-10" y1="0" x2="10" y2="0"/><line x1="-10" y1="10" x2="4" y2="10"/></g>
+      <text y="80" font-size="22" font-weight="700" fill="#3b2a1a">1 · Ticket</text>
+      <text y="104" font-size="15" fill="#5e1520">/pipeline-ticket</text>
+    </g>
+    <g transform="translate(365 190)">
+      <circle r="44" fill="#7a1f2b" stroke="#c9a227" stroke-width="5"/>
+      <path d="M-16 18 L14 -14" stroke="#f1d27a" stroke-width="6" stroke-linecap="round"/>
+      <path d="M6 -20 L20 -6" stroke="#f1d27a" stroke-width="6" stroke-linecap="round"/>
+      <text y="80" font-size="22" font-weight="700" fill="#3b2a1a">2 · Execução</text>
+      <text y="104" font-size="15" fill="#5e1520">/pipeline-execute</text>
+    </g>
+    <g transform="translate(600 190)">
+      <circle r="44" fill="#7a1f2b" stroke="#c9a227" stroke-width="5"/>
+      <circle cx="-4" cy="-4" r="14" fill="none" stroke="#f1d27a" stroke-width="5"/>
+      <line x1="6" y1="6" x2="18" y2="18" stroke="#f1d27a" stroke-width="6" stroke-linecap="round"/>
+      <text y="80" font-size="22" font-weight="700" fill="#3b2a1a">3 · Revisão</text>
+      <text y="104" font-size="15" fill="#5e1520">contexto limpo, antes do PR</text>
+    </g>
+    <g transform="translate(840 190)">
+      <circle r="44" fill="#7a1f2b" stroke="#c9a227" stroke-width="5"/>
+      <circle r="20" fill="#c9a227"/>
+      <path d="M-9 0 l6 6 l12 -13" fill="none" stroke="#5e1520" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <text y="80" font-size="22" font-weight="700" fill="#3b2a1a">4 · Selos</text>
+      <text y="104" font-size="15" fill="#5e1520">pipeline/* no commit</text>
+    </g>
+    <g transform="translate(1070 190)">
+      <circle r="44" fill="#7a1f2b" stroke="#c9a227" stroke-width="5"/>
+      <path d="M-18 16 v-20 l8 6 l10 -14 l10 14 l8 -6 v20 z" fill="#f1d27a"/>
+      <text y="80" font-size="22" font-weight="700" fill="#3b2a1a">5 · Merge</text>
+      <text y="104" font-size="15" fill="#5e1520">pedido pelo humano</text>
+    </g>
+  </g>
+</svg>

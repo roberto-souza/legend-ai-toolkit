@@ -1,0 +1,68 @@
+# Fatos deste repositório para o pipeline. Schema: .claude/pipeline/core/profile-schema.md.
+# Gerado a partir do template do Legend AI Toolkit: troque cada <valor> pelo fato real e apague o que não usar.
+profileVersion: 2
+project: <nome curto>
+repo: <owner>/<name> # igual ao `gh repo view --json nameWithOwner`
+topology: monorepo # ou polyrepo (exige workspace.repos)
+branches: { default: main, base: main }
+closing: closes-keyword
+
+# `board: none` desliga o board, e aí só o /pipeline-review-diff roda.
+# Ids lidos com `gh project field-list <number> --owner <owner> --format json`.
+board:
+  owner: <owner>
+  number: <número do Project>
+  projectId: <PVT_...>
+  statusField: <PVTSSF_...>
+  statusOptions:
+    Backlog: <id>
+    Ready: <id>
+    In progress: <id>
+    In review: <id>
+    Done: <id>
+
+issues:
+  types:
+    Bug: fix
+    Feature: feat
+    Task: [chore, docs, refactor]
+  label: ticket
+  template: .github/ISSUE_TEMPLATE/ticket.yml
+  titleUnit: app
+  milestone: optional
+
+# O gate do laço roda o que mudou; o final roda tudo, uma vez antes do push.
+gate:
+  loop: <comando do gate escopado>
+  final: <comando do gate inteiro>
+  tests: true
+  ci: none
+
+language: { artifacts: pt, conversation: pt }
+
+knowledge:
+  stackSkills: [] # ex.: - { paths: [apps/api/**], skill: <skill de stack> }
+  projectInstructions: CLAUDE.md
+  # moduleMaps: .claude/module-maps/README.md
+  # adrs: docs/adr/
+  # memories: <índice da memória versionada>
+  # verification: .claude/pipeline/verification.md # obrigatória com team:
+
+# security:
+#   baseline: <arquivo de riscos aceitos> # obrigatória com security.md
+
+# Opcional: orquestração do time pela skill pipeline-maestro (schema, seção `team`).
+# team:
+#   note: <nome da nota de estado>
+#   roles: { maestro: …, executor: …, validatorApi: …, validatorUi: … }
+#   dev: { up: <comando que sobe os apps> }
+#   credentials: { file: .env, keys: [<VARIAVEL>] }
+
+# Opcional: tipos de PR por caminho, para os selos de validação (.claude/pipeline/core/seals.md).
+# seals:
+#   kinds:
+#     api: ['<glob>']
+#     screen: ['<glob>']
+
+# Opcional: arquivos que são só prosa, para o revisor de modelo menor.
+# review: { proseOnly: ['**/*.md'] }

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" role="img" aria-labelledby="t d">
+  <title id="t">Os selos e o portão</title>
+  <desc id="d">Quatro lacres de cera sobre uma fita: review, exigido em todo PR; e2e, para PR de API; screen e ux, para PR de tela. À direita, um portão que só abre para o comando de merge com número, depois de conferir todos os selos do commit.</desc>
+  <defs>
+    <path id="wax" d="M0 -62 l14 10 l17 -2 l6 16 l15 9 l-5 16 l5 16 l-15 9 l-6 16 l-17 -2 l-14 10 l-14 -10 l-17 2 l-6 -16 l-15 -9 l5 -16 l-5 -16 l15 -9 l6 -16 l17 2 z"/>
+  </defs>
+  <rect width="1200" height="300" rx="14" fill="#2a1d14"/>
+  <rect x="10" y="10" width="1180" height="280" rx="10" fill="none" stroke="#c9a227" stroke-width="2" opacity=".6"/>
+  <rect x="40" y="135" width="780" height="30" fill="#7a1f2b" opacity=".85"/>
+  <g font-family="Georgia, serif" text-anchor="middle">
+    <g transform="translate(130 150)">
+      <use href="#wax" fill="#9b2a37" stroke="#5e1520" stroke-width="3"/>
+      <circle r="34" fill="none" stroke="#f1d27a" stroke-width="2" opacity=".7"/>
+      <text y="8" font-size="22" font-weight="700" fill="#f3e7c9">review</text>
+      <text y="102" font-size="16" fill="#f1d27a">todo PR</text>
+    </g>
+    <g transform="translate(330 150)">
+      <use href="#wax" fill="#b8891d" stroke="#6b4f10" stroke-width="3"/>
+      <circle r="34" fill="none" stroke="#3b2a1a" stroke-width="2" opacity=".5"/>
+      <text y="8" font-size="24" font-weight="700" fill="#3b2a1a">e2e</text>
+      <text y="102" font-size="16" fill="#f1d27a">PR de API</text>
+    </g>
+    <g transform="translate(530 150)">
+      <use href="#wax" fill="#2f5d50" stroke="#173029" stroke-width="3"/>
+      <circle r="34" fill="none" stroke="#f1d27a" stroke-width="2" opacity=".6"/>
+      <text y="8" font-size="22" font-weight="700" fill="#f3e7c9">screen</text>
+      <text y="102" font-size="16" fill="#f1d27a">PR de tela</text>
+    </g>
+    <g transform="translate(730 150)">
+      <use href="#wax" fill="#3d3a7a" stroke="#1f1d40" stroke-width="3"/>
+      <circle r="34" fill="none" stroke="#f1d27a" stroke-width="2" opacity=".6"/>
+      <text y="8" font-size="24" font-weight="700" fill="#f3e7c9">ux</text>
+      <text y="102" font-size="16" fill="#f1d27a">PR de tela</text>
+    </g>
+    <g transform="translate(1000 178)">
+      <path d="M-110 90 v-120 a110 80 0 0 1 220 0 v120" fill="#4a2f1f" stroke="#c9a227" stroke-width="4"/>
+      <g stroke="#c9a227" stroke-width="3" opacity=".8">
+        <line x1="-66" y1="-52" x2="-66" y2="90"/><line x1="-22" y1="-76" x2="-22" y2="90"/>
+        <line x1="22" y1="-76" x2="22" y2="90"/><line x1="66" y1="-52" x2="66" y2="90"/>
+        <line x1="-110" y1="6" x2="110" y2="6"/>
+      </g>
+      <rect x="-96" y="20" width="192" height="36" rx="5" fill="#f3e7c9"/>
+      <text y="44" font-size="16" font-family="Menlo, Consolas, monospace" fill="#5e1520">gh pr merge &lt;n&gt;</text>
+      <text y="-124" font-size="20" font-weight="700" fill="#f1d27a">o portão</text>
+    </g>
+  </g>
+</svg>

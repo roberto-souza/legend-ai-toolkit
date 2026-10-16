@@ -1,0 +1,4 @@
+{
+  "terms": ["palanque", "cotiq", "kapi", "ctg", "ctgs"],
+  "allow": ["scripts/neutrality.json"]
+}

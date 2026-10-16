@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" role="img" aria-labelledby="t d">
+  <title id="t">A távola</title>
+  <desc id="d">Mesa redonda vista de cima. Na cabeceira, o maestro, que despacha a fila do board. Ao redor: o executor, que implementa e abre o PR; o validador de API, que grava o selo e2e; o validador de tela, que grava o selo screen; e a UX, que grava o selo ux.</desc>
+  <rect width="1200" height="400" rx="14" fill="#f3e7c9"/>
+  <rect x="10" y="10" width="1180" height="380" rx="10" fill="none" stroke="#7a1f2b" stroke-width="2"/>
+  <text x="80" y="58" text-anchor="start" font-family="Georgia, serif" font-size="30" font-weight="700" fill="#5e1520">A távola</text>
+
+  <ellipse cx="600" cy="225" rx="200" ry="110" fill="#6b4226" stroke="#c9a227" stroke-width="6"/>
+  <ellipse cx="600" cy="225" rx="160" ry="80" fill="none" stroke="#c9a227" stroke-width="2" opacity=".5"/>
+  <text x="600" y="220" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#f1d27a">board</text>
+  <text x="600" y="244" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#f3e7c9" opacity=".8">Ready · In progress · In review</text>
+
+  <g font-family="Georgia, serif" text-anchor="middle">
+    <g transform="translate(600 92)">
+      <circle r="30" fill="#7a1f2b" stroke="#c9a227" stroke-width="4"/>
+      <path d="M-14 6 v-14 l6 5 l8 -11 l8 11 l6 -5 v14 z" fill="#f1d27a"/>
+      <text x="44" y="0" text-anchor="start" font-size="18" font-weight="700" fill="#3b2a1a">maestro</text>
+      <text x="44" y="20" text-anchor="start" font-size="14" fill="#5e1520">despacha a fila</text>
+    </g>
+    <g transform="translate(310 175)">
+      <circle r="30" fill="#7a1f2b" stroke="#c9a227" stroke-width="4"/>
+      <path d="M-12 12 L10 -10" stroke="#f1d27a" stroke-width="5" stroke-linecap="round"/>
+      <text y="56" font-size="18" font-weight="700" fill="#3b2a1a">executor</text>
+      <text y="78" font-size="14" fill="#5e1520">implementa e abre o PR</text>
+    </g>
+    <g transform="translate(890 175)">
+      <circle r="30" fill="#b8891d" stroke="#6b4f10" stroke-width="4"/>
+      <text y="6" font-size="16" font-weight="700" fill="#3b2a1a">e2e</text>
+      <text y="56" font-size="18" font-weight="700" fill="#3b2a1a">validador de API</text>
+      <text y="78" font-size="14" fill="#5e1520">roteiro na rota real</text>
+    </g>
+    <g transform="translate(420 345)">
+      <circle r="30" fill="#2f5d50" stroke="#173029" stroke-width="4"/>
+      <text y="6" font-size="13" font-weight="700" fill="#f3e7c9">screen</text>
+      <text x="-50" y="0" text-anchor="end" font-size="18" font-weight="700" fill="#3b2a1a">validador de tela</text>
+      <text x="-50" y="20" text-anchor="end" font-size="14" fill="#5e1520">roteiro no navegador</text>
+    </g>
+    <g transform="translate(780 345)">
+      <circle r="30" fill="#3d3a7a" stroke="#1f1d40" stroke-width="4"/>
+      <text y="6" font-size="16" font-weight="700" fill="#f3e7c9">ux</text>
+      <text x="50" y="0" text-anchor="start" font-size="18" font-weight="700" fill="#3b2a1a">UX</text>
+      <text x="50" y="20" text-anchor="start" font-size="14" fill="#5e1520">nota de usabilidade</text>
+    </g>
+  </g>
+</svg>
