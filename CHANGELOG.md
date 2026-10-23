@@ -2,6 +2,17 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
+## 0.7.0 — 2026-10-23
+
+- **Agentes de produção e validação do módulo de landing**, em pt-BR, `claude-opus-5-5`, no molde comum dos agentes de landing e sem rede:
+  - `pipeline-landing-copywriter` (esforço medium): H1 com alternativas, texto por seção, FAQ, `title` e `description`, barra móvel e a tabela afirmação → trecho da fonte; afirmação sem fonte sai do texto.
+  - `pipeline-landing-designer` (esforço high): protótipo num arquivo HTML único, com o texto literal, divergências listadas, e as regras de sem JavaScript, teclado, movimento reduzido e varredura de larguras.
+  - `pipeline-landing-validator` (esforço high): roda a rubrica no protótipo e na página construída e escreve o laudo no modelo de validação, terminando na linha `VALIDAÇÃO DE LANDING …` (ou `VALIDAÇÃO DE LANDING INTERROMPIDA: …`).
+- **Rubrica em `core/landing/rubrica.md`:** critérios Beleza, Clareza, Vendas e Desejo; escala de 0 a 10; nota (termômetro, no placar) separada de defeito (`[QUEBRADO]` em `## Quebrado`, `[AJUSTE]` em `## Correções`); oito passos fixos, com teclado e sem JavaScript em toda rodada e borda e indexação só na página; o preenchimento do laudo; as armadilhas. Quem aprova é o dono, com zero `[QUEBRADO]`.
+- A spec `tests/landing-core.test.mjs` passa a conferir a rubrica.
+
+**Ao atualizar:** nada muda no comportamento: os agentes e a rubrica só são lidos pela skill de landing, que chega na 0.9.0. O `install.mjs` copia os quatro arquivos novos (os três agentes em `.claude/agents/` e a rubrica em `.claude/pipeline/core/landing/`). O módulo só fica útil com a 0.9.0.
+
 ## 0.6.0 — 2026-10-23
 
 - **Agentes de pesquisa do módulo de landing**, em pt-BR, `claude-sonnet-5-5` com esforço medium, com rede (`WebSearch`, `WebFetch`):

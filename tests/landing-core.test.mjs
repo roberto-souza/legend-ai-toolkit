@@ -14,6 +14,7 @@ const SECTIONS = {
   'contexto-tickets.md': ['Demanda', 'Material de referência', 'Decisões do solicitante', 'Decisões do orquestrador (a confirmar)', 'Contrato entre tickets', 'Critérios fixos', 'Recorte'],
   'descoberta.md': ['Como responder', 'Itens'],
   'taste.md': ['Evitar', 'Preferir', 'Movimento', 'Arte'],
+  'rubrica.md': ['Critérios', 'Escala', 'Nota e defeito', 'Passos fixos', 'Laudo', 'Armadilhas'],
 };
 const CONTRACT = ['Arquivos e donos', 'Tokens', 'Classes e animações', 'Listas fechadas', 'Contagens', 'Política de script', 'Dependência entre tickets'];
 const HIERARCHY = 'Spec, depois protótipo, depois copy. Onde divergem, vale a mais à esquerda.';
