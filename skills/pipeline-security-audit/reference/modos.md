@@ -19,6 +19,6 @@ A classe que escapa da revisão de diff é a interação entre peças corretas i
 
 - **Julgar o diff isolado.** O buraco que importa costuma estar na soma do diff com o que já existe.
 - **Rodar o sweep como subagente.** Subagente não lança subagente: o sweep roda na sessão principal do `/pipeline-security`.
-- **Rodar comando de correção no eixo `supply-chain`.** `audit --fix`, `update`, `install` e `dedupe` mudam o lockfile
+- **Rodar comando de correção no eixo `supply-chain`.** Comandos como `audit --fix`, `update`, `install` e `dedupe` mudam o lockfile
   e as dependências instaladas: o revisor não edita arquivo nenhum, e a correção é ticket. Só
   rodam os comandos de leitura que `## Supply chain` declara.
