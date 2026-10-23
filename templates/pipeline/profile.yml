@@ -78,4 +78,4 @@ security:
 #   sweepWidths: [320, 360, 390, 414, 600, 768, 1024, 1280, 1440, 1920]
 #   lineBudget: { logic: 400, section: 1000 }
 #   formatCommand: <comando do formatador> {files}
-#   taste: <arquivo .md do projeto>
+#   taste: default # ou <arquivo .md do projeto>, que substitui o padrão

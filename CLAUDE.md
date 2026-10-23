@@ -6,7 +6,7 @@ Fonte única do pipeline de agentes (ticket, execução, revisão, selos e merge
 
 | Pasta | O que é | Vai para o projeto em |
 | --- | --- | --- |
-| `core/` | contrato do pipeline, gate de selos (`pipeline-gate.mjs`) e guarda de deriva (`verify.mjs`) | `.claude/pipeline/core/` |
+| `core/` | contrato do pipeline, gate de selos (`pipeline-gate.mjs`), guarda de deriva (`verify.mjs`) e os modelos do módulo de landing (`core/landing/`) | `.claude/pipeline/core/` |
 | `skills/pipeline-*` | as skills do fluxo | `.claude/skills/` |
 | `agents/pipeline-*.md` | os subagentes | `.claude/agents/` |
 | `templates/` | profile, extensões e issue form em branco | copiados uma vez, pelo prompt 01 |

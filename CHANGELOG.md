@@ -2,6 +2,16 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
+## 0.5.0 — 2026-10-23
+
+- **Modelos do módulo de landing em `core/landing/`**, instalados com o core: `briefing.md` (documento vivo, decisões por rodada propagadas por banner), `validacao.md` (placar, quebrado, correções, varredura nas duas direções, teclado e sem JavaScript, página no ar, parada pelo dono), `manifesto.md` (hierarquia de fontes, arquivos, versionamento do handoff) e `contexto-tickets.md` (com o bloco **Contrato entre tickets**, sete rótulos, e os critérios fixos de todo ticket de landing).
+- **Checklist de descoberta (`descoberta.md`):** 15 itens com rótulo e a etapa que os cobra (protótipo, primeiro ticket, primeiro deploy); três novos em relação ao uso à mão: conta (o que habilitar na CDN e no analytics), toolchain e redirecionamentos de borda.
+- **Gosto padrão (`taste.md`):** evitar, preferir, movimento e arte. `landing.taste: default` deixa de ser reservado e passa a valer; um caminho `.md` do projeto substitui o padrão por inteiro. A lista de reservados do schema volta a ficar vazia.
+- **Item 27 do `/pipeline-doctor`:** confere os seis modelos do core com `landing:` e os 15 rótulos da `## Descoberta` quando ela já foi preenchida (falta é aviso).
+- **Spec `tests/landing-core.test.mjs`:** fixa os arquivos, a ordem das seções, os rótulos do contrato entre tickets e do checklist, e proíbe caminho `.md` nos modelos.
+
+**Ao atualizar:** sem `landing:` no profile nada muda. Os seis arquivos de `core/landing/` chegam a todo projeto pelo `install.mjs`, parados, sem leitor. `landing.taste: default` passou a valer. O módulo só fica completo na 0.9.0 (agentes e rubrica nas 0.6.0 a 0.8.0, a skill de landing na 0.9.0), e as ferramentas opcionais de landing chegam na 0.10.0.
+
 ## 0.4.0 — 2026-10-23
 
 - **Contrato do módulo de landing (opt-in):** seção `landing` no schema do profile, com sete chaves opcionais (`app`, `handoff`, `widths`, `sweepWidths`, `lineBudget`, `formatCommand`, `taste`), os defaults e os valores suportados. `landing:` ausente desliga o módulo; presente, `app` e `handoff` são obrigatórias.

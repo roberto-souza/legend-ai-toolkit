@@ -2,7 +2,7 @@
 
 - O profile é o único lugar onde o pipeline aprende os **fatos** de um repositório: `<raiz do projeto>/.claude/pipeline/profile.yml`.
 - Cada chave diz se é obrigatória, o default quando omitida e os valores **suportados pelo core**.
-- **Valor reservado** é o que o schema prevê e o core ainda não trata. **A lista de reservados é esta:** `landing.taste: default` (até a 0.5.0, que traz o `taste.md` padrão do core).
+- **Valor reservado** é o que o schema prevê e o core ainda não trata. **A lista de reservados é esta, e hoje está vazia.**
 - Notação `<chave>` das skills: `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Notação".
 - Recusa de chave ausente, valor reservado ou combinação inválida: `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir".
 
@@ -319,7 +319,7 @@ landing:
   # sweepWidths: [320, 360, 390, 414, 600, 768, 1024, 1280, 1440, 1920]
   # lineBudget: { logic: 400, section: 1000 }
   # formatCommand: <comando do formatador> {files}
-  # taste: <arquivo .md do projeto>
+  # taste: default   # ou <arquivo .md do projeto>, que substitui o padrão
 ```
 
 | Chave | Obrigatória | Default | Suportado | O que é |
@@ -330,10 +330,11 @@ landing:
 | `landing.sweepWidths` | não | `[320, 360, 390, 414, 600, 768, 1024, 1280, 1440, 1920]` | lista não vazia de inteiros positivos, sem repetição | larguras da varredura de sobreposição e de rolagem horizontal, no protótipo e na página construída |
 | `landing.lineBudget` | não | `{ logic: 400, section: 1000 }` | mapa só com `logic` e `section`, inteiros positivos; chave omitida assume o default dela | teto de linhas **por arquivo**: `logic` para arquivo de lógica (script, hook, utilitário), `section` para arquivo de seção da página (marcação e estilo). Contado **depois** do `formatCommand` |
 | `landing.formatCommand` | não | ausente | texto com `{files}` | comando que formata arquivos do projeto; `{files}` vira a lista de arquivos. Ausente = a contagem de linhas é feita sem formatar, e o ticket de landing diz isso |
-| `landing.taste` | não | ausente | `default` (**reservado** até a 0.5.0) ou caminho terminado em `.md` | ausente = sem taste; `default` = o `taste.md` padrão do core (chega na 0.5.0); caminho = arquivo do projeto que sobrescreve o padrão |
+| `landing.taste` | não | ausente | `default` ou caminho terminado em `.md` | ausente = sem taste; `default` = o `taste` padrão do core (em `.claude/pipeline/core/landing/`); caminho = arquivo do projeto que **substitui** o padrão por inteiro |
 
 - `lineBudget` é teto por arquivo e não muda o corte de tamanho do ticket do fluxo de tickets: seção que passa desse corte vira dois tickets.
 - `{files}` não é a notação `<chave>` do pipeline: quem formata o troca, na hora, pela lista de arquivos.
+- Os modelos do módulo vêm com o core, em `.claude/pipeline/core/landing/`: briefing, validação, manifesto do handoff, contexto de tickets, checklist de descoberta e o `taste` padrão. A skill de landing copia os moldes para `<landing.handoff>`, e o projeto preenche a cópia; o checklist e o `taste` não se copiam.
 
 ## As extensões
 

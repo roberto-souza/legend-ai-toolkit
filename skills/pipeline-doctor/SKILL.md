@@ -21,8 +21,8 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24 e 27 rodam as r
 2. **Profile existe.** `.claude/pipeline/profile.yml` na raiz do projeto (`${CLAUDE_PROJECT_DIR}`). Falha → criar pelo schema.
 3. **`profileVersion` suportada** (Passo 2). Precisa ser `2`.
 4. **Chaves obrigatórias** (Passo 2) presentes. Liste as que faltam.
-5. **Valores reservados** (Passo 2; a lista está no schema, no topo) ausentes. Valor fora do conjunto suportado de uma
-   chave também é `FALHA`.
+5. **Valores reservados** (Passo 2; a lista está no schema e **hoje está vazia**) ausentes. Valor fora do conjunto
+   suportado de uma chave também é `FALHA`.
 6. **Combinações obrigatórias** (Passo 2: a tabela, e `topology: polyrepo` com `<repo>` em `workspace.repos`), cada uma `OK`
    ou `FALHA` com a chave que falta.
 7. **Irmãos** (só com `topology: polyrepo`). Para cada item de `workspace.repos` que não é `<repo>`, confira o diretório
@@ -160,14 +160,18 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24 e 27 rodam as r
 26. **Toolkit.** `.claude/pipeline/toolkit.lock` ausente → `AVISO` ("core copiado à mão; instale pelo prompt 01-instalar do Legend AI Toolkit"). Presente: `node .claude/pipeline/core/verify.mjs` sai 0 → `OK` com a versão; senão `FALHA` com os arquivos que ele lista e a ação "desfaça a edição local ou leve a mudança ao toolkit e reinstale pelo prompt 02-atualizar". Gate: leia o comando de `<gate.final>` e, a cada script do projeto que ele chama (por exemplo, `scripts` do `package.json`), o comando desse script, até achar `verify.mjs` → `OK`; senão `AVISO` ("ponha o `verify.mjs` no gate").
 27. **Landing (`landing`).** Sem `landing:` no profile → `OK`, com a nota "módulo de landing desligado". Com `landing:`,
     `FALHA` e `AVISO` nomeiam a chave ou o arquivo:
-    - (Passo 2) as recusas de `landing`, inclusive `landing.taste: default` ("valor reservado, ainda sem suporte no core");
+    - (Passo 2) as recusas de `landing`;
     - extensão `landing.md` ausente em `.claude/pipeline` → `FALHA`, ação "criar pelo template `landing.md` do toolkit e
       preencher"; presente, cada um dos sete títulos (`## Produto`, `## Público`, `## Ação`, `## Proibições`, `## Fontes`,
       `## Hospedagem`, `## Descoberta`) que falta → `FALHA` com o título;
     - `landing.md` com `<...>` do template ainda sem preencher fora de `## Descoberta` → `AVISO` com as linhas; `## Descoberta`
-      com placeholder → `OK` com a nota "descoberta ainda não feita";
+      sem nenhum rótulo `- **<Rótulo>:**` (só o placeholder) → `OK` com a nota "descoberta ainda não feita"; com rótulos, cada
+      rótulo do checklist de descoberta que falta → `AVISO` com os rótulos (a descoberta se faz aos poucos); os 15 → `OK`;
     - `<landing.app>` ou `<landing.handoff>` inexistente → `AVISO` ("o fluxo de landing cria"); `<landing.taste>` por
       caminho inexistente → `FALHA`;
+    - os seis modelos de `.claude/pipeline/core/landing/` (briefing, validacao, manifesto, contexto-tickets, descoberta, taste) existem →
+      senão `FALHA` com os nomes, ação "reinstale pelo prompt 02-atualizar"; com `landing.taste: default`, é o `taste` do
+      core que vale, e a mesma checagem o cobre;
     - nota `OK`: handoff ignorado pelo git ou versionado.
 
     Comandos, da raiz do repositório (bash):
@@ -177,9 +181,15 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24 e 27 rodam as r
     if test -f "$L"; then
       for t in Produto Público Ação Proibições Fontes Hospedagem Descoberta; do grep -qx "## $t" "$L" || echo "FALHA landing.md sem ## $t"; done
       awk '/^## /{d=($0=="## Descoberta")} !d && /<[^>]*>/{print "AVISO "FILENAME":"FNR": "$0}' "$L"
-      awk '/^## /{d=($0=="## Descoberta")} d && /<[^>]*>/' "$L" | grep -q . && echo "OK descoberta ainda não feita"
+      D=$(awk '/^## /{d=($0=="## Descoberta"); next} d' "$L")
+      if ! printf '%s\n' "$D" | grep -q '^- \*\*[^*]*:\*\*'; then echo "OK descoberta ainda não feita"; else
+        for r in Domínio Deploy Stack Spec Guardas Segurança Privacidade Medição Bots Marca Convenções Segredos Conta Toolchain Redirecionamentos; do
+          printf '%s\n' "$D" | grep -q "^- \*\*$r:\*\*" || echo "AVISO descoberta sem o rótulo $r"
+        done
+      fi
     else echo "FALHA landing.md ausente"; fi
     test -d "<landing.app>" || echo "AVISO <landing.app> não existe"; test -d "<landing.handoff>" || echo "AVISO <landing.handoff> não existe"
-    [ -z "<landing.taste>" ] || test -f "<landing.taste>" || echo "FALHA landing.taste: <landing.taste> não existe"
+    for f in .claude/pipeline/core/landing/{briefing,validacao,manifesto,contexto-tickets,descoberta,taste}.md; do test -f "$f" || echo "FALHA $f ausente"; done
+    case "<landing.taste>" in ""|default) ;; *) test -f "<landing.taste>" || echo "FALHA landing.taste: <landing.taste> não existe" ;; esac
     git check-ignore -q "<landing.handoff>/" && echo "handoff ignorado pelo git" || echo "handoff versionado"
     ```
