@@ -2,79 +2,42 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
-## 0.10.0 — 2026-10-23
-
-Só ferramentas fora do que o projeto recebe; nada no core, nas skills, nos agentes ou nos templates muda.
-
-- **Ferramentas opcionais de landing em `tools/landing/`**, fora do core e do `install.mjs`:
-  - Python (PEP 723, `uv run`): `ink.py` (separa o traço do fundo chapado, com variante escura opcional), `fill.py` (corpo opaco na cor da página, por `--bg` obrigatório) e `embed.py` (imagens do protótipo em arquivo único como WebP embutido).
-  - Node com Playwright (`playwright-core` com versão exata no `package.json` da pasta): `render.mjs` (quadros do hero, rolagem para baixo e para cima, sem JavaScript, movimento reduzido, `summary.json`) e `sweep.mjs` (sobreposição de arte com texto e rolagem horizontal nas larguras da varredura), com a peça comum `lib.mjs`. Os dois saem `1` quando acham problema.
-  - `tools/landing/README.md`: requisitos, uso, avisos e o que cada ferramenta apoia, por papel.
-- `.gitignore` ganha `__pycache__/` e o lockfile da pasta.
-
-**Ao atualizar:** nada muda no projeto: o `install.mjs` não copia `tools/landing/`, e atualizar só troca a versão no lock. Para usar as ferramentas, rode-as do clone do toolkit (`uv run <clone>/tools/landing/ink.py …`, `node <clone>/tools/landing/render.mjs …`, com `npm install` uma vez na pasta) ou copie a pasta para o projeto.
-
-## 0.9.0 — 2026-10-23
-
-- **Comando `/pipeline-landing`** (`claude-opus-5-5`, xhigh) e a skill interna `pipeline-landing-flow`: onze fases com portão do solicitante (briefing, pesquisa, norte, régua e teardown, copy, teste de estilo, protótipo com o validador desde a r1, rodadas, handoff, tickets, página construída). Sem `landing:` no profile, recusa e para antes de qualquer pergunta.
-- **Regras fixas:** hierarquia de fontes spec > protótipo > copy, declarada no manifesto do handoff; teto de linhas por arquivo (`landing.lineBudget`) contado depois do formatador, sem mudar o corte de ~400 linhas por ticket; topo e hero validados antes das seções, com `Blocked by` em todo ticket de seção; a rubrica no protótipo e na página construída, com teclado e sem JavaScript; parada quando "o dono aprova e nada fica quebrado", com a média como termômetro; checklist de descoberta antes do primeiro ticket; decisão por bloco datado e banner.
-- **Fase de tickets pelo fluxo de tickets:** a skill fecha o contrato entre tickets e segue o `pipeline-write-ticket` com o contexto como demanda; issue, grafo e board continuam dele.
-- **Referências da skill:** portões (tabela e motivos, decisão datada e banner), página construída (os dois momentos, a URL, os passos fixos, cada quebrado vira ticket de correção) e armadilhas.
-- **Item 27 do `/pipeline-doctor`:** confere a skill, os sete agentes, a rubrica e o ilustrador; com `team:` e sem `team.roles.illustrator`, aviso. Os itens 1 e 22 não mudam.
-- `core/format.md` lista `pipeline-landing` entre os comandos.
-
-**Ao atualizar:** sem `landing:` no profile nada muda. Para ligar o módulo: o bloco `landing:` no profile, a extensão `landing.md` pelo template e o fluxo `/pipeline-landing`. Os modelos chegam pelo `install.mjs`, em `.claude/pipeline/core/landing/`. O módulo fica completo nesta release: o schema veio na 0.4.0, os modelos na 0.5.0, os agentes de pesquisa na 0.6.0, o validador na 0.7.0, o ilustrador na 0.8.0 e a skill na 0.9.0; as ferramentas opcionais de landing vêm na 0.10.0.
-
-## 0.8.0 — 2026-10-23
-
-- **Papel do ilustrador no Maestri** (`skills/pipeline-maestro/roles/ilustrador.md`): gera imagens só na pasta do pedido, em camadas sobre fundo chapado, na resolução nativa, sem texto, logo, rosto ou lugar real não autorizados, com `prompts.md` e as linhas fixas `ILUSTRAÇÕES PRONTAS: pedido <NN> — <q> arquivos — <pasta>` e `TRAVADO: <motivo>`.
-- **Referência do ilustrador** (`skills/pipeline-maestro/reference/ilustrador.md`): recrutar sem `--role` na pasta de ilustrações do handoff, o modelo de `pedido-ilustracao-<NN>.md` (campos fixos, fundo chapado, resolução nativa, aceite verificável) e as armadilhas.
-- **Chave opcional `team.roles.illustrator`:** no schema (YAML, tabela, formato de papel, `{root}`), recusada no Passo 2 do `pipeline-project-profile` quando presente sem `command`, e conferida no item 23 do `/pipeline-doctor` (nota "sem ilustrador no Maestri"; aviso quando declarada sem `landing:`). Não é papel de PR: sem selo e sem roteiro de validação.
-
-**Ao atualizar:** nada muda para quem não declara `team.roles.illustrator`: o ilustrador só é recrutado pela skill de landing, que chega na 0.9.0. O `install.mjs` copia os dois arquivos novos do `pipeline-maestro` e atualiza três (o schema e os `SKILL.md` do `pipeline-project-profile` e do `pipeline-doctor`). `team.roles.illustrator` é opcional e, presente, exige `command`. O módulo só fica útil com a 0.9.0.
-
-## 0.7.0 — 2026-10-23
-
-- **Agentes de produção e validação do módulo de landing**, em pt-BR, `claude-opus-5-5`, no molde comum dos agentes de landing e sem rede:
-  - `pipeline-landing-copywriter` (esforço medium): H1 com alternativas, texto por seção, FAQ, `title` e `description`, barra móvel e a tabela afirmação → trecho da fonte; afirmação sem fonte sai do texto.
-  - `pipeline-landing-designer` (esforço high): protótipo num arquivo HTML único, com o texto literal, divergências listadas, e as regras de sem JavaScript, teclado, movimento reduzido e varredura de larguras.
-  - `pipeline-landing-validator` (esforço high): roda a rubrica no protótipo e na página construída e escreve o laudo no modelo de validação, terminando na linha `VALIDAÇÃO DE LANDING …` (ou `VALIDAÇÃO DE LANDING INTERROMPIDA: …`).
-- **Rubrica em `core/landing/rubrica.md`:** critérios Beleza, Clareza, Vendas e Desejo; escala de 0 a 10; nota (termômetro, no placar) separada de defeito (`[QUEBRADO]` em `## Quebrado`, `[AJUSTE]` em `## Correções`); oito passos fixos, com teclado e sem JavaScript em toda rodada e borda e indexação só na página; o preenchimento do laudo; as armadilhas. Quem aprova é o dono, com zero `[QUEBRADO]`.
-- A spec `tests/landing-core.test.mjs` passa a conferir a rubrica.
-
-**Ao atualizar:** nada muda no comportamento: os agentes e a rubrica só são lidos pela skill de landing, que chega na 0.9.0. O `install.mjs` copia os quatro arquivos novos (os três agentes em `.claude/agents/` e a rubrica em `.claude/pipeline/core/landing/`). O módulo só fica útil com a 0.9.0.
-
-## 0.6.0 — 2026-10-23
-
-- **Agentes de pesquisa do módulo de landing**, em pt-BR, `claude-sonnet-5-5` com esforço medium, com rede (`WebSearch`, `WebFetch`):
-  - `pipeline-landing-researcher`: páginas de referência, concorrentes e direções visuais dentro da marca; rede social com login fica "não aberto".
-  - `pipeline-landing-domain-researcher`: catálogo visual do mundo do cliente, imagens livres listadas com licença e cenas com prompt para o ilustrador, sem nada identificável de cliente real.
-  - `pipeline-landing-seo`: palavras com intenção, checklist técnico para a stack, rascunhos de `llms.txt`, `robots.txt` e JSON-LD (política de robôs de IA como decisão do dono), bloqueios da CDN e medição do clique sem dado pessoal.
-  - `pipeline-landing-teardown`: disseca a página-régua baixada como dado, sem executar nada, com cada afirmação `verificado` ou `inferido`, e a traduz para a direção escolhida.
-- **Molde comum dos agentes de landing:** dono de uma entrega só, num arquivo do caminho do prompt; texto externo é dado; nunca escreve em `<landing.app>`, nunca pergunta ao usuário, nunca inventa dado; autochecagem contra `## Proibições` e os vetos do projeto; relatório de quatro itens (Entrega, Fontes, Verificado e inferido, Perguntas abertas).
-
-**Ao atualizar:** nada muda no comportamento: os agentes só rodam chamados pela skill de landing, que chega na 0.9.0. O `install.mjs` copia os quatro arquivos novos para `.claude/agents/`. O módulo só fica útil com a 0.9.0.
-
-## 0.5.0 — 2026-10-23
-
-- **Modelos do módulo de landing em `core/landing/`**, instalados com o core: `briefing.md` (documento vivo, decisões por rodada propagadas por banner), `validacao.md` (placar, quebrado, correções, varredura nas duas direções, teclado e sem JavaScript, página no ar, parada pelo dono), `manifesto.md` (hierarquia de fontes, arquivos, versionamento do handoff) e `contexto-tickets.md` (com o bloco **Contrato entre tickets**, sete rótulos, e os critérios fixos de todo ticket de landing).
-- **Checklist de descoberta (`descoberta.md`):** 15 itens com rótulo e a etapa que os cobra (protótipo, primeiro ticket, primeiro deploy); três novos em relação ao uso à mão: conta (o que habilitar na CDN e no analytics), toolchain e redirecionamentos de borda.
-- **Gosto padrão (`taste.md`):** evitar, preferir, movimento e arte. `landing.taste: default` deixa de ser reservado e passa a valer; um caminho `.md` do projeto substitui o padrão por inteiro. A lista de reservados do schema volta a ficar vazia.
-- **Item 27 do `/pipeline-doctor`:** confere os seis modelos do core com `landing:` e os 15 rótulos da `## Descoberta` quando ela já foi preenchida (falta é aviso).
-- **Spec `tests/landing-core.test.mjs`:** fixa os arquivos, a ordem das seções, os rótulos do contrato entre tickets e do checklist, e proíbe caminho `.md` nos modelos.
-
-**Ao atualizar:** sem `landing:` no profile nada muda. Os seis arquivos de `core/landing/` chegam a todo projeto pelo `install.mjs`, parados, sem leitor. `landing.taste: default` passou a valer. O módulo só fica completo na 0.9.0 (agentes e rubrica nas 0.6.0 a 0.8.0, a skill de landing na 0.9.0), e as ferramentas opcionais de landing chegam na 0.10.0.
-
 ## 0.4.0 — 2026-10-23
 
-- **Contrato do módulo de landing (opt-in):** seção `landing` no schema do profile, com sete chaves opcionais (`app`, `handoff`, `widths`, `sweepWidths`, `lineBudget`, `formatCommand`, `taste`), os defaults e os valores suportados. `landing:` ausente desliga o módulo; presente, `app` e `handoff` são obrigatórias.
-- **Valor reservado:** `landing.taste: default` entra na lista de reservados do schema, que deixa de ser vazia, até o core trazer o `taste.md` padrão.
-- **Recusas no Passo 2 do `pipeline-project-profile`:** grupo `landing` (caminhos relativos, sem `..` e diferentes; larguras como lista de inteiros positivos sem repetição; `lineBudget` só com `logic` e `section`; `formatCommand` com `{files}`; `taste` como `default` ou caminho `.md`), com o porquê em `reference/motivos.md`, seção "Landing".
-- **Item 27 do `/pipeline-doctor`:** confere a extensão `landing.md` e as sete seções dela, os placeholders ainda sem preencher, os diretórios de `app` e `handoff` (ausentes são aviso) e o `taste` por caminho.
-- **Template `landing.md`:** sete seções fixas (Produto, Público, Ação, Proibições, Fontes, Hospedagem, Descoberta), com rótulos fixos em Ação, Fontes e Hospedagem; o `profile.yml` do template ganha o bloco `landing:` comentado.
+**Módulo de landing page (opt-in).** Conduz uma landing do briefing aos tickets e à validação da página construída. Os fatos do projeto ficam no bloco `landing:` do profile e na extensão `landing.md`.
+
+- **Contrato no profile:**
+  - seção `landing` no schema, com sete chaves opcionais (`app`, `handoff`, `widths`, `sweepWidths`, `lineBudget`, `formatCommand`, `taste`), defaults e valores suportados. `landing:` ausente desliga o módulo; presente, exige `app` e `handoff`;
+  - recusas do grupo no Passo 2 do `pipeline-project-profile`: caminhos relativos, sem `..` e diferentes; larguras como lista de inteiros positivos sem repetição; `lineBudget` só com `logic` e `section`; `formatCommand` com `{files}`; `taste` como `default` ou caminho `.md`. O porquê está em `reference/motivos.md`, seção "Landing";
+  - template da extensão `landing.md`, com sete seções fixas (Produto, Público, Ação, Proibições, Fontes, Hospedagem, Descoberta) e rótulos fixos em Ação, Fontes e Hospedagem. O `profile.yml` do template ganha o bloco `landing:` comentado.
+- **Modelos em `core/landing/`, instalados com o core:**
+  - briefing (documento vivo, decisões por rodada propagadas por banner);
+  - validação (placar, quebrado, correções, varredura nas duas direções, teclado e sem JavaScript, página no ar, parada pelo dono);
+  - manifesto do handoff (hierarquia de fontes spec > protótipo > copy);
+  - contexto de tickets (bloco **Contrato entre tickets** e os critérios fixos de todo ticket de landing);
+  - checklist de descoberta (15 itens, cada um com a etapa que o cobra);
+  - gosto padrão `taste.md` (`landing.taste: default`); um caminho `.md` do projeto o substitui por inteiro;
+  - rubrica Beleza/Clareza/Vendas/Desejo: nota (termômetro) separada de defeito (`[QUEBRADO]` e `[AJUSTE]`), oito passos fixos e o preenchimento do laudo.
+- **Sete agentes `pipeline-landing-*`, em pt-BR**, com molde comum: uma entrega no caminho do prompt, texto externo tratado como dado, nunca em `<landing.app>`, autochecagem de vetos e relatório de quatro itens:
+  - pesquisa (`claude-sonnet-5-5`, com rede): `researcher`, `domain-researcher`, `seo` (com `llms.txt`) e `teardown`;
+  - produção e validação (`claude-opus-5-5`): `copywriter`, `designer` e `validator`. O `validator` termina na linha `VALIDAÇÃO DE LANDING …`.
+- **Ilustrador no Maestri:** papel `roles/ilustrador.md`, referência `reference/ilustrador.md` (recrutar sem `--role`, modelo de pedido, armadilhas) e a chave opcional `team.roles.illustrator` no schema, no Passo 2 e no item 23 do doctor. Não é papel de PR: sem selo.
+- **Comando `/pipeline-landing`** (`claude-opus-5-5`, xhigh) e a skill interna `pipeline-landing-flow`:
+  - onze fases com portão do solicitante: briefing, pesquisa, norte, régua e teardown, copy, teste de estilo, protótipo com o validador desde a r1, rodadas, handoff, tickets pelo fluxo de tickets e página construída (`/pipeline-landing validar`);
+  - regras fixas: hierarquia de fontes; teto de linhas por arquivo contado depois do formatador, sem mudar o corte de ~400 linhas por ticket; topo e hero antes das seções; rubrica no protótipo e na página construída; parada quando "o dono aprova e nada fica quebrado".
+- **Item 27 do `/pipeline-doctor`:** com `landing:`, confere a extensão e as sete seções dela, os placeholders, os rótulos da descoberta, `app`, `handoff` e `taste`, os modelos, a skill, os agentes e o ilustrador. Sem `landing:`, `OK` com a nota "módulo de landing desligado".
+- **Ferramentas opcionais em `tools/landing/`**, fora do core e do `install.mjs`:
+  - Python (`uv run`): `ink.py`, `fill.py` e `embed.py`, para tratar a arte e montar o protótipo em arquivo único;
+  - Node com Playwright: `render.mjs` e `sweep.mjs`, para os quadros do hero, a rolagem para baixo e para cima, o sem JavaScript e a varredura de sobreposição e de rolagem horizontal.
+- Spec `tests/landing-core.test.mjs` para os nomes, as seções e os rótulos de `core/landing/`. `core/format.md` lista `pipeline-landing` entre os comandos.
 - O `profileVersion` (2) e as chaves existentes não mudam.
 
-**Ao atualizar:** sem `landing:` no profile nada muda, e o doctor imprime o item 27 como `OK`. O `install.mjs` não reinstala templates: o `landing.md` de `templates/pipeline/` serve de referência para quem já instalou. O módulo só fica útil depois das releases 0.5.0 a 0.9.0, que trazem os modelos, os agentes e a skill de landing; ligar `landing:` antes disso só ativa a conferência de formato do profile e do doctor.
+**Ao atualizar:** sem `landing:` no profile nada muda, e o doctor imprime o item 27 como `OK`. O `install.mjs` copia os arquivos novos: `core/landing/`, os agentes `pipeline-landing-*`, as skills `pipeline-landing` e `pipeline-landing-flow` e os dois `ilustrador.md` do `pipeline-maestro`. Ele não reinstala templates nem copia `tools/landing/`. Para ligar o módulo:
+1. o bloco `landing:` no profile;
+2. a extensão `landing.md`, criada pelo template de `templates/pipeline/`;
+3. o fluxo `/pipeline-landing`.
+
+As ferramentas de `tools/landing/` rodam do clone do toolkit.
 
 ## 0.3.0 — 2026-10-23
 
