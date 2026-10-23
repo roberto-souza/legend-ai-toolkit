@@ -19,7 +19,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-7a1f2b" alt="Licença MIT"></a>
-  <img src="https://img.shields.io/badge/vers%C3%A3o-0.2.1-c9a227" alt="Versão 0.2.1">
+  <img src="https://img.shields.io/badge/vers%C3%A3o-0.3.0-c9a227" alt="Versão 0.3.0">
   <img src="https://img.shields.io/badge/node-%E2%89%A522-3b2a1a" alt="Node 22 ou mais novo">
   <img src="https://img.shields.io/badge/idioma-pt--BR-2f5d50" alt="Em português do Brasil">
 </p>
@@ -99,7 +99,7 @@ Rodar duas vezes não muda nada na segunda vez.
 | 4 · Selos | (interna) | o push, o PR e o selo `pipeline/review` no SHA da cabeça; os validadores gravam os demais | PR selado |
 | 5 · Merge | o humano pede | o portão confere os selos e o pedido em texto livre | PR mergeado |
 
-Outros comandos: `/pipeline-doctor` (o reino está pronto?), `/pipeline-security` (varredura da superfície inteira, com prova de exploração) e `/pipeline-maestro` (a távola, na seção 05). Várias issues viram uma pilha, executada na ordem pedida; um `blockedBy` aberto espera o merge do bloqueador.
+Outros comandos: `/pipeline-doctor` (o reino está pronto?), `/pipeline-security` (varredura da superfície inteira, com prova de exploração; o eixo `supply-chain`, opt-in, audita dependências, runtime e imagens pela saída das ferramentas do projeto, sem prova de exploração) e `/pipeline-maestro` (a távola, na seção 05). Várias issues viram uma pilha, executada na ordem pedida; um `blockedBy` aberto espera o merge do bloqueador.
 
 ## 04 / Os selos e o portão
 
