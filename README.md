@@ -19,7 +19,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-7a1f2b" alt="Licença MIT"></a>
-  <img src="https://img.shields.io/badge/vers%C3%A3o-0.7.0-c9a227" alt="Versão 0.7.0">
+  <img src="https://img.shields.io/badge/vers%C3%A3o-0.8.0-c9a227" alt="Versão 0.8.0">
   <img src="https://img.shields.io/badge/node-%E2%89%A522-3b2a1a" alt="Node 22 ou mais novo">
   <img src="https://img.shields.io/badge/idioma-pt--BR-2f5d50" alt="Em português do Brasil">
 </p>
@@ -117,7 +117,7 @@ O **portão** é um gancho do Claude Code (`pipeline-gate.mjs hook`): só a form
   <img src="docs/assets/readme/tavola.svg" alt="A távola: o maestro na cabeceira, o executor, o validador de API, o validador de tela e a UX ao redor do board" width="100%">
 </p>
 
-Opcional. Com a chave `team:` no profile, a skill `pipeline-maestro` monta um time de agentes em terminais separados: o **maestro** despacha a fila do board, o **executor** implementa e abre o PR, o **validador de API** roda o roteiro na rota real e grava `e2e`, o **validador de tela** percorre as telas e grava `screen`, e a **UX** dá a nota e grava `ux`. Cada papel declara a ferramenta e o modelo; os validadores podem ser de outro fornecedor. Sem `team:`, o pipeline funciona inteiro numa sessão só, e o PR exige apenas `review`.
+Opcional. Com a chave `team:` no profile, a skill `pipeline-maestro` monta um time de agentes em terminais separados: o **maestro** despacha a fila do board, o **executor** implementa e abre o PR, o **validador de API** roda o roteiro na rota real e grava `e2e`, o **validador de tela** percorre as telas e grava `screen`, e a **UX** dá a nota e grava `ux`. Cada papel declara a ferramenta e o modelo; os validadores podem ser de outro fornecedor. Sem `team:`, o pipeline funciona inteiro numa sessão só, e o PR exige apenas `review`. No módulo de landing, o **ilustrador** (`team.roles.illustrator`) é um papel opcional, sem selo: gera as imagens que a skill de landing pede.
 
 ## 06 / O que é do códice e o que é do reino
 

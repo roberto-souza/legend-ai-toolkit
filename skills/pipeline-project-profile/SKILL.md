@@ -63,7 +63,7 @@ Detalhe: `.claude/skills/pipeline-project-profile/reference/motivos.md`, seção
 | `team.roles.maestro`, `team.roles.executor`, `team.roles.validatorApi`, `team.roles.validatorUi` | ausente ou sem `command`. |
 | `knowledge.verification` | ausente (a orquestração do time exige o critério de verificação). |
 | `team.roles.validator` | presente. Mensagem: "chave renomeada para validatorApi (profileVersion 2)". |
-| `team.roles.ticketWriter`, `team.roles.validatorBackup` | presente sem `command`. |
+| `team.roles.ticketWriter`, `team.roles.validatorBackup`, `team.roles.illustrator` | presente sem `command`. |
 | `team.roles.ux` | presente sem `command`, `dir` ou `audience`. |
 | `team.roles.ux.siblings` | chave que não é `app` de nenhum item de `team.portals` ou `team.devices`; item de `team.roles.ux.siblings.<app>` sem `name`, `route` ou `pattern`; `name` repetido dentro do mesmo `app`. A mensagem nomeia a chave com o índice a partir de 0: `team.roles.ux.siblings.<app>[2].pattern`, `team.roles.ux.siblings.<app>[3].name`. |
 | `team.portals` | vazio, ou item sem `name` ou `url`. |
