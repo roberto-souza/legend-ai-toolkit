@@ -69,3 +69,13 @@ security:
 
 # Opcional: arquivos que são só prosa, para o revisor de modelo menor.
 # review: { proseOnly: ['**/*.md'] }
+
+# Opcional: módulo de landing (schema, seção `landing`); os fatos em prosa vão em landing.md, ao lado deste arquivo.
+# landing:
+#   app: <caminho do app da página>
+#   handoff: <diretório do handoff do protótipo>
+#   widths: [390, 1440]
+#   sweepWidths: [320, 360, 390, 414, 600, 768, 1024, 1280, 1440, 1920]
+#   lineBudget: { logic: 400, section: 1000 }
+#   formatCommand: <comando do formatador> {files}
+#   taste: <arquivo .md do projeto>

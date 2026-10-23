@@ -13,7 +13,7 @@ em `FALHA`, senão `DOCTOR: RED — <n> falhas`. `AVISO` não conta para o vered
 
 O schema de referência é `.claude/pipeline/core/profile-schema.md`.
 
-Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23 e 24 rodam as recusas de `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir", sem parar nelas: cada recusa é `FALHA` que nomeia a chave e nunca repete o valor.
+Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24 e 27 rodam as recusas de `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir", sem parar nelas: cada recusa é `FALHA` que nomeia a chave e nunca repete o valor.
 
 1. **Core local.** Existem as sete `.claude/skills/pipeline-{project-profile,github-tickets,write-ticket,execute-ticket,review-diff,security-audit,maestro}/SKILL.md`,
    os quatro `.claude/skills/pipeline-maestro/roles/{executor,validador-api,validador-ui,ux}.md`, os quatro `.claude/agents/pipeline-{ticket-writer,implementer,reviewer,security-reviewer}.md` e os seis `.claude/pipeline/core/{principles,profile-schema,seals-reference,ux-reference,format,entrada}.md`.
@@ -21,8 +21,8 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23 e 24 rodam as recus
 2. **Profile existe.** `.claude/pipeline/profile.yml` na raiz do projeto (`${CLAUDE_PROJECT_DIR}`). Falha → criar pelo schema.
 3. **`profileVersion` suportada** (Passo 2). Precisa ser `2`.
 4. **Chaves obrigatórias** (Passo 2) presentes. Liste as que faltam.
-5. **Valores reservados** (Passo 2; a lista está no schema e **hoje está vazia**) ausentes. Valor fora do conjunto
-   suportado de uma chave também é `FALHA`.
+5. **Valores reservados** (Passo 2; a lista está no schema, no topo) ausentes. Valor fora do conjunto suportado de uma
+   chave também é `FALHA`.
 6. **Combinações obrigatórias** (Passo 2: a tabela, e `topology: polyrepo` com `<repo>` em `workspace.repos`), cada uma `OK`
    ou `FALHA` com a chave que falta.
 7. **Irmãos** (só com `topology: polyrepo`). Para cada item de `workspace.repos` que não é `<repo>`, confira o diretório
@@ -158,3 +158,28 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23 e 24 rodam as recus
 
     Nenhuma linha `FALHA` → (a) `OK`.
 26. **Toolkit.** `.claude/pipeline/toolkit.lock` ausente → `AVISO` ("core copiado à mão; instale pelo prompt 01-instalar do Legend AI Toolkit"). Presente: `node .claude/pipeline/core/verify.mjs` sai 0 → `OK` com a versão; senão `FALHA` com os arquivos que ele lista e a ação "desfaça a edição local ou leve a mudança ao toolkit e reinstale pelo prompt 02-atualizar". Gate: leia o comando de `<gate.final>` e, a cada script do projeto que ele chama (por exemplo, `scripts` do `package.json`), o comando desse script, até achar `verify.mjs` → `OK`; senão `AVISO` ("ponha o `verify.mjs` no gate").
+27. **Landing (`landing`).** Sem `landing:` no profile → `OK`, com a nota "módulo de landing desligado". Com `landing:`,
+    `FALHA` e `AVISO` nomeiam a chave ou o arquivo:
+    - (Passo 2) as recusas de `landing`, inclusive `landing.taste: default` ("valor reservado, ainda sem suporte no core");
+    - extensão `landing.md` ausente em `.claude/pipeline` → `FALHA`, ação "criar pelo template `landing.md` do toolkit e
+      preencher"; presente, cada um dos sete títulos (`## Produto`, `## Público`, `## Ação`, `## Proibições`, `## Fontes`,
+      `## Hospedagem`, `## Descoberta`) que falta → `FALHA` com o título;
+    - `landing.md` com `<...>` do template ainda sem preencher fora de `## Descoberta` → `AVISO` com as linhas; `## Descoberta`
+      com placeholder → `OK` com a nota "descoberta ainda não feita";
+    - `<landing.app>` ou `<landing.handoff>` inexistente → `AVISO` ("o fluxo de landing cria"); `<landing.taste>` por
+      caminho inexistente → `FALHA`;
+    - nota `OK`: handoff ignorado pelo git ou versionado.
+
+    Comandos, da raiz do repositório (bash):
+
+    ```bash
+    L=.claude/pipeline/landing.md
+    if test -f "$L"; then
+      for t in Produto Público Ação Proibições Fontes Hospedagem Descoberta; do grep -qx "## $t" "$L" || echo "FALHA landing.md sem ## $t"; done
+      awk '/^## /{d=($0=="## Descoberta")} !d && /<[^>]*>/{print "AVISO "FILENAME":"FNR": "$0}' "$L"
+      awk '/^## /{d=($0=="## Descoberta")} d && /<[^>]*>/' "$L" | grep -q . && echo "OK descoberta ainda não feita"
+    else echo "FALHA landing.md ausente"; fi
+    test -d "<landing.app>" || echo "AVISO <landing.app> não existe"; test -d "<landing.handoff>" || echo "AVISO <landing.handoff> não existe"
+    [ -z "<landing.taste>" ] || test -f "<landing.taste>" || echo "FALHA landing.taste: <landing.taste> não existe"
+    git check-ignore -q "<landing.handoff>/" && echo "handoff ignorado pelo git" || echo "handoff versionado"
+    ```

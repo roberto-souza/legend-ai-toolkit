@@ -2,6 +2,17 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
+## 0.4.0 — 2026-10-23
+
+- **Contrato do módulo de landing (opt-in):** seção `landing` no schema do profile, com sete chaves opcionais (`app`, `handoff`, `widths`, `sweepWidths`, `lineBudget`, `formatCommand`, `taste`), os defaults e os valores suportados. `landing:` ausente desliga o módulo; presente, `app` e `handoff` são obrigatórias.
+- **Valor reservado:** `landing.taste: default` entra na lista de reservados do schema, que deixa de ser vazia, até o core trazer o `taste.md` padrão.
+- **Recusas no Passo 2 do `pipeline-project-profile`:** grupo `landing` (caminhos relativos, sem `..` e diferentes; larguras como lista de inteiros positivos sem repetição; `lineBudget` só com `logic` e `section`; `formatCommand` com `{files}`; `taste` como `default` ou caminho `.md`), com o porquê em `reference/motivos.md`, seção "Landing".
+- **Item 27 do `/pipeline-doctor`:** confere a extensão `landing.md` e as sete seções dela, os placeholders ainda sem preencher, os diretórios de `app` e `handoff` (ausentes são aviso) e o `taste` por caminho.
+- **Template `landing.md`:** sete seções fixas (Produto, Público, Ação, Proibições, Fontes, Hospedagem, Descoberta), com rótulos fixos em Ação, Fontes e Hospedagem; o `profile.yml` do template ganha o bloco `landing:` comentado.
+- O `profileVersion` (2) e as chaves existentes não mudam.
+
+**Ao atualizar:** sem `landing:` no profile nada muda, e o doctor imprime o item 27 como `OK`. O `install.mjs` não reinstala templates: o `landing.md` de `templates/pipeline/` serve de referência para quem já instalou. O módulo só fica útil depois das releases 0.5.0 a 0.9.0, que trazem os modelos, os agentes e a skill de landing; ligar `landing:` antes disso só ativa a conferência de formato do profile e do doctor.
+
 ## 0.3.0 — 2026-10-23
 
 - **Eixo `supply-chain` no `pipeline-security-audit`:** genérico e opt-in. Roda os comandos de leitura que o projeto declara (auditoria de dependência, guarda de runtime, registro, varredura de imagem) e cinco verificações: `dependency-advisory`, `runtime-version`, `image-pin`, `override` e `unmaintained`. Os itens vão num bloco `## Supply chain`, depois de `## Findings`, nos laudos dos modos axis e sweep, com `BLOCKER` e `IMPORTANT` próprios e supressão pelo baseline; a linha `SECURITY SWEEP COMPLETE` soma os itens nas contagens, no mesmo formato.
