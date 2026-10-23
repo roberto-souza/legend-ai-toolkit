@@ -172,9 +172,15 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24 e 27 rodam as r
       rótulo do checklist de descoberta que falta → `AVISO` com os rótulos (a descoberta se faz aos poucos); os 15 → `OK`;
     - `<landing.app>` ou `<landing.handoff>` inexistente → `AVISO` ("o fluxo de landing cria"); `<landing.taste>` por
       caminho inexistente → `FALHA`;
-    - os seis modelos de `.claude/pipeline/core/landing/` (briefing, validacao, manifesto, contexto-tickets, descoberta, taste) existem →
-      senão `FALHA` com os nomes, ação "reinstale pelo prompt 02-atualizar"; com `landing.taste: default`, é o `taste` do
-      core que vale, e a mesma checagem o cobre;
+    - os modelos de `.claude/pipeline/core/landing/` que a skill copia ou lê (briefing, validacao, manifesto, contexto-tickets,
+      descoberta, taste, rubrica) existem → senão `FALHA` com os nomes, ação "reinstale pelo prompt 02-atualizar"; com
+      `landing.taste: default`, é o `taste` do core que vale, e a mesma checagem o cobre;
+    - skill do módulo: `.claude/skills/pipeline-landing/SKILL.md` com `model:` no frontmatter,
+      `.claude/skills/pipeline-landing-flow/SKILL.md` com `disable-model-invocation: true` e `## Entrada`, os três arquivos de
+      `reference/` dela e os sete agentes `pipeline-landing-*` existem → senão `FALHA` com o arquivo, ação "reinstale pelo
+      prompt 02-atualizar"; os dois `ilustrador.md` do `pipeline-maestro` ausentes → `FALHA`, a mesma ação;
+    - com `team:` e sem `team.roles.illustrator` → `AVISO` "sem ilustrador no time: a fase de teste de estilo fica com o
+      solicitante";
     - nota `OK`: handoff ignorado pelo git ou versionado.
 
     Comandos, da raiz do repositório (bash):
@@ -192,7 +198,14 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24 e 27 rodam as r
       fi
     else echo "FALHA landing.md ausente"; fi
     test -d "<landing.app>" || echo "AVISO <landing.app> não existe"; test -d "<landing.handoff>" || echo "AVISO <landing.handoff> não existe"
-    for f in .claude/pipeline/core/landing/{briefing,validacao,manifesto,contexto-tickets,descoberta,taste}.md; do test -f "$f" || echo "FALHA $f ausente"; done
+    for f in .claude/pipeline/core/landing/{briefing,validacao,manifesto,contexto-tickets,descoberta,taste,rubrica}.md \
+      .claude/skills/pipeline-landing-flow/SKILL.md .claude/skills/pipeline-landing-flow/reference/{portoes,pagina-construida,armadilhas}.md \
+      .claude/agents/pipeline-landing-{researcher,domain-researcher,seo,teardown,copywriter,designer,validator}.md \
+      .claude/skills/pipeline-maestro/{roles,reference}/ilustrador.md; do test -f "$f" || echo "FALHA $f ausente"; done
+    test -f .claude/skills/pipeline-landing/SKILL.md || echo "FALHA skill pipeline-landing ausente"
+    grep -L '^model:' .claude/skills/pipeline-landing/SKILL.md
+    grep -L '^disable-model-invocation: true' .claude/skills/pipeline-landing-flow/SKILL.md
+    grep -L '^## Entrada' .claude/skills/pipeline-landing-flow/SKILL.md
     case "<landing.taste>" in ""|default) ;; *) test -f "<landing.taste>" || echo "FALHA landing.taste: <landing.taste> não existe" ;; esac
     git check-ignore -q "<landing.handoff>/" && echo "handoff ignorado pelo git" || echo "handoff versionado"
     ```

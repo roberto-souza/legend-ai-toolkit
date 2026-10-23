@@ -2,6 +2,17 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
+## 0.9.0 — 2026-10-23
+
+- **Comando `/pipeline-landing`** (`claude-opus-5-5`, xhigh) e a skill interna `pipeline-landing-flow`: onze fases com portão do solicitante (briefing, pesquisa, norte, régua e teardown, copy, teste de estilo, protótipo com o validador desde a r1, rodadas, handoff, tickets, página construída). Sem `landing:` no profile, recusa e para antes de qualquer pergunta.
+- **Regras fixas:** hierarquia de fontes spec > protótipo > copy, declarada no manifesto do handoff; teto de linhas por arquivo (`landing.lineBudget`) contado depois do formatador, sem mudar o corte de ~400 linhas por ticket; topo e hero validados antes das seções, com `Blocked by` em todo ticket de seção; a rubrica no protótipo e na página construída, com teclado e sem JavaScript; parada quando "o dono aprova e nada fica quebrado", com a média como termômetro; checklist de descoberta antes do primeiro ticket; decisão por bloco datado e banner.
+- **Fase de tickets pelo fluxo de tickets:** a skill fecha o contrato entre tickets e segue o `pipeline-write-ticket` com o contexto como demanda; issue, grafo e board continuam dele.
+- **Referências da skill:** portões (tabela e motivos, decisão datada e banner), página construída (os dois momentos, a URL, os passos fixos, cada quebrado vira ticket de correção) e armadilhas.
+- **Item 27 do `/pipeline-doctor`:** confere a skill, os sete agentes, a rubrica e o ilustrador; com `team:` e sem `team.roles.illustrator`, aviso. Os itens 1 e 22 não mudam.
+- `core/format.md` lista `pipeline-landing` entre os comandos.
+
+**Ao atualizar:** sem `landing:` no profile nada muda. Para ligar o módulo: o bloco `landing:` no profile, a extensão `landing.md` pelo template e o fluxo `/pipeline-landing`. Os modelos chegam pelo `install.mjs`, em `.claude/pipeline/core/landing/`. O módulo fica completo nesta release: o schema veio na 0.4.0, os modelos na 0.5.0, os agentes de pesquisa na 0.6.0, o validador na 0.7.0, o ilustrador na 0.8.0 e a skill na 0.9.0; as ferramentas opcionais de landing vêm na 0.10.0.
+
 ## 0.8.0 — 2026-10-23
 
 - **Papel do ilustrador no Maestri** (`skills/pipeline-maestro/roles/ilustrador.md`): gera imagens só na pasta do pedido, em camadas sobre fundo chapado, na resolução nativa, sem texto, logo, rosto ou lugar real não autorizados, com `prompts.md` e as linhas fixas `ILUSTRAÇÕES PRONTAS: pedido <NN> — <q> arquivos — <pasta>` e `TRAVADO: <motivo>`.
