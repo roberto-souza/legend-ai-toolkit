@@ -111,10 +111,11 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24 e 27 rodam as r
     primeira seção; `Use quando` no frontmatter → mover a frase para a `description` do comando dono; comando que manda
     carregar a skill interna → trocar por leitura do caminho `.claude/skills/<skill>/SKILL.md`. Nenhuma saída → `OK`.
 23. **Time (`team`).** Sem `team:` no profile → `OK`, com a nota "repositório sem orquestração de time". Com `team:`, cada
-    falta é `FALHA` com a chave ou o arquivo, nunca o valor:
+    falta é `FALHA` (e o `AVISO` do ilustrador) com a chave ou o arquivo, nunca o valor:
     - (Passo 2) as recusas de `team`, `team.e2e` (inclusive `login.signCommand` sem `{bodyFile}`), `team.devices` e
-      `team.roles.ux.siblings`, inclusive `knowledge.verification` ausente, `team.roles.validator` presente ("chave
-      renomeada para validatorApi (profileVersion 2)") e `team.credentials.*` com cara de segredo;
+      `team.roles.ux.siblings`, inclusive `team.roles.illustrator` sem `command`, `knowledge.verification` ausente,
+      `team.roles.validator` presente ("chave renomeada para validatorApi (profileVersion 2)") e `team.credentials.*`
+      com cara de segredo;
     - `knowledge.verification` ausente, ou com o arquivo ausente → `FALHA` "a orquestração do time exige
       `knowledge.verification`";
     - `<team.credentials.file>.example` existe → inexistente, `FALHA` "sem arquivo de exemplo para conferir as variáveis";
@@ -133,7 +134,9 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24 e 27 rodam as r
       com a URL;
     - notas `OK`: sem `team.e2e` "sem validação de API por E2E"; sem `team.devices` "sem validação de app"; aparelho sem
       `offline` "cenário offline sem corte de rede em <name>"; sem `team.roles.ux` "sem validação de UX"; sem
-      `team.roles.ux.siblings` "UX sem telas irmãs".
+      `team.roles.ux.siblings` "UX sem telas irmãs"; sem `team.roles.illustrator` "sem ilustrador no Maestri";
+    - `team.roles.illustrator` declarado sem `landing:` no profile → `AVISO` "ilustrador sem módulo de landing; ninguém o
+      recruta".
 24. **Selos (`seals`).** `FALHA` com a ação se faltar: `.claude/pipeline/core/seals.md` e `pipeline-gate.mjs`; em
     `.claude/settings.json`, `hooks.PreToolUse` com `Bash` e com `Write|Edit|MultiEdit|NotebookEdit` chamando
     `pipeline-gate.mjs hook`, e `hooks.UserPromptSubmit` chamando `authorize`; `node -e "import('yaml')"` resolvendo;

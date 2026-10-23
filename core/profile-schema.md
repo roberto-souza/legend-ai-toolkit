@@ -197,6 +197,7 @@ team:
         <app>:
           - { name: <nome curto em kebab-case>, route: "<caminho no app; :param vira id real>", pattern: <rótulo do padrão> }
     validatorBackup: { tool: <ferramenta>, effort: low, command: "<comando que sobe o validador de reserva; {root} no lugar da raiz do checkout>" }
+    illustrator: { tool: <ferramenta>, model: <id>, command: "<comando que sobe o ilustrador; {root} no lugar da raiz do checkout>" }
   dev:
     infraRequires: <pré-requisito humano, ex.: Docker ligado>
     infra: <comando que sobe a infra local>
@@ -237,6 +238,7 @@ team:
 | `roles.ux.command`, `roles.ux.dir`, `roles.ux.audience` | sim, com `roles.ux` | — | o comando; a pasta das capturas, relativa à raiz do checkout principal, uma subpasta `pr-<n>/` por PR, ignorada pelo git; o público das telas, que o maestro resolve em `.claude/skills/pipeline-maestro/roles/ux.md` |
 | `roles.ux.siblings` | não | ausente = a UX recebe só as telas do PR | telas irmãs por unidade, capturadas como referência de consistência. Chave do mapa: um `app` de `portals` ou `devices`. Item: `name` (kebab-case, nome do arquivo da captura, único no mesmo `app`), `route` (caminho no app), `pattern` (rótulo curto: `list`, `detail`, `form`, `panel`, `login`; texto livre que só precisa se repetir entre irmãs do mesmo `app` para agrupá-las). Detalhe: `.claude/pipeline/core/ux-reference.md`, seção "Seleção das irmãs" |
 | `roles.validatorBackup` | não | ausente = validador sem cota → o maestro para e avisa o usuário | substitui o validador de API ou o de tela quando ficam sem cota |
+| `roles.illustrator` | não | ausente = o fluxo de landing pede a imagem ao humano | ilustrador recrutado pela skill de landing, sem selo; não é papel de PR. Detalhe: `.claude/skills/pipeline-maestro/reference/ilustrador.md`, seção "Recrutar o ilustrador" |
 | `dev.up` | sim | — | sobe os apps |
 | `dev.infraRequires`, `dev.infra`, `dev.migrate`, `dev.seed` | não | ausente = o passo não existe no repositório | pré-requisito humano e comandos de infra, migration e seed locais |
 | `dev.appUp` | não | ausente = o `build` de cada aparelho basta | sobe o bundler do app móvel no checkout principal |
@@ -255,7 +257,7 @@ team:
 
 Formato de cada item:
 
-- Papel (os quatro obrigatórios, e `roles.ticketWriter`, `roles.ux` e `roles.validatorBackup` quando presentes): `command` obrigatório; no validador de API, no de tela, na UX e no de reserva, o `command` pode levar `{root}`; `tool` (`claude-code` \| `codex` \| `antigravity`, informativo) e `effort` opcionais; `model` opcional (em `roles.ux` também), e a ausência significa "não conferir o modelo".
+- Papel (os quatro obrigatórios, e `roles.ticketWriter`, `roles.ux`, `roles.validatorBackup` e `roles.illustrator` quando presentes): `command` obrigatório; no validador de API, no de tela, na UX, no de reserva e no ilustrador, o `command` pode levar `{root}`; `tool` (`claude-code` \| `codex` \| `antigravity`, informativo) e `effort` opcionais; `model` opcional (em `roles.ux` também), e a ausência significa "não conferir o modelo".
 - Portal: `name` e `url` (`http://` ou `https://`) obrigatórios; `app` opcional (unidade de `issues.titleUnit`).
 - Aparelho: `name` (não repete nenhum `name` de `portals`), `app`, `platform` (`ios` \| `android`), `formFactor` (`phone` \| `tablet`), `appId` e `build` (com `{udid}`) obrigatórios; `offline` e `online` opcionais, sempre juntos e com `{udid}`: cortam e devolvem a rede **do aparelho** (o app tem de ver a rede cair; derrubar a API não serve); ausentes = o cenário offline não se aplica àquele aparelho.
 
@@ -263,7 +265,7 @@ Nenhum placeholder da tabela abaixo é a notação `<chave>` do pipeline: quem u
 
 | Placeholder | Onde | O que é |
 | --- | --- | --- |
-| `{root}` | `roles.validatorApi.command`, `roles.validatorUi.command`, `roles.ux.command`, `roles.validatorBackup.command` | raiz do checkout principal, que o maestro troca ao recrutar o papel (`git rev-parse --show-toplevel`, no Ground) |
+| `{root}` | `roles.validatorApi.command`, `roles.validatorUi.command`, `roles.ux.command`, `roles.validatorBackup.command`, `roles.illustrator.command` | raiz do checkout principal, que quem recruta o papel (o maestro; no ilustrador, a skill de landing) troca ao recrutá-lo (`git rev-parse --show-toplevel`, no Ground) |
 | `{slug}` | `portals[].url`, `e2e.login.headers`, `e2e.login.body` | identificador do tenant quando o host o carrega; em `e2e`, o `slug` do papel |
 | `{<nome da credencial>}` | `e2e.login.body` | valor da variável em `credentials.<nome>` do papel que faz o login |
 | `{method}`, `{path}` | `e2e.login.signCommand` | `e2e.login.method` e `e2e.login.path` |

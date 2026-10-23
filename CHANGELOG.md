@@ -2,6 +2,14 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
+## 0.8.0 — 2026-10-23
+
+- **Papel do ilustrador no Maestri** (`skills/pipeline-maestro/roles/ilustrador.md`): gera imagens só na pasta do pedido, em camadas sobre fundo chapado, na resolução nativa, sem texto, logo, rosto ou lugar real não autorizados, com `prompts.md` e as linhas fixas `ILUSTRAÇÕES PRONTAS: pedido <NN> — <q> arquivos — <pasta>` e `TRAVADO: <motivo>`.
+- **Referência do ilustrador** (`skills/pipeline-maestro/reference/ilustrador.md`): recrutar sem `--role` na pasta de ilustrações do handoff, o modelo de `pedido-ilustracao-<NN>.md` (campos fixos, fundo chapado, resolução nativa, aceite verificável) e as armadilhas.
+- **Chave opcional `team.roles.illustrator`:** no schema (YAML, tabela, formato de papel, `{root}`), recusada no Passo 2 do `pipeline-project-profile` quando presente sem `command`, e conferida no item 23 do `/pipeline-doctor` (nota "sem ilustrador no Maestri"; aviso quando declarada sem `landing:`). Não é papel de PR: sem selo e sem roteiro de validação.
+
+**Ao atualizar:** nada muda para quem não declara `team.roles.illustrator`: o ilustrador só é recrutado pela skill de landing, que chega na 0.9.0. O `install.mjs` copia os dois arquivos novos do `pipeline-maestro` e atualiza três (o schema e os `SKILL.md` do `pipeline-project-profile` e do `pipeline-doctor`). `team.roles.illustrator` é opcional e, presente, exige `command`. O módulo só fica útil com a 0.9.0.
+
 ## 0.7.0 — 2026-10-23
 
 - **Agentes de produção e validação do módulo de landing**, em pt-BR, `claude-opus-5-5`, no molde comum dos agentes de landing e sem rede:
