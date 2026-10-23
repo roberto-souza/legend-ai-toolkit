@@ -19,7 +19,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-7a1f2b" alt="Licença MIT"></a>
-  <img src="https://img.shields.io/badge/vers%C3%A3o-0.9.0-c9a227" alt="Versão 0.9.0">
+  <img src="https://img.shields.io/badge/vers%C3%A3o-0.10.0-c9a227" alt="Versão 0.10.0">
   <img src="https://img.shields.io/badge/node-%E2%89%A522-3b2a1a" alt="Node 22 ou mais novo">
   <img src="https://img.shields.io/badge/idioma-pt--BR-2f5d50" alt="Em português do Brasil">
 </p>
@@ -130,7 +130,7 @@ Opcional. Com a chave `team:` no profile, a skill `pipeline-maestro` monta um ti
 | **Módulo de landing (opt-in)** — comando e skill `pipeline-landing`, ligado por `landing:` no profile e pela extensão `landing.md` | `.claude/skills/pipeline-landing*`, `.claude/pipeline/core/landing/` | só o toolkit; os fatos, o projeto |
 | **Skills de stack e as demais** | `.claude/skills/<outra>` | o projeto |
 
-O prefixo `pipeline-` é do toolkit: o instalador remove dali o que ele não traz. **Extensão acrescenta regra, nunca remove gate do core.** O schema do profile está em [`core/profile-schema.md`](core/profile-schema.md), e os templates em branco, em [`templates/pipeline/`](templates/pipeline/).
+As ferramentas opcionais de landing, em [`tools/landing/`](tools/landing/), não são instaladas: rodam do clone do toolkit, e nada no core depende delas. O prefixo `pipeline-` é do toolkit: o instalador remove dali o que ele não traz. **Extensão acrescenta regra, nunca remove gate do core.** O schema do profile está em [`core/profile-schema.md`](core/profile-schema.md), e os templates em branco, em [`templates/pipeline/`](templates/pipeline/).
 
 ## 07 / Mude o códice
 
