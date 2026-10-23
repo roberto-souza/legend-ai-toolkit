@@ -19,7 +19,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-7a1f2b" alt="Licença MIT"></a>
-  <img src="https://img.shields.io/badge/vers%C3%A3o-0.8.0-c9a227" alt="Versão 0.8.0">
+  <img src="https://img.shields.io/badge/vers%C3%A3o-0.9.0-c9a227" alt="Versão 0.9.0">
   <img src="https://img.shields.io/badge/node-%E2%89%A522-3b2a1a" alt="Node 22 ou mais novo">
   <img src="https://img.shields.io/badge/idioma-pt--BR-2f5d50" alt="Em português do Brasil">
 </p>
@@ -99,7 +99,7 @@ Rodar duas vezes não muda nada na segunda vez.
 | 4 · Selos | (interna) | o push, o PR e o selo `pipeline/review` no SHA da cabeça; os validadores gravam os demais | PR selado |
 | 5 · Merge | o humano pede | o portão confere os selos e o pedido em texto livre | PR mergeado |
 
-Outros comandos: `/pipeline-doctor` (o reino está pronto?), `/pipeline-security` (varredura da superfície inteira, com prova de exploração; o eixo `supply-chain`, opt-in, audita dependências, runtime e imagens pela saída das ferramentas do projeto, sem prova de exploração) e `/pipeline-maestro` (a távola, na seção 05). Várias issues viram uma pilha, executada na ordem pedida; um `blockedBy` aberto espera o merge do bloqueador.
+Outros comandos: `/pipeline-doctor` (o reino está pronto?), `/pipeline-security` (varredura da superfície inteira, com prova de exploração; o eixo `supply-chain`, opt-in, audita dependências, runtime e imagens pela saída das ferramentas do projeto, sem prova de exploração), `/pipeline-maestro` (a távola, na seção 05) e `/pipeline-landing` (módulo opt-in de landing page: do briefing aos tickets e à validação da página construída, com `landing:` no profile). Várias issues viram uma pilha, executada na ordem pedida; um `blockedBy` aberto espera o merge do bloqueador.
 
 ## 04 / Os selos e o portão
 
@@ -127,6 +127,7 @@ Opcional. Com a chave `team:` no profile, a skill `pipeline-maestro` monta um ti
 | **Skills e agents `pipeline-*`** | `.claude/skills/pipeline-*`, `.claude/agents/pipeline-*.md` | só o toolkit |
 | **Profile** — repositório, board, gate, idioma, stack, time | `.claude/pipeline/profile.yml` | o projeto |
 | **Extensões** — `rules.md`, `ticket.md`, `security.md`, `verification.md`, `landing.md` (opt-in) | `.claude/pipeline/` | o projeto |
+| **Módulo de landing (opt-in)** — comando e skill `pipeline-landing`, ligado por `landing:` no profile e pela extensão `landing.md` | `.claude/skills/pipeline-landing*`, `.claude/pipeline/core/landing/` | só o toolkit; os fatos, o projeto |
 | **Skills de stack e as demais** | `.claude/skills/<outra>` | o projeto |
 
 O prefixo `pipeline-` é do toolkit: o instalador remove dali o que ele não traz. **Extensão acrescenta regra, nunca remove gate do core.** O schema do profile está em [`core/profile-schema.md`](core/profile-schema.md), e os templates em branco, em [`templates/pipeline/`](templates/pipeline/).
