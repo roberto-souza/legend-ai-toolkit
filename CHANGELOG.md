@@ -2,6 +2,18 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
+## 0.10.0 — 2026-10-23
+
+Só ferramentas fora do que o projeto recebe; nada no core, nas skills, nos agentes ou nos templates muda.
+
+- **Ferramentas opcionais de landing em `tools/landing/`**, fora do core e do `install.mjs`:
+  - Python (PEP 723, `uv run`): `ink.py` (separa o traço do fundo chapado, com variante escura opcional), `fill.py` (corpo opaco na cor da página, por `--bg` obrigatório) e `embed.py` (imagens do protótipo em arquivo único como WebP embutido).
+  - Node com Playwright (`playwright-core` com versão exata no `package.json` da pasta): `render.mjs` (quadros do hero, rolagem para baixo e para cima, sem JavaScript, movimento reduzido, `summary.json`) e `sweep.mjs` (sobreposição de arte com texto e rolagem horizontal nas larguras da varredura), com a peça comum `lib.mjs`. Os dois saem `1` quando acham problema.
+  - `tools/landing/README.md`: requisitos, uso, avisos e o que cada ferramenta apoia, por papel.
+- `.gitignore` ganha `__pycache__/` e o lockfile da pasta.
+
+**Ao atualizar:** nada muda no projeto: o `install.mjs` não copia `tools/landing/`, e atualizar só troca a versão no lock. Para usar as ferramentas, rode-as do clone do toolkit (`uv run <clone>/tools/landing/ink.py …`, `node <clone>/tools/landing/render.mjs …`, com `npm install` uma vez na pasta) ou copie a pasta para o projeto.
+
 ## 0.9.0 — 2026-10-23
 
 - **Comando `/pipeline-landing`** (`claude-opus-5-5`, xhigh) e a skill interna `pipeline-landing-flow`: onze fases com portão do solicitante (briefing, pesquisa, norte, régua e teardown, copy, teste de estilo, protótipo com o validador desde a r1, rodadas, handoff, tickets, página construída). Sem `landing:` no profile, recusa e para antes de qualquer pergunta.

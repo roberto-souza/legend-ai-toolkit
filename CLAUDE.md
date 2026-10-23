@@ -14,6 +14,7 @@ Fonte única do pipeline de agentes (ticket, execução, revisão, selos e merge
 | `scripts/` | `install.mjs`, `neutrality-guard.mjs`, `release-notes.mjs`, `version-guard.mjs`, `token-usage.mjs` | não vai |
 | `.github/workflows/` | `validate.yml` (PR e `main`) e `release.yml` (release publicada) | não vai |
 | `tests/` | `node --test`, sem dependência | não vai |
+| `tools/landing/` | ferramentas opcionais de landing (Python com `uv`, Node com Playwright) | não vai |
 
 ## Regras
 

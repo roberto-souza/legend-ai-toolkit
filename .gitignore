@@ -1,5 +1,7 @@
 # Dependências e pacotes
 node_modules/
+__pycache__/
+tools/landing/package-lock.json
 *.tgz
 
 # Sistema e editores
