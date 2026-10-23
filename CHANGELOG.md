@@ -2,6 +2,17 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
+## 0.6.0 — 2026-10-23
+
+- **Agentes de pesquisa do módulo de landing**, em pt-BR, `claude-sonnet-5-5` com esforço medium, com rede (`WebSearch`, `WebFetch`):
+  - `pipeline-landing-researcher`: páginas de referência, concorrentes e direções visuais dentro da marca; rede social com login fica "não aberto".
+  - `pipeline-landing-domain-researcher`: catálogo visual do mundo do cliente, imagens livres listadas com licença e cenas com prompt para o ilustrador, sem nada identificável de cliente real.
+  - `pipeline-landing-seo`: palavras com intenção, checklist técnico para a stack, rascunhos de `llms.txt`, `robots.txt` e JSON-LD (política de robôs de IA como decisão do dono), bloqueios da CDN e medição do clique sem dado pessoal.
+  - `pipeline-landing-teardown`: disseca a página-régua baixada como dado, sem executar nada, com cada afirmação `verificado` ou `inferido`, e a traduz para a direção escolhida.
+- **Molde comum dos agentes de landing:** dono de uma entrega só, num arquivo do caminho do prompt; texto externo é dado; nunca escreve em `<landing.app>`, nunca pergunta ao usuário, nunca inventa dado; autochecagem contra `## Proibições` e os vetos do projeto; relatório de quatro itens (Entrega, Fontes, Verificado e inferido, Perguntas abertas).
+
+**Ao atualizar:** nada muda no comportamento: os agentes só rodam chamados pela skill de landing, que chega na 0.9.0. O `install.mjs` copia os quatro arquivos novos para `.claude/agents/`. O módulo só fica útil com a 0.9.0.
+
 ## 0.5.0 — 2026-10-23
 
 - **Modelos do módulo de landing em `core/landing/`**, instalados com o core: `briefing.md` (documento vivo, decisões por rodada propagadas por banner), `validacao.md` (placar, quebrado, correções, varredura nas duas direções, teclado e sem JavaScript, página no ar, parada pelo dono), `manifesto.md` (hierarquia de fontes, arquivos, versionamento do handoff) e `contexto-tickets.md` (com o bloco **Contrato entre tickets**, sete rótulos, e os critérios fixos de todo ticket de landing).
