@@ -1,6 +1,6 @@
 {
   "name": "legend-ai-toolkit",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Pipeline de agentes de IA, do ticket ao merge, instalável em qualquer repositório.",
   "license": "MIT",

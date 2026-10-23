@@ -2,7 +2,7 @@
 
 - O profile é o único lugar onde o pipeline aprende os **fatos** de um repositório: `<raiz do projeto>/.claude/pipeline/profile.yml`.
 - Cada chave diz se é obrigatória, o default quando omitida e os valores **suportados pelo core**.
-- **Valor reservado** é o que o schema prevê e o core ainda não trata. **A lista de reservados é esta, e hoje está vazia.**
+- **Valor reservado** é o que o schema prevê e o core ainda não trata. **A lista de reservados é esta:** `landing.taste: default` (até a 0.5.0, que traz o `taste.md` padrão do core).
 - Notação `<chave>` das skills: `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Notação".
 - Recusa de chave ausente, valor reservado ou combinação inválida: `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir".
 
@@ -304,6 +304,37 @@ review:
   proseOnly: ['<glob>']
 ```
 
+## `landing`
+
+- Opcional. Ausente = módulo de landing desligado, e nada muda no projeto. Presente = módulo ligado, e `app` e `handoff` são obrigatórias dentro dele.
+- Todo caminho é relativo à raiz do repositório e não contém `..`: o profile é versionado, e caminho absoluto morre na máquina seguinte (a mesma razão de `workspace.repos[].dir`).
+- Os fatos em prosa (produto, público, ação, proibições, fontes, hospedagem, descoberta) vivem na extensão `landing.md`, descrita em seção "As extensões", abaixo.
+- Recusas: `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir". Conferências ao vivo (extensão, diretórios, `taste` por caminho): `.claude/skills/pipeline-doctor/SKILL.md`, item 27.
+
+```yaml
+landing:
+  app: <caminho do app da página>
+  handoff: <diretório do handoff do protótipo>
+  # widths: [390, 1440]
+  # sweepWidths: [320, 360, 390, 414, 600, 768, 1024, 1280, 1440, 1920]
+  # lineBudget: { logic: 400, section: 1000 }
+  # formatCommand: <comando do formatador> {files}
+  # taste: <arquivo .md do projeto>
+```
+
+| Chave | Obrigatória | Default | Suportado | O que é |
+| --- | --- | --- | --- | --- |
+| `landing.app` | sim, com `landing` | — | caminho relativo à raiz | diretório do app da página no repositório |
+| `landing.handoff` | sim, com `landing` | — | caminho relativo à raiz, diferente de `app` | diretório onde o handoff do protótipo vive (briefing, protótipo, copy, manifesto); pode estar no `.gitignore` |
+| `landing.widths` | não | `[390, 1440]` | lista não vazia de inteiros positivos, sem repetição | larguras fixas (em px) da rubrica, no protótipo e na página construída |
+| `landing.sweepWidths` | não | `[320, 360, 390, 414, 600, 768, 1024, 1280, 1440, 1920]` | lista não vazia de inteiros positivos, sem repetição | larguras da varredura de sobreposição e de rolagem horizontal, no protótipo e na página construída |
+| `landing.lineBudget` | não | `{ logic: 400, section: 1000 }` | mapa só com `logic` e `section`, inteiros positivos; chave omitida assume o default dela | teto de linhas **por arquivo**: `logic` para arquivo de lógica (script, hook, utilitário), `section` para arquivo de seção da página (marcação e estilo). Contado **depois** do `formatCommand` |
+| `landing.formatCommand` | não | ausente | texto com `{files}` | comando que formata arquivos do projeto; `{files}` vira a lista de arquivos. Ausente = a contagem de linhas é feita sem formatar, e o ticket de landing diz isso |
+| `landing.taste` | não | ausente | `default` (**reservado** até a 0.5.0) ou caminho terminado em `.md` | ausente = sem taste; `default` = o `taste.md` padrão do core (chega na 0.5.0); caminho = arquivo do projeto que sobrescreve o padrão |
+
+- `lineBudget` é teto por arquivo e não muda o corte de tamanho do ticket do fluxo de tickets: seção que passa desse corte vira dois tickets.
+- `{files}` não é a notação `<chave>` do pipeline: quem formata o troca, na hora, pela lista de arquivos.
+
 ## As extensões
 
 Ao lado do `profile.yml`, em `.claude/pipeline/`, vivem as extensões em prosa; todas opcionais para o schema, e cada skill diz quais lê e o que faz quando falta.
@@ -314,6 +345,7 @@ Ao lado do `profile.yml`, em `.claude/pipeline/`, vivem as extensões em prosa; 
 | `ticket.md` | `pipeline-write-ticket` | fatiamento, arestas de colisão, perguntas de domínio, exemplos |
 | `security.md` | `pipeline-security-audit`, `pipeline-execute-ticket` (gatilho) | perfis de atacante, threat model com ponteiros, eixos do sweep, `## Triggers`; com o eixo opt-in `supply-chain`, a seção `## Supply chain` (comandos e arquivos que o eixo lê) |
 | `verification.md` | `pipeline-maestro` | critério de verificação do PR depois de aberto: API, tela, app (com `team.devices`), nota de UX, PR sem tela nem rota; o `pipeline-execute-ticket` o cita na Fase 7 |
+| `landing.md` | o módulo de landing (opt-in; existe só com `landing:` no profile, e então o `/pipeline-doctor` a exige) | sete seções `##` fixas, nesta ordem: `## Produto`, `## Público`, `## Ação` (rótulos **Ação única** e **Canal**), `## Proibições`, `## Fontes` (rótulos **Spec**, **Protótipo** e **Copy**; a hierarquia entre eles é regra do core), `## Hospedagem` (rótulos **CDN**, **Analytics** e **Bordas**) e `## Descoberta` (respostas do checklist de descoberta, preenchidas no fluxo de landing) |
 
 **Extensão acrescenta regra, nunca remove gate do core.** Um `rules.md` não pode desligar o teto de rodadas nem mudar o formato do laudo, e um `security.md` não pode
 relaxar a regra de prova. O único interruptor declarado é `security.diffGate`.

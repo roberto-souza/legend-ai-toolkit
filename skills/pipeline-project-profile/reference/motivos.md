@@ -19,3 +19,10 @@ Os motivos das recusas e da trava do `pipeline-project-profile`; as ações est�
 ## Polyrepo
 
 - A trava vale ainda mais: o board é compartilhado, os números de issue colidem entre os irmãos e um comando de Project não sabe de onde foi chamado.
+
+## Landing
+
+- `landing.taste: default` é reservado até o core trazer o `taste.md` padrão: aceitar antes faria o profile apontar para um arquivo que nenhuma release traz. A versão que cria o arquivo tira o valor da lista no mesmo PR.
+- `landing.formatCommand` exige `{files}`: comando de projeto sem o lugar do argumento é a falha silenciosa mais provável (formata tudo, ou nada), e a recusa é barata, como em `{udid}` e `{bodyFile}`.
+- `landing.lineBudget` aceita só `logic` e `section`: chave de outro nome é erro de digitação (`sections`) que, sem recusa, vira o default em silêncio.
+- `landing.app` e `landing.handoff` são relativos, sem `..`, e diferentes: o profile é versionado, e o handoff pode ser ignorado pelo git enquanto o app não; apontar os dois para o mesmo lugar mistura ou versiona o que não devia.
