@@ -312,7 +312,7 @@ Ao lado do `profile.yml`, em `.claude/pipeline/`, vivem as extensões em prosa; 
 | --- | --- | --- |
 | `rules.md` | `pipeline-execute-ticket`, `pipeline-review-diff` | regras do repositório que a ferramenta não pega, com a severidade de cada uma na revisão |
 | `ticket.md` | `pipeline-write-ticket` | fatiamento, arestas de colisão, perguntas de domínio, exemplos |
-| `security.md` | `pipeline-security-audit`, `pipeline-execute-ticket` (gatilho) | perfis de atacante, threat model com ponteiros, eixos do sweep, `## Triggers` |
+| `security.md` | `pipeline-security-audit`, `pipeline-execute-ticket` (gatilho) | perfis de atacante, threat model com ponteiros, eixos do sweep, `## Triggers`; com o eixo opt-in `supply-chain`, a seção `## Supply chain` (comandos e arquivos que o eixo lê) |
 | `verification.md` | `pipeline-maestro` | critério de verificação do PR depois de aberto: API, tela, app (com `team.devices`), nota de UX, PR sem tela nem rota; o `pipeline-execute-ticket` o cita na Fase 7 |
 
 **Extensão acrescenta regra, nunca remove gate do core.** Um `rules.md` não pode desligar o teto de rodadas nem mudar o formato do laudo, e um `security.md` não pode

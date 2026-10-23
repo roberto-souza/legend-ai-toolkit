@@ -9,7 +9,19 @@ Lido por `pipeline-security-audit` e, pelo gatilho, por `pipeline-execute-ticket
 ## Eixos
 
 - **<Eixo do sweep>**: <onde olhar, com ponteiro>.
+- **supply-chain**: opcional; dependências, runtime, imagens e overrides, pelos comandos de `## Supply chain`. Apague esta linha e a seção abaixo se o repositório não usa o eixo.
 
 ## Triggers
 
 - `<glob>`: <por que mudança aqui chama o revisor de segurança>.
+
+## Supply chain
+
+Lida só pelo eixo `supply-chain`. O revisor roda os comandos de leitura daqui e nunca um comando de correção.
+
+- **Auditoria:** <comando de auditoria de dependência, com o recorte de produção>.
+- **Runtime:** <arquivos que fixam a versão do runtime>; <onde as dependências declaram o mínimo delas>.
+- **Imagens e pins:** <arquivos com imagem base e versão fixada: Dockerfile, configuração de deploy, workflows>; varredura de imagem: <comando, ou `nenhum`>.
+- **Overrides:** <arquivo e chave dos overrides de dependência>.
+- **Registro:** <comando que dá a data de publicação de uma versão de um pacote>.
+- **Guarda:** <comando do gate que confere a versão do runtime, ou `nenhuma`>.
