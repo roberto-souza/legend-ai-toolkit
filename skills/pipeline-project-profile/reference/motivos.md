@@ -22,7 +22,7 @@ Os motivos das recusas e da trava do `pipeline-project-profile`; as ações est�
 
 ## Landing
 
-- `landing.taste: default` é reservado até o core trazer o `taste.md` padrão: aceitar antes faria o profile apontar para um arquivo que nenhuma release traz. A versão que cria o arquivo tira o valor da lista no mesmo PR.
+- `landing.taste` aceita só `default` (o `taste` padrão do core) ou um caminho `.md` do projeto, que **substitui** o padrão por inteiro: mesclar dois arquivos de gosto cria o caso "qual linha vale", e quem quer só acrescentar copia o padrão e edita. Valor que não é nem um nem outro é erro de digitação.
 - `landing.formatCommand` exige `{files}`: comando de projeto sem o lugar do argumento é a falha silenciosa mais provável (formata tudo, ou nada), e a recusa é barata, como em `{udid}` e `{bodyFile}`.
 - `landing.lineBudget` aceita só `logic` e `section`: chave de outro nome é erro de digitação (`sections`) que, sem recusa, vira o default em silêncio.
 - `landing.app` e `landing.handoff` são relativos, sem `..`, e diferentes: o profile é versionado, e o handoff pode ser ignorado pelo git enquanto o app não; apontar os dois para o mesmo lugar mistura ou versiona o que não devia.

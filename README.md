@@ -19,7 +19,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-7a1f2b" alt="Licença MIT"></a>
-  <img src="https://img.shields.io/badge/vers%C3%A3o-0.4.0-c9a227" alt="Versão 0.4.0">
+  <img src="https://img.shields.io/badge/vers%C3%A3o-0.5.0-c9a227" alt="Versão 0.5.0">
   <img src="https://img.shields.io/badge/node-%E2%89%A522-3b2a1a" alt="Node 22 ou mais novo">
   <img src="https://img.shields.io/badge/idioma-pt--BR-2f5d50" alt="Em português do Brasil">
 </p>
@@ -123,7 +123,7 @@ Opcional. Com a chave `team:` no profile, a skill `pipeline-maestro` monta um ti
 
 | Camada | Onde vive | Quem muda |
 | --- | --- | --- |
-| **Core** — contrato, formato dos arquivos, princípios, gate de selos, guarda de deriva | `.claude/pipeline/core/` | só o toolkit |
+| **Core** — contrato, formato dos arquivos, princípios, gate de selos, guarda de deriva e os modelos do módulo de landing | `.claude/pipeline/core/` | só o toolkit |
 | **Skills e agents `pipeline-*`** | `.claude/skills/pipeline-*`, `.claude/agents/pipeline-*.md` | só o toolkit |
 | **Profile** — repositório, board, gate, idioma, stack, time | `.claude/pipeline/profile.yml` | o projeto |
 | **Extensões** — `rules.md`, `ticket.md`, `security.md`, `verification.md`, `landing.md` (opt-in) | `.claude/pipeline/` | o projeto |

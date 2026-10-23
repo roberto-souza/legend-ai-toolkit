@@ -47,7 +47,7 @@ Topo e combinações (sempre):
 | --- | --- |
 | `profileVersion` | diferente de `2`. |
 | chaves obrigatórias | falta `project`, `repo`, `gate.loop`, `gate.final`, `knowledge.stackSkills` ou `knowledge.projectInstructions`; com `board` diferente de `none`, falta uma das cinco de `board`, `issues.types` ou `issues.template`. |
-| qualquer chave | valor **reservado** (o schema prevê, o core ainda não trata; a lista está no schema). Mensagem: "valor reservado, ainda sem suporte no core". |
+| qualquer chave | valor **reservado** (o schema prevê, o core ainda não trata; a lista está no schema, hoje vazia). Mensagem: "valor reservado, ainda sem suporte no core". |
 | `topology: polyrepo` | sem `workspace.repos`, item sem `repo`, ou `<repo>` fora da lista. |
 | `issues.titleUnit: repo` | `topology` diferente de `polyrepo`. |
 | `branches.base` ≠ `branches.default` | `closing.mode` diferente de `close-references-mutation`. |
@@ -113,7 +113,7 @@ Detalhe: `.claude/skills/pipeline-project-profile/reference/motivos.md`, seção
 | `landing.widths`, `landing.sweepWidths` | presente e não é lista não vazia de inteiros positivos sem repetição. A mensagem nomeia a chave. |
 | `landing.lineBudget` | presente e não é mapa; chave fora de `logic`/`section` (nomeie a chave, como `landing.lineBudget.sections`); valor que não é inteiro positivo (nomeie a chave, como `landing.lineBudget.logic`). |
 | `landing.formatCommand` | presente e sem `{files}`; a mensagem nomeia `landing.formatCommand`. |
-| `landing.taste` | presente e nem `default` nem caminho terminado em `.md`; `default` cai na recusa de valor reservado da linha "qualquer chave". |
+| `landing.taste` | presente e nem `default` nem caminho terminado em `.md`. |
 
 Detalhe: `.claude/skills/pipeline-project-profile/reference/motivos.md`, seção "Landing".
 
