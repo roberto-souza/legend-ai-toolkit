@@ -6,8 +6,11 @@
  * `.claude/agents/pipeline-*.md`. This copies `core/`, `skills/pipeline-*` and `agents/pipeline-*.md` into it (content
  * and executable bit), removes every other entry found in it, writes `.claude/pipeline/toolkit.lock` (version, sha256
  * per file, executables) and merges the pipeline gate hooks into `.claude/settings.json` without duplicating a hook
- * already there. Outside the namespace it touches only the lock and the settings: never `profile.yml`, the extensions
- * or another skill. It refuses to write through a symbolic link, and validates the settings before writing anything.
+ * already there. It also sets `env.CLAUDE_CODE_AUTO_COMPACT_WINDOW` when the project has no value for it and, only
+ * while `profile.yml` declares `team:`, the SessionStart `compact` hook that points the team orchestrator back to its
+ * note (removed again when `team:` goes away). Outside the namespace it touches only the lock and the settings: it
+ * reads `profile.yml` but never writes it, the extensions or another skill. It refuses to write through a symbolic
+ * link, and validates the settings before writing anything.
  * `--check` writes nothing, prints what would change and exits 1 when anything would. Dependency free and
  * deterministic: the prompt orchestrates, this script only copies.
  */
@@ -32,12 +35,16 @@ import { isExecutable, ownedFiles } from '../core/verify.mjs';
 const TOOLKIT = fileURLToPath(new URL('..', import.meta.url));
 const LOCK = '.claude/pipeline/toolkit.lock';
 const SETTINGS = '.claude/settings.json';
+const PROFILE = '.claude/pipeline/profile.yml';
+const COMPACT_ENV = 'CLAUDE_CODE_AUTO_COMPACT_WINDOW';
+const COMPACT_WINDOW = '250000';
 const GATE = 'node "$CLAUDE_PROJECT_DIR/.claude/pipeline/core/pipeline-gate.mjs"';
 const HOOKS = [
   { event: 'PreToolUse', matcher: 'Bash', command: `${GATE} hook` },
   { event: 'PreToolUse', matcher: 'Write|Edit|MultiEdit|NotebookEdit', command: `${GATE} hook` },
   { event: 'UserPromptSubmit', matcher: undefined, command: `${GATE} authorize` },
 ];
+const RESUME_HOOK = { event: 'SessionStart', matcher: 'compact', command: `${GATE} resume` };
 
 function usage() {
   process.stderr.write('Usage: node scripts/install.mjs --to <project> [--check]\n');
@@ -124,10 +131,13 @@ function readSettings(project) {
 
   const settings = readJson(file);
   if (!isPlainObject(settings)) throw new Error(`${SETTINGS} must be a JSON object`);
+  if (settings.env !== undefined && !isPlainObject(settings.env)) {
+    throw new Error(`${SETTINGS}: "env" must be an object`);
+  }
   if (settings.hooks === undefined) return settings;
   if (!isPlainObject(settings.hooks)) throw new Error(`${SETTINGS}: "hooks" must be an object`);
 
-  for (const hook of HOOKS) {
+  for (const hook of [...HOOKS, RESUME_HOOK]) {
     const entries = settings.hooks[hook.event];
     if (entries === undefined) continue;
     if (!Array.isArray(entries)) throw new Error(`${SETTINGS}: "hooks.${hook.event}" must be an array`);
@@ -147,13 +157,61 @@ function sameMatcher(entry, matcher) {
   return current === matcher;
 }
 
-/** Return the settings with the gate hooks merged in, and the hooks that were missing. */
-function mergeHooks(settings) {
+/**
+ * Tell whether the project profile declares a top-level `team` key in block style, quoted or not, without a YAML
+ * parser. A `team:` whose value is empty still counts: the resume hook then prints nothing.
+ */
+function declaresTeam(project) {
+  const file = path.join(project, PROFILE);
+  return existsSync(file) && /^(["']?)team\1\s*:/m.test(readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
+}
+
+const hookLabel = hook => `${hook.event}${hook.matcher ? ` ${hook.matcher}` : ''}`;
+
+/**
+ * Drop the toolkit's own command for `hook` and the entries that only this removal empties.
+ * Return whether it was there.
+ */
+function removeHook(hooks, hook) {
+  const entries = hooks[hook.event];
+  if (!entries) return false;
+
+  const emptied = new Set();
+  let removed = false;
+  for (const entry of entries.filter(item => sameMatcher(item, hook.matcher) && item.hooks)) {
+    const kept = entry.hooks.filter(item => item?.command !== hook.command);
+    if (kept.length === entry.hooks.length) continue;
+    entry.hooks = kept;
+    removed = true;
+    if (kept.length === 0) emptied.add(entry);
+  }
+  if (!removed) return false;
+
+  hooks[hook.event] = entries.filter(entry => !emptied.has(entry));
+  if (hooks[hook.event].length === 0) delete hooks[hook.event];
+  return true;
+}
+
+/**
+ * Return the settings with the toolkit's env and hooks merged in, plus what changed: the hooks added, the hooks removed
+ * and the env keys set. The resume hook follows `team:`; an env value the project already has is kept, and `null`
+ * counts as no value.
+ */
+function mergeSettings(settings, { team }) {
   const merged = structuredClone(settings);
   const added = [];
+  const removed = [];
+  const env = [];
   merged.hooks ??= {};
 
-  for (const hook of HOOKS) {
+  if (merged.env?.[COMPACT_ENV] == null) {
+    merged.env = { ...merged.env, [COMPACT_ENV]: COMPACT_WINDOW };
+    env.push(COMPACT_ENV);
+  }
+
+  if (!team && removeHook(merged.hooks, RESUME_HOOK)) removed.push(hookLabel(RESUME_HOOK));
+
+  for (const hook of team ? [...HOOKS, RESUME_HOOK] : HOOKS) {
     const entries = (merged.hooks[hook.event] ??= []);
     const present = entries.some(
       entry => sameMatcher(entry, hook.matcher) && entry.hooks?.some(item => item?.command === hook.command),
@@ -166,10 +224,10 @@ function mergeHooks(settings) {
     if (entry) (entry.hooks ??= []).push(command);
     else entries.push(hook.matcher === undefined ? { hooks: [command] } : { matcher: hook.matcher, hooks: [command] });
 
-    added.push(`${hook.event}${hook.matcher ? ` ${hook.matcher}` : ''}`);
+    added.push(hookLabel(hook));
   }
 
-  return { merged, added };
+  return { merged, added, removed, env };
 }
 
 function readLock(project) {
@@ -206,7 +264,7 @@ function plan(project) {
 
   for (const file of [LOCK, SETTINGS]) assertNoLink(project, file);
 
-  const { merged, added } = mergeHooks(readSettings(project));
+  const { merged, added, removed, env } = mergeSettings(readSettings(project), { team: declaresTeam(project) });
   const version = readFileSync(path.join(TOOLKIT, 'VERSION'), 'utf8').trim();
   const lock =
     JSON.stringify(
@@ -219,7 +277,9 @@ function plan(project) {
       2,
     ) + '\n';
 
-  return { changes, merged, added, lock, lockChanged: readLock(project) !== lock, version };
+  const settingsChanged = added.length > 0 || removed.length > 0 || env.length > 0;
+  const lockChanged = readLock(project) !== lock;
+  return { changes, merged, added, removed, env, settingsChanged, lock, lockChanged, version };
 }
 
 function removeEmptyParents(file, project) {
@@ -232,7 +292,7 @@ function removeEmptyParents(file, project) {
   }
 }
 
-function apply(project, { changes, merged, added, lock, lockChanged }) {
+function apply(project, { changes, merged, settingsChanged, lock, lockChanged }) {
   const removalsFirst = [...changes].sort((a, b) => (b.action === 'REMOVE') - (a.action === 'REMOVE'));
 
   for (const change of removalsFirst) {
@@ -251,7 +311,7 @@ function apply(project, { changes, merged, added, lock, lockChanged }) {
 
   if (lockChanged) writeFileSync(path.join(project, LOCK), lock);
 
-  if (added.length > 0) {
+  if (settingsChanged) {
     mkdirSync(path.join(project, '.claude'), { recursive: true });
     writeFileSync(path.join(project, SETTINGS), JSON.stringify(merged, null, 2) + '\n');
   }
@@ -266,14 +326,16 @@ function main() {
   }
 
   const result = plan(project);
-  const { changes, added, lockChanged, version } = result;
+  const { changes, added, removed, env, settingsChanged, lockChanged, version } = result;
 
   for (const change of changes) process.stdout.write(`${change.action} ${change.target}\n`);
   for (const hook of added) process.stdout.write(`HOOK ${hook}\n`);
+  for (const hook of removed) process.stdout.write(`UNHOOK ${hook}\n`);
+  for (const key of env) process.stdout.write(`ENV ${key}\n`);
   if (lockChanged) process.stdout.write(`LOCK ${LOCK}\n`);
 
   if (check) {
-    const pending = changes.length > 0 || added.length > 0 || lockChanged;
+    const pending = changes.length > 0 || settingsChanged || lockChanged;
     process.stdout.write(pending ? `check: differs from Legend AI Toolkit ${version}\n` : `check: up to date with ${version}\n`);
     process.exit(pending ? 1 : 0);
   }
@@ -283,7 +345,8 @@ function main() {
   const count = action => changes.filter(change => change.action === action).length;
   process.stdout.write(
     `install: Legend AI Toolkit ${version}: ${count('ADD')} added, ${count('CHANGE') + count('MODE')} changed, ` +
-      `${count('REMOVE')} removed, ${added.length} hooks added\n`,
+      `${count('REMOVE')} removed, ${added.length} hooks added, ${removed.length} hooks removed, ` +
+      `${env.length} env set\n`,
   );
 }
 

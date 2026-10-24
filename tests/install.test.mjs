@@ -1,6 +1,7 @@
 /**
  * Verify the installer copies the toolkit into a project, is idempotent, merges the gate hooks without duplicating
- * them or dropping other settings, removes only the files the previous lock owned, and never touches project files.
+ * them or dropping other settings, sets the compaction window and follows `team:` with the resume hook, removes only
+ * the files the previous lock owned, and never touches project files.
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
@@ -228,4 +229,164 @@ test('an install refuses a directory that is not a git root and a malformed sett
   assert.equal(result.status, 1);
   assert.match(result.stderr, /not valid JSON/);
   assert.ok(!existsSync(path.join(directory, LOCK)));
+});
+
+const ENV = 'CLAUDE_CODE_AUTO_COMPACT_WINDOW';
+const PROFILE = '.claude/pipeline/profile.yml';
+const RESUME = 'node "$CLAUDE_PROJECT_DIR/.claude/pipeline/core/pipeline-gate.mjs" resume';
+
+function resumeEntries(settings) {
+  return (settings.hooks.SessionStart ?? []).filter(entry => entry.hooks.some(hook => hook.command === RESUME));
+}
+
+test('an install sets the compaction window once and keeps a value the project already has', t => {
+  const directory = project(t);
+  const first = install(directory);
+  assert.match(first.stdout, new RegExp(`ENV ${ENV}`));
+  assert.equal(JSON.parse(read(directory, SETTINGS)).env[ENV], '250000');
+
+  const again = install(directory);
+  assert.doesNotMatch(again.stdout, /ENV /);
+  assert.equal(install(directory, '--check').status, 0);
+
+  const own = project(t);
+  write(own, SETTINGS, JSON.stringify({ env: { [ENV]: '180000', KEEP: '1' } }));
+  const result = install(own);
+  assert.equal(result.status, 0, result.stderr);
+  assert.doesNotMatch(result.stdout, /ENV /);
+  assert.deepEqual(JSON.parse(read(own, SETTINGS)).env, { [ENV]: '180000', KEEP: '1' });
+});
+
+test('a project without team: never gets the resume hook', t => {
+  const directory = project(t);
+  write(directory, PROFILE, 'profileVersion: 2\n# team:\n#   note: <nota>\n');
+  install(directory);
+  const settings = JSON.parse(read(directory, SETTINGS));
+  assert.equal(settings.hooks.SessionStart, undefined);
+  assert.equal(gateCommands(settings).length, 3);
+});
+
+test('a project with team: gets the resume hook once, and loses it when team: goes away', t => {
+  const directory = project(t);
+  write(directory, PROFILE, 'profileVersion: 2\nteam:\n  note: <nota>\n');
+  const first = install(directory);
+  assert.match(first.stdout, /HOOK SessionStart compact/);
+  assert.equal(resumeEntries(JSON.parse(read(directory, SETTINGS))).length, 1);
+
+  const again = install(directory);
+  assert.doesNotMatch(again.stdout, /HOOK /);
+  assert.equal(install(directory, '--check').status, 0);
+
+  write(directory, PROFILE, 'profileVersion: 2\n');
+  const check = install(directory, '--check');
+  assert.equal(check.status, 1);
+  assert.match(check.stdout, /UNHOOK SessionStart compact/);
+  install(directory);
+  assert.equal(JSON.parse(read(directory, SETTINGS)).hooks.SessionStart, undefined);
+});
+
+test('an existing resume hook is not duplicated, and other SessionStart hooks stay', t => {
+  const directory = project(t);
+  write(directory, PROFILE, 'team:\n  note: <nota>\n');
+  write(
+    directory,
+    SETTINGS,
+    JSON.stringify({
+      env   : { [ENV]: '250000' },
+      hooks : {
+        SessionStart: [
+          {
+            matcher : 'compact',
+            hooks   : [
+              { type: 'command', command: 'echo mine' },
+              { type: 'command', command: RESUME },
+            ],
+          },
+          { matcher: 'startup', hooks: [{ type: 'command', command: 'echo startup' }] },
+        ],
+      },
+    }),
+  );
+
+  const result = install(directory);
+  assert.equal(result.status, 0, result.stderr);
+  assert.doesNotMatch(result.stdout, /HOOK SessionStart|ENV /);
+  const settings = JSON.parse(read(directory, SETTINGS));
+  assert.equal(resumeEntries(settings).length, 1);
+  assert.equal(settings.hooks.SessionStart[0].hooks.length, 2);
+
+  write(directory, PROFILE, 'profileVersion: 2\n');
+  install(directory);
+  assert.deepEqual(JSON.parse(read(directory, SETTINGS)).hooks.SessionStart, [
+    { matcher: 'compact', hooks: [{ type: 'command', command: 'echo mine' }] },
+    { matcher: 'startup', hooks: [{ type: 'command', command: 'echo startup' }] },
+  ]);
+});
+
+test('an install refuses a settings file whose env is not an object', t => {
+  const directory = project(t);
+  write(directory, SETTINGS, JSON.stringify({ env: ['x'] }));
+  const result = install(directory);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /"env" must be an object/);
+});
+
+test('a quoted team key also gets the resume hook', t => {
+  const directory = project(t);
+  write(directory, PROFILE, '"team":\n  note: <nota>\n');
+  install(directory);
+  assert.equal(resumeEntries(JSON.parse(read(directory, SETTINGS))).length, 1);
+});
+
+test('without team: a project compact entry that has no resume hook is left as it was', t => {
+  const directory = project(t);
+  write(directory, SETTINGS, JSON.stringify({ hooks: { SessionStart: [{ matcher: 'compact' }] } }));
+  const result = install(directory);
+  assert.equal(result.status, 0, result.stderr);
+  assert.doesNotMatch(result.stdout, /UNHOOK/);
+  assert.deepEqual(JSON.parse(read(directory, SETTINGS)).hooks.SessionStart, [{ matcher: 'compact' }]);
+});
+
+test('a single-quoted team key, or a profile with a byte order mark, also gets the resume hook', t => {
+  for (const profile of ["'team':\n  note: <nota>\n", '﻿team:\n  note: <nota>\n']) {
+    const directory = project(t);
+    write(directory, PROFILE, profile);
+    install(directory);
+    assert.equal(resumeEntries(JSON.parse(read(directory, SETTINGS))).length, 1, JSON.stringify(profile));
+  }
+});
+
+test('removing the resume hook keeps an empty compact entry the project wrote itself', t => {
+  const directory = project(t);
+  write(
+    directory,
+    SETTINGS,
+    JSON.stringify({
+      hooks: {
+        SessionStart: [
+          { matcher: 'compact', hooks: [] },
+          { matcher: 'compact', hooks: [{ type: 'command', command: RESUME }] },
+        ],
+      },
+    }),
+  );
+  const result = install(directory);
+  assert.match(result.stdout, /UNHOOK SessionStart compact/);
+  assert.deepEqual(JSON.parse(read(directory, SETTINGS)).hooks.SessionStart, [{ matcher: 'compact', hooks: [] }]);
+});
+
+test('a null compaction window is replaced, and check sees an env-only change on settings without hooks', t => {
+  const directory = project(t);
+  install(directory);
+  const settings = JSON.parse(read(directory, SETTINGS));
+  delete settings.hooks;
+  settings.env[ENV] = null;
+  write(directory, SETTINGS, JSON.stringify(settings));
+
+  const check = install(directory, '--check');
+  assert.equal(check.status, 1);
+  assert.match(check.stdout, new RegExp(`ENV ${ENV}`));
+  install(directory);
+  assert.equal(JSON.parse(read(directory, SETTINGS)).env[ENV], '250000');
+  assert.equal(install(directory, '--check').status, 0);
 });

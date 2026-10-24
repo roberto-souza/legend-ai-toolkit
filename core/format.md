@@ -53,6 +53,12 @@ O contrato que todo arquivo principal e toda referência do pipeline seguem; o `
 - Toda reescrita informa a contagem de linhas antes e depois no `## Test plan` do PR; mudança intermediária mantém as seções enxutas; a que termina um arquivo e ainda passa de 150 explica em `## Decisions` quais passos o mantêm acima.
 - **Nunca** tire um passo do checklist, nem junte dois passos num que perca uma condição, para caber no teto.
 
+## Arquivo de instruções do projeto
+
+- `<knowledge.projectInstructions>` é índice: cada regra em uma linha, com ponteiro para o detalhe.
+- Histórico, motivo, exemplo e procedimento ficam fora dele (ADR, module map, memória versionada, referência).
+- Com `knowledge.instructionsBudget`, o `node .claude/pipeline/core/document-budget.mjs` no `<gate.final>` reprova o arquivo acima do teto; conferência: `.claude/skills/pipeline-doctor/SKILL.md`, item 29.
+
 ## Idioma
 
 - Arquivo existente mantém o idioma que tem hoje: reescrita nunca traduz (alguns arquivos de agent estão em outro idioma que o das skills, e continuam assim).

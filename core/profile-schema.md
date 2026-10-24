@@ -144,6 +144,7 @@ workspace:
 | `projectInstructions` | sim | arquivo de instruções do repo (normalmente `CLAUDE.md`) |
 | `memories` | não | índice da memória versionada do projeto (fatos de processo que não cabem em ADR nem nas instruções); ausente = o repositório não tem memória versionada |
 | `verification` | não | arquivo com o critério de verificação de PR; ausente = nenhum critério além da revisão e do gate. Notação `<knowledge.verification>`. Opcional para o core |
+| `instructionsBudget` | não | teto, em bytes (inteiro positivo), de `<knowledge.projectInstructions>`; ausente = sem teto. O guard `node .claude/pipeline/core/document-budget.mjs` entra no `<gate.final>` do projeto. Regra: `.claude/pipeline/core/format.md`, seção "Arquivo de instruções do projeto" |
 
 - `verification` é obrigatória com `team:`: `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir".
 - Memória é contexto, não instrução: fato do repositório (código, ADR, `<knowledge.projectInstructions>`) vence memória defasada.
@@ -174,7 +175,7 @@ workspace:
 
 ## `team`
 
-- Opcional. Ausente = o repositório não orquestra o time e a skill `pipeline-maestro` para; só ela lê a chave.
+- Opcional. Ausente = o repositório não orquestra o time: a skill `pipeline-maestro` para, o PR exige só o selo `review` e o install não põe o gancho de retomada depois da compactação (seção "O que o install põe no `settings.json`").
 - Recusas: `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir".
 - Conferências ao vivo (arquivo `.example`, `git check-ignore`, cobertura das chaves de credencial): `.claude/skills/pipeline-doctor/SKILL.md`, item 23.
 
@@ -337,6 +338,20 @@ landing:
 - `lineBudget` é teto por arquivo e não muda o corte de tamanho do ticket do fluxo de tickets: seção que passa desse corte vira dois tickets.
 - `{files}` não é a notação `<chave>` do pipeline: quem formata o troca, na hora, pela lista de arquivos.
 - Os modelos do módulo vêm com o core, em `.claude/pipeline/core/landing/`: briefing, validação, manifesto do handoff, contexto de tickets, checklist de descoberta e o `taste` padrão. A skill de landing copia os moldes para `<landing.handoff>`, e o projeto preenche a cópia; o checklist e o `taste` não se copiam.
+
+## O que o install põe no `settings.json`
+
+O `install.mjs` do toolkit mescla em `.claude/settings.json`, sem duplicar e sem apagar o que o projeto já tem:
+
+| O quê | Quando | Para quê |
+| --- | --- | --- |
+| ganchos `PreToolUse` (`hook`) e `UserPromptSubmit` (`authorize`) do `pipeline-gate.mjs` | sempre | o gate de selos e a autorização de merge (`.claude/pipeline/core/seals.md`) |
+| `env.CLAUDE_CODE_AUTO_COMPACT_WINDOW: "250000"` | sempre, só se o projeto não tem valor (`null` conta como sem valor) | teto de contexto de toda sessão do Claude Code no projeto; o valor do projeto vale, mesmo diferente de 250000 |
+| gancho `SessionStart` de matcher `compact` (`resume`) | só com `team:` no profile | depois de uma compactação, a sessão recebe, em inglês, a instrução de ler a nota `<team.note>` antes de agir se ela for a orquestradora do time |
+
+- Sem `team:`, o install não põe o gancho `resume` e tira o que tiver posto; o `resume` também não imprime nada sem `team`.
+- O install detecta `team:` sem parser de YAML: chave `team` no topo do arquivo, em estilo de bloco, com ou sem aspas. Profile em estilo de fluxo (`{team: …}` numa linha) não é detectado.
+- Conferência: `.claude/skills/pipeline-doctor/SKILL.md`, item 28.
 
 ## As extensões
 

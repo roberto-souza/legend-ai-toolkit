@@ -19,7 +19,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-7a1f2b" alt="Licença MIT"></a>
-  <img src="https://img.shields.io/badge/vers%C3%A3o-0.4.0-c9a227" alt="Versão 0.4.0">
+  <img src="https://img.shields.io/badge/vers%C3%A3o-0.5.0-c9a227" alt="Versão 0.5.0">
   <img src="https://img.shields.io/badge/node-%E2%89%A522-3b2a1a" alt="Node 22 ou mais novo">
   <img src="https://img.shields.io/badge/idioma-pt--BR-2f5d50" alt="Em português do Brasil">
 </p>
@@ -81,7 +81,9 @@ O `install.mjs`:
 - remove do espaço do toolkit (`.claude/pipeline/core/`, `.claude/skills/pipeline-*`, `.claude/agents/pipeline-*.md`) tudo o que ele não traz, inclusive sobra de um core copiado à mão;
 - recusa escrever através de link simbólico e confere o `settings.json` antes de escrever qualquer coisa;
 - mescla os três ganchos do gate no `.claude/settings.json`, sem duplicar e sem apagar o que já está lá;
-- **nunca toca** em `profile.yml`, nas extensões nem em skill que não seja `pipeline-*`.
+- põe `env.CLAUDE_CODE_AUTO_COMPACT_WINDOW` (250000) no mesmo arquivo, sem trocar o valor que o projeto já tenha;
+- com `team:` no profile, mescla o gancho `SessionStart` (`compact`) que manda o orquestrador reler a nota do time; sem `team:`, não põe e tira o que tiver posto;
+- lê o `profile.yml`, mas **nunca escreve** nele, nas extensões nem em skill que não seja `pipeline-*`.
 
 Rodar duas vezes não muda nada na segunda vez.
 
@@ -123,14 +125,14 @@ Opcional. Com a chave `team:` no profile, a skill `pipeline-maestro` monta um ti
 
 | Camada | Onde vive | Quem muda |
 | --- | --- | --- |
-| **Core** — contrato, formato dos arquivos, princípios, gate de selos, guarda de deriva e os modelos do módulo de landing | `.claude/pipeline/core/` | só o toolkit |
+| **Core** — contrato, formato dos arquivos, princípios, gate de selos, guarda de deriva, guarda do teto do arquivo de instruções e os modelos do módulo de landing | `.claude/pipeline/core/` | só o toolkit |
 | **Skills e agents `pipeline-*`** | `.claude/skills/pipeline-*`, `.claude/agents/pipeline-*.md` | só o toolkit |
 | **Profile** — repositório, board, gate, idioma, stack, time | `.claude/pipeline/profile.yml` | o projeto |
 | **Extensões** — `rules.md`, `ticket.md`, `security.md`, `verification.md`, `landing.md` (opt-in) | `.claude/pipeline/` | o projeto |
 | **Módulo de landing (opt-in)** — comando e skill `pipeline-landing`, ligado por `landing:` no profile e pela extensão `landing.md` | `.claude/skills/pipeline-landing*`, `.claude/pipeline/core/landing/` | só o toolkit; os fatos, o projeto |
 | **Skills de stack e as demais** | `.claude/skills/<outra>` | o projeto |
 
-As ferramentas opcionais de landing, em [`tools/landing/`](tools/landing/), não são instaladas: rodam do clone do toolkit, e nada no core depende delas. O prefixo `pipeline-` é do toolkit: o instalador remove dali o que ele não traz. **Extensão acrescenta regra, nunca remove gate do core.** O schema do profile está em [`core/profile-schema.md`](core/profile-schema.md), e os templates em branco, em [`templates/pipeline/`](templates/pipeline/).
+As ferramentas opcionais de landing, em [`tools/landing/`](tools/landing/), não são instaladas: rodam do clone do toolkit, e nada no core depende delas. O prefixo `pipeline-` é do toolkit: o instalador remove dali o que ele não traz. **Extensão acrescenta regra, nunca remove gate do core.** Opcional: com `knowledge.instructionsBudget` no profile, o `document-budget.mjs` no gate do projeto reprova o arquivo de instruções acima do teto, porque ele é índice (regra em uma linha e ponteiro; o detalhe mora fora). O schema do profile está em [`core/profile-schema.md`](core/profile-schema.md), e os templates em branco, em [`templates/pipeline/`](templates/pipeline/).
 
 ## 07 / Mude o códice
 
