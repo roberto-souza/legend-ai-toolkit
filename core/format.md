@@ -57,7 +57,7 @@ O contrato que todo arquivo principal e toda referência do pipeline seguem; o `
 
 - `<knowledge.projectInstructions>` é índice: cada regra em uma linha, com ponteiro para o detalhe.
 - Histórico, motivo, exemplo e procedimento ficam fora dele (ADR, module map, memória versionada, referência).
-- Com `knowledge.instructionsBudget`, o `node .claude/pipeline/core/document-budget.mjs` no `<gate.final>` reprova o arquivo acima do teto; o `/pipeline-doctor` (item 29) confere.
+- Com `knowledge.instructionsBudget`, o `node .claude/pipeline/core/document-budget.mjs` no `<gate.final>` reprova o arquivo acima do teto; conferência: `.claude/skills/pipeline-doctor/SKILL.md`, item 29.
 
 ## Idioma
 

@@ -175,7 +175,7 @@ workspace:
 
 ## `team`
 
-- Opcional. Ausente = o repositório não orquestra o time e a skill `pipeline-maestro` para; só ela lê a chave, além do `resume` do gate.
+- Opcional. Ausente = o repositório não orquestra o time e a skill `pipeline-maestro` para; só ela lê a chave, além do `install.mjs` do toolkit e do `resume` do gate.
 - Com `team:`, o install põe o gancho de retomada depois da compactação: seção "O que o install põe no `settings.json`".
 - Recusas: `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir".
 - Conferências ao vivo (arquivo `.example`, `git check-ignore`, cobertura das chaves de credencial): `.claude/skills/pipeline-doctor/SKILL.md`, item 23.
@@ -351,7 +351,7 @@ O `install.mjs` do toolkit mescla em `.claude/settings.json`, sem duplicar e sem
 | gancho `SessionStart` de matcher `compact` (`resume`) | só com `team:` no profile | depois de uma compactação, a sessão lê "se você é o orquestrador do time, leia a nota `<team.note>` antes de agir" |
 
 - Sem `team:`, o install não põe o gancho `resume` e tira o que tiver posto; o `resume` também não imprime nada sem `team`.
-- O install detecta `team:` sem parser de YAML: chave `team` no topo do arquivo, com ou sem aspas.
+- O install detecta `team:` sem parser de YAML: chave `team` no topo do arquivo, em estilo de bloco, com ou sem aspas. Profile em estilo de fluxo (`{team: …}` numa linha) não é detectado.
 - Conferência: `.claude/skills/pipeline-doctor/SKILL.md`, item 28.
 
 ## As extensões

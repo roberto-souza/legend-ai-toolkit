@@ -156,38 +156,44 @@ function sameMatcher(entry, matcher) {
 }
 
 /**
- * Tell whether the project profile declares a top-level `team` key, quoted or not, without a YAML parser. A `team:`
- * whose value is empty still counts: the resume hook then prints nothing.
+ * Tell whether the project profile declares a top-level `team` key in block style, quoted or not, without a YAML
+ * parser. A `team:` whose value is empty still counts: the resume hook then prints nothing.
  */
 function declaresTeam(project) {
   const file = path.join(project, PROFILE);
-  return existsSync(file) && /^(["']?)team\1\s*:/m.test(readFileSync(file, 'utf8'));
+  return existsSync(file) && /^(["']?)team\1\s*:/m.test(readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
 }
 
 const hookLabel = hook => `${hook.event}${hook.matcher ? ` ${hook.matcher}` : ''}`;
 
-/** Drop the toolkit's own command for `hook`, and the entries it leaves empty. Return whether it was there. */
+/**
+ * Drop the toolkit's own command for `hook` and the entries that only this removal empties.
+ * Return whether it was there.
+ */
 function removeHook(hooks, hook) {
   const entries = hooks[hook.event];
   if (!entries) return false;
 
+  const emptied = new Set();
   let removed = false;
   for (const entry of entries.filter(item => sameMatcher(item, hook.matcher) && item.hooks)) {
     const kept = entry.hooks.filter(item => item?.command !== hook.command);
     if (kept.length === entry.hooks.length) continue;
     entry.hooks = kept;
     removed = true;
+    if (kept.length === 0) emptied.add(entry);
   }
   if (!removed) return false;
 
-  hooks[hook.event] = entries.filter(entry => !sameMatcher(entry, hook.matcher) || entry.hooks?.length !== 0);
+  hooks[hook.event] = entries.filter(entry => !emptied.has(entry));
   if (hooks[hook.event].length === 0) delete hooks[hook.event];
   return true;
 }
 
 /**
  * Return the settings with the toolkit's env and hooks merged in, plus what changed: the hooks added, the hooks removed
- * and the env keys set. The resume hook follows `team:`; an env value the project already has is kept.
+ * and the env keys set. The resume hook follows `team:`; an env value the project already has is kept, and `null`
+ * counts as no value.
  */
 function mergeSettings(settings, { team }) {
   const merged = structuredClone(settings);
@@ -196,7 +202,7 @@ function mergeSettings(settings, { team }) {
   const env = [];
   merged.hooks ??= {};
 
-  if (merged.env?.[COMPACT_ENV] === undefined) {
+  if (merged.env?.[COMPACT_ENV] == null) {
     merged.env = { ...merged.env, [COMPACT_ENV]: COMPACT_WINDOW };
     env.push(COMPACT_ENV);
   }

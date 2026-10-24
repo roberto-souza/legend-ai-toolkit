@@ -1,6 +1,7 @@
 /**
  * Verify the instructions budget guard passes a file within the limit, names the file, size and limit when it is
- * larger, warns and passes without `knowledge.instructionsBudget` or without a profile, and fails on a missing file.
+ * larger, warns and passes without `knowledge.instructionsBudget` or without a profile (even without the `yaml`
+ * package), and fails on a missing file or an invalid budget.
  * The profile is JSON, which is valid YAML, read through a stub `yaml` package so the test needs no dependency.
  */
 import assert from 'node:assert/strict';
@@ -20,14 +21,14 @@ function write(directory, file, content) {
   writeFileSync(path.join(directory, file), content);
 }
 
-function guarded(t, knowledge, instructions) {
+function guarded(t, knowledge, instructions, { yaml = true } = {}) {
   const directory = mkdtempSync(path.join(tmpdir(), 'legend-budget-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   spawnSync('git', ['init', '-q', directory]);
   spawnSync(process.execPath, [path.join(TOOLKIT, 'scripts', 'install.mjs'), '--to', directory]);
-  write(directory, 'node_modules/yaml/package.json', JSON.stringify({ name: 'yaml', type: 'module', main: 'index.js' }));
-  write(directory, 'node_modules/yaml/index.js', 'export const parse = JSON.parse;\n');
-  if (knowledge) write(directory, '.claude/pipeline/profile.yml', JSON.stringify({ knowledge }));
+  if (yaml) write(directory, 'node_modules/yaml/package.json', JSON.stringify({ name: 'yaml', type: 'module', main: 'index.js' }));
+  if (yaml) write(directory, 'node_modules/yaml/index.js', 'export const parse = JSON.parse;\n');
+  if (knowledge) write(directory, '.claude/pipeline/profile.yml', JSON.stringify({ knowledge }, null, 2));
   if (instructions !== undefined) write(directory, 'CLAUDE.md', instructions);
   return spawnSync(process.execPath, [path.join(directory, '.claude/pipeline/core/document-budget.mjs')], {
     encoding: 'utf8',
@@ -62,6 +63,22 @@ test('a missing instructions file fails and is named', t => {
   const result = guarded(t, { projectInstructions: 'CLAUDE.md', instructionsBudget: 10 }, undefined);
   assert.equal(result.status, 1);
   assert.match(result.stderr, /CLAUDE\.md \(knowledge\.projectInstructions\) does not exist/);
+});
+
+test('without the yaml package it passes when no budget is declared, and fails naming the package when one is', t => {
+  const free = guarded(t, { projectInstructions: 'CLAUDE.md' }, 'x', { yaml: false });
+  assert.equal(free.status, 0, free.stderr);
+  assert.match(free.stderr, /no knowledge\.instructionsBudget/);
+
+  const bound = guarded(t, { projectInstructions: 'CLAUDE.md', instructionsBudget: 10 }, 'x', { yaml: false });
+  assert.equal(bound.status, 1);
+  assert.match(bound.stderr, /the yaml package is not installed/);
+});
+
+test('a null budget fails as not a positive integer', t => {
+  const result = guarded(t, { projectInstructions: 'CLAUDE.md', instructionsBudget: null }, 'x');
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /must be a positive integer/);
 });
 
 test('a budget that is not a positive integer is refused', () => {

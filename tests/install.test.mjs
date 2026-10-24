@@ -339,3 +339,47 @@ test('without team: a project compact entry that has no resume hook is left as i
   assert.doesNotMatch(result.stdout, /UNHOOK/);
   assert.deepEqual(JSON.parse(read(directory, SETTINGS)).hooks.SessionStart, [{ matcher: 'compact' }]);
 });
+
+test('a single-quoted team key, or a profile with a byte order mark, also gets the resume hook', t => {
+  for (const profile of ["'team':\n  note: <nota>\n", '﻿team:\n  note: <nota>\n']) {
+    const directory = project(t);
+    write(directory, PROFILE, profile);
+    install(directory);
+    assert.equal(resumeEntries(JSON.parse(read(directory, SETTINGS))).length, 1, JSON.stringify(profile));
+  }
+});
+
+test('removing the resume hook keeps an empty compact entry the project wrote itself', t => {
+  const directory = project(t);
+  write(
+    directory,
+    SETTINGS,
+    JSON.stringify({
+      hooks: {
+        SessionStart: [
+          { matcher: 'compact', hooks: [] },
+          { matcher: 'compact', hooks: [{ type: 'command', command: RESUME }] },
+        ],
+      },
+    }),
+  );
+  const result = install(directory);
+  assert.match(result.stdout, /UNHOOK SessionStart compact/);
+  assert.deepEqual(JSON.parse(read(directory, SETTINGS)).hooks.SessionStart, [{ matcher: 'compact', hooks: [] }]);
+});
+
+test('a null compaction window is replaced, and check sees an env-only change on settings without hooks', t => {
+  const directory = project(t);
+  install(directory);
+  const settings = JSON.parse(read(directory, SETTINGS));
+  delete settings.hooks;
+  settings.env[ENV] = null;
+  write(directory, SETTINGS, JSON.stringify(settings));
+
+  const check = install(directory, '--check');
+  assert.equal(check.status, 1);
+  assert.match(check.stdout, new RegExp(`ENV ${ENV}`));
+  install(directory);
+  assert.equal(JSON.parse(read(directory, SETTINGS)).env[ENV], '250000');
+  assert.equal(install(directory, '--check').status, 0);
+});

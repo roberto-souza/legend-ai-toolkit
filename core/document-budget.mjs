@@ -4,9 +4,9 @@
  *
  * The project instructions file (`knowledge.projectInstructions`) is an index: a one-line rule and a pointer, with the
  * history and the detail elsewhere (`.claude/pipeline/core/format.md`). With `knowledge.instructionsBudget` (bytes) in
- * the profile, this fails naming the file, its size and the limit when the file is larger. Without the key, or without a
- * profile, it warns and passes, so a project that has not chosen a budget is not blocked. It reads the profile with the
- * `yaml` package, like `pipeline-gate.mjs`.
+ * the profile, this fails naming the file, its size and the limit when the file is larger. Without the key, or
+ * without a profile, it warns and passes, so a project that has not chosen a budget is not blocked. It looks for the
+ * key (block style) before loading the `yaml` package, so only a project with a budget needs that package.
  */
 import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import * as path from 'node:path';
@@ -14,6 +14,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('../../..', import.meta.url));
 const PROFILE = '.claude/pipeline/profile.yml';
+const BUDGET_KEY = /^\s+(["']?)instructionsBudget\1\s*:/m;
 
 /** Return the problem with the instructions file, or null when it fits. `sizeOf` maps a relative path to bytes. */
 export function budgetProblem(knowledge, sizeOf) {
@@ -32,20 +33,24 @@ function sizeOf(file) {
 }
 
 async function main() {
-  if (!existsSync(path.join(ROOT, PROFILE))) {
+  const file = path.join(ROOT, PROFILE);
+  if (!existsSync(file)) {
     process.stderr.write(`document-budget: no ${PROFILE}, nothing checked\n`);
     return 0;
   }
 
+  const text = readFileSync(file, 'utf8').replace(/^\uFEFF/, '');
+  const noBudget = () => {
+    process.stderr.write('document-budget: no knowledge.instructionsBudget in the profile, nothing checked\n');
+    return 0;
+  };
+  if (!BUDGET_KEY.test(text)) return noBudget();
+
   const { parse } = await import('yaml').catch(() => {
     throw new Error('the yaml package is not installed in this project; the pipeline gate needs it too');
   });
-  const knowledge = parse(readFileSync(path.join(ROOT, PROFILE), 'utf8'))?.knowledge ?? {};
-
-  if (knowledge.instructionsBudget === undefined) {
-    process.stderr.write('document-budget: no knowledge.instructionsBudget in the profile, nothing checked\n');
-    return 0;
-  }
+  const knowledge = parse(text)?.knowledge ?? {};
+  if (knowledge.instructionsBudget === undefined) return noBudget();
 
   const problem = budgetProblem(knowledge, sizeOf);
   if (problem) {
