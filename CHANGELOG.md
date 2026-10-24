@@ -4,7 +4,7 @@ Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcion
 
 ## 0.5.0 — 2026-10-24
 
-**Teto de contexto e arquivo de instruções como índice (os dois opcionais).**
+**Teto de contexto e arquivo de instruções como índice.** As chaves novas são opcionais; o env entra sempre que o projeto não tem valor.
 
 - **Teto de contexto:**
   - o `install.mjs` grava `env.CLAUDE_CODE_AUTO_COMPACT_WINDOW: "250000"` em `.claude/settings.json` quando o projeto não tem valor, sem trocar o que já está lá e sem duplicar; `env` fora de objeto é recusado. Saída nova `ENV`;
@@ -18,7 +18,7 @@ Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcion
   - regra nova em `core/format.md`, seção "Arquivo de instruções do projeto": regra em uma linha e ponteiro, histórico e detalhe fora;
   - doctor, item 29: com a chave, roda o guard e procura o guard no `gate.final`; sem ela, `OK` com nota.
 
-**Ao atualizar:** tudo é opcional. Sem mudar o profile, o `install.mjs` só acrescenta `CLAUDE_CODE_AUTO_COMPACT_WINDOW` (250000) ao `.claude/settings.json`, sem sobrescrever o valor que o projeto já tenha. Com `team:` no profile, ele também mescla o gancho `SessionStart`/`compact` de retomada. Para usar o teto do arquivo de instruções, declare `knowledge.instructionsBudget` e ponha `node .claude/pipeline/core/document-budget.mjs` no `gate.final`.
+**Ao atualizar:** as chaves novas são opcionais, e o profile não precisa mudar. O `install.mjs` acrescenta `CLAUDE_CODE_AUTO_COMPACT_WINDOW` (250000) ao `.claude/settings.json`, sem sobrescrever o valor que o projeto já tenha. Com `team:` no profile, ele também mescla o gancho `SessionStart`/`compact` de retomada. Para usar o teto do arquivo de instruções, declare `knowledge.instructionsBudget` e ponha `node .claude/pipeline/core/document-budget.mjs` no `gate.final`.
 
 ## 0.4.0 — 2026-10-23
 

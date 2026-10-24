@@ -35,7 +35,7 @@ O detalhe das regras que o `CLAUDE.md` lista em uma linha. Leia só a seção qu
 ## Fluxo de mudança
 
 - Branch e PR aqui. O `validate.yml` roda `npm test` e `npm run guard`.
-- O `npm test` também confere que todo ponteiro dos arquivos instalados e destes docs resolve, e que o comando do item 28 do doctor funciona (`tests/docs.test.mjs`).
+- O `npm test` também confere que todo ponteiro para arquivo do toolkit ou deste repositório resolve, nos arquivos instalados e nestes docs, e que o comando do item 28 do doctor funciona (`tests/docs.test.mjs`). Ponteiro para arquivo do projeto (extensão, `AGENTS.md`) fica de fora: quem o confere é o doctor, no projeto.
 - Merge na `main`, release, e em cada projeto o `prompts/02-atualizar.md`.
 - Push direto na `main` só com autorização explícita.
 - Mudança feita direto num projeto falha no `verify.mjs` dele.

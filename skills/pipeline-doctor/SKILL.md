@@ -232,7 +232,7 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24 e 27 rodam as r
     ```
 29. **Teto do arquivo de instruções.** Regra: `.claude/pipeline/core/format.md`, seção "Arquivo de instruções do projeto".
     Sem `knowledge.instructionsBudget` → `OK`, com a nota "sem teto declarado". Com a chave (valor que não é inteiro
-    positivo já é recusa do item 5): `node .claude/pipeline/core/document-budget.mjs` sai 0 → `OK`; senão `FALHA` com a
+    positivo já é recusa do item 6): `node .claude/pipeline/core/document-budget.mjs` sai 0 → `OK`; senão `FALHA` com a
     linha que ele imprime e a ação "mova histórico e detalhe para fora de `<knowledge.projectInstructions>`, deixando a regra
     em uma linha e o ponteiro".
     Gate: como no item 26, siga `<gate.final>` até achar `document-budget.mjs` → `OK`; senão `AVISO` ("ponha o
