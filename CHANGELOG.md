@@ -14,7 +14,7 @@ Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcion
   - doctor, item 28 (**Contexto**): env ausente é `AVISO`; com `team:`, gancho ausente é `FALHA`.
 - **Arquivo de instruções como índice:**
   - chave opcional `knowledge.instructionsBudget` (bytes), sem default; o Passo 2 do `pipeline-project-profile` recusa valor que não seja inteiro positivo;
-  - guard novo `core/document-budget.mjs`: `Document budget check passed.`, ou `<arquivo>: <n> bytes, limit <m>` no stderr e exit 1; sem a chave ou sem `profile.yml`, aviso e exit 0;
+  - guard novo `core/document-budget.mjs`: `Document budget check passed.`, ou `<arquivo>: <n> bytes, limit <m>` no stderr e exit 1; sem a chave ou sem `profile.yml`, aviso e exit 0, mesmo sem o pacote `yaml` (a chave é procurada antes de carregá-lo);
   - regra nova em `core/format.md`, seção "Arquivo de instruções do projeto": regra em uma linha e ponteiro, histórico e detalhe fora;
   - doctor, item 29: com a chave, roda o guard e procura o guard no `gate.final`; sem ela, `OK` com nota.
 
