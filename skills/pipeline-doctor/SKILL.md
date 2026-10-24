@@ -209,3 +209,18 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24 e 27 rodam as r
     case "<landing.taste>" in ""|default) ;; *) test -f "<landing.taste>" || echo "FALHA landing.taste: <landing.taste> não existe" ;; esac
     git check-ignore -q "<landing.handoff>/" && echo "handoff ignorado pelo git" || echo "handoff versionado"
     ```
+28. **Contexto.** Regra: `.claude/pipeline/core/profile-schema.md`, seção "`team`". `env.CLAUDE_CODE_AUTO_COMPACT_WINDOW`
+    ausente de `.claude/settings.json` → `AVISO`, ação "reinstale pelo prompt 02-atualizar"; presente → `OK` com o valor
+    (o do projeto vale, mesmo diferente de 250000). Sem `team:` no profile, o gancho não é cobrado. Com `team:`, sem
+    `hooks.SessionStart` de matcher `compact` chamando `pipeline-gate.mjs resume` → `FALHA`, a mesma ação. Comando, da
+    raiz do repositório (bash):
+
+    ```bash
+    node -e 'const s=require("./.claude/settings.json"); console.log(s.env?.CLAUDE_CODE_AUTO_COMPACT_WINDOW ?? "AVISO sem env"); console.log((s.hooks?.SessionStart ?? []).some(e => e.matcher === "compact" && e.hooks?.some(h => / resume$/.test(h.command ?? ""))) ? "gancho resume presente" : "gancho resume ausente")'
+    ```
+29. **Teto do arquivo de instruções.** Regra: `.claude/pipeline/core/format.md`, seção "Arquivo de instruções do projeto".
+    Sem `knowledge.instructionsBudget` → `OK`, com a nota "sem teto declarado". Com a chave:
+    `node .claude/pipeline/core/document-budget.mjs` sai 0 → `OK`; senão `FALHA` com a linha que ele imprime e a ação
+    "mova histórico e detalhe para fora de `<knowledge.projectInstructions>`, deixando a regra em uma linha e o ponteiro".
+    Gate: como no item 26, siga `<gate.final>` até achar `document-budget.mjs` → `OK`; senão `AVISO` ("ponha o
+    `document-budget.mjs` no gate").

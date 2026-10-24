@@ -169,7 +169,7 @@ Régua: `.claude/skills/pipeline-maestro/roles/ux.md`; critério: `<crit>`, seç
 5. Registre em `## Decisões` o slug do tenant de teste e toda decisão do usuário, com data.
 6. A linha `PR #<pr> aberto para #<n>: <url> — <AAAA-MM-DD>` em `## Em execução` é o registro provisório do sentinela, trocada no `PILHA PRONTA` pelo item do passo 3.
 7. Conte nos itens do PR as voltas pós-PR de cada tela (`REPROVADO`, `AJUSTAR`, review humano); só achado de tela tem volta (PR só de API não tem). Toda correção mandada ao executor diz `volta <k> da tela <rota>`.
-8. A sessão compacta em ~250k (`.claude/settings.json`, `env`); ao fim de cada pilha, deixe a nota em dia para retomar numa sessão nova se a compactação perder o fio.
+8. A sessão compacta no `CLAUDE_CODE_AUTO_COMPACT_WINDOW` que o install põe em `.claude/settings.json` (`.claude/skills/pipeline-doctor/SKILL.md`, item 28), e o gancho `resume` aponta a nota depois da compactação; ao fim de cada pilha, deixe a nota em dia para retomar numa sessão nova se a compactação perder o fio.
 
 ## Recursos do Maestri
 

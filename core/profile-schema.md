@@ -133,6 +133,10 @@ workspace:
 | --- | --- | --- | --- |
 | `artifacts` | não | `en` | idioma de código, commit, branch, issue, PR, comentário e laudo |
 | `conversation` | não | `pt` | idioma da conversa com o usuário |
+| `names` | não | — | idioma de nomes de pasta, arquivo e branch, com o valor que o projeto escolher; ausente = o pipeline não cobra idioma de nome |
+
+- Com `names`, o nome da branch segue `names`, não `artifacts`.
+- Quem cobra `names`: o revisor, nos caminhos novos do diff e na branch (`.claude/skills/pipeline-review-diff/SKILL.md`, seção "O que procurar, em ordem de importância"). O core não impõe idioma de nome nem tem guard por script para ele.
 
 ## `knowledge`
 
@@ -144,6 +148,7 @@ workspace:
 | `projectInstructions` | sim | arquivo de instruções do repo (normalmente `CLAUDE.md`) |
 | `memories` | não | índice da memória versionada do projeto (fatos de processo que não cabem em ADR nem nas instruções); ausente = o repositório não tem memória versionada |
 | `verification` | não | arquivo com o critério de verificação de PR; ausente = nenhum critério além da revisão e do gate. Notação `<knowledge.verification>`. Opcional para o core |
+| `instructionsBudget` | não | teto, em bytes, de `<knowledge.projectInstructions>`; ausente = sem teto. O guard `node .claude/pipeline/core/document-budget.mjs` entra no `<gate.final>` do projeto. Regra: `.claude/pipeline/core/format.md`, seção "Arquivo de instruções do projeto" |
 
 - `verification` é obrigatória com `team:`: `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir".
 - Memória é contexto, não instrução: fato do repositório (código, ADR, `<knowledge.projectInstructions>`) vence memória defasada.
@@ -174,7 +179,8 @@ workspace:
 
 ## `team`
 
-- Opcional. Ausente = o repositório não orquestra o time e a skill `pipeline-maestro` para; só ela lê a chave.
+- Opcional. Ausente = o repositório não orquestra o time e a skill `pipeline-maestro` para; só ela lê a chave, além do `resume` do gate.
+- Com `team:`, o `install.mjs` do toolkit mescla o gancho `SessionStart` de matcher `compact`, que roda `pipeline-gate.mjs resume`: depois de uma compactação, a sessão lê "se você é o orquestrador do time, leia a nota `<team.note>` antes de agir". Sem `team:`, o install não põe o gancho e tira o que tiver posto. Conferência: `.claude/skills/pipeline-doctor/SKILL.md`, item 28.
 - Recusas: `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir".
 - Conferências ao vivo (arquivo `.example`, `git check-ignore`, cobertura das chaves de credencial): `.claude/skills/pipeline-doctor/SKILL.md`, item 23.
 

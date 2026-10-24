@@ -1,15 +1,18 @@
 /**
  * Verify the pipeline gate reads the human's merge request in free text, refuses what is not one, carries a
- * validation seal only when the delta does not require it, and lets a malformed hook payload through.
+ * validation seal only when the delta does not require it, lets a malformed hook payload through, and after a compaction
+ * points the team orchestrator back to its note.
  */
 
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { resolve } from 'node:path';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { carryProblem, mentionsMerge, normalize, parseAuthorization } from '../core/pipeline-gate.mjs';
+import { carryProblem, mentionsMerge, normalize, parseAuthorization, resumeInstruction } from '../core/pipeline-gate.mjs';
 
 const GATE = resolve(fileURLToPath(new URL('.', import.meta.url)), '../core/pipeline-gate.mjs');
 const PROFILE = {
@@ -114,4 +117,36 @@ test('a null hook payload passes through', () => {
     const result = spawnSync(process.execPath, [GATE, command], { input: 'null', encoding: 'utf8' });
     assert.equal(result.status, 0, `${command}: ${result.stderr}`);
   }
+});
+
+test('after a compaction the resume instruction names the team note, and is empty without team', () => {
+  assert.equal(
+    resumeInstruction({ team: { note: 'state' } }),
+    'If you are the team orchestrator, read the note "state" before acting.',
+  );
+  assert.equal(resumeInstruction({ repo: 'owner/name' }), '');
+  assert.equal(resumeInstruction(null), '');
+});
+
+test('the resume entrypoint prints the note of an installed project and nothing without team', t => {
+  const directory = mkdtempSync(join(tmpdir(), 'legend-resume-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  spawnSync('git', ['init', '-q', directory]);
+  spawnSync(process.execPath, [resolve(GATE, '../../scripts/install.mjs'), '--to', directory]);
+  const write = (file, content) => {
+    mkdirSync(dirname(join(directory, file)), { recursive: true });
+    writeFileSync(join(directory, file), content);
+  };
+  write('node_modules/yaml/package.json', JSON.stringify({ name: 'yaml', type: 'module', main: 'index.js' }));
+  write('node_modules/yaml/index.js', 'export const parse = JSON.parse;\n');
+  const resume = () =>
+    spawnSync(process.execPath, [join(directory, '.claude/pipeline/core/pipeline-gate.mjs'), 'resume'], { encoding: 'utf8' });
+
+  write('.claude/pipeline/profile.yml', JSON.stringify({ team: { note: 'state' } }));
+  assert.equal(resume().stdout, 'If you are the team orchestrator, read the note "state" before acting.\n');
+
+  write('.claude/pipeline/profile.yml', JSON.stringify({ repo: 'owner/name' }));
+  const silent = resume();
+  assert.equal(silent.status, 0);
+  assert.equal(silent.stdout, '');
 });

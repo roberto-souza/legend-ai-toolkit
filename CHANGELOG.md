@@ -2,6 +2,25 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
+## 0.5.0 — 2026-10-24
+
+**Teto de contexto, arquivo de instruções como índice e idioma de nomes (tudo opcional).**
+
+- **Teto de contexto:**
+  - o `install.mjs` grava `env.CLAUDE_CODE_AUTO_COMPACT_WINDOW: "250000"` em `.claude/settings.json` quando o projeto não tem valor, sem trocar o que já está lá e sem duplicar; `env` fora de objeto é recusado. Saída nova `ENV`;
+  - com `team:` no profile, o install mescla o gancho `SessionStart` (matcher `compact`) que roda o subcomando novo `pipeline-gate.mjs resume`: ele lê `team.note` e imprime "If you are the team orchestrator, read the note "<team.note>" before acting.". Sem `team:`, o gancho não entra, e o que tiver entrado sai (saída nova `UNHOOK`). O install detecta `team:` sem parser de YAML, e o `resume` sem `team` não imprime nada;
+  - o `pipeline-maestro` deixa de assumir o env por conta própria e aponta para o doctor;
+  - doctor, item 28 (**Contexto**): env ausente é `AVISO`; com `team:`, gancho ausente é `FALHA`.
+- **Arquivo de instruções como índice:**
+  - chave opcional `knowledge.instructionsBudget` (bytes), sem default;
+  - guard novo `core/document-budget.mjs`: `Document budget check passed.`, ou `<arquivo>: <n> bytes, limit <m>` no stderr e exit 1; sem a chave, aviso e exit 0;
+  - regra nova em `core/format.md`, seção "Arquivo de instruções do projeto": regra em uma linha e ponteiro, histórico e detalhe fora;
+  - doctor, item 29: com a chave, roda o guard e procura o guard no `gate.final`; sem ela, `OK` com nota.
+- **Idioma de nomes:** chave opcional `language.names` (idioma de pasta, arquivo e branch). O revisor só a cobra quando ela existe, nos caminhos novos do diff e no nome da branch (passo 8 do item 3 de "O que procurar"). O core não impõe idioma nem tem guard por script para isso.
+- O Passo 2 do `pipeline-project-profile` recusa `instructionsBudget` que não seja inteiro positivo e `language.names` que não seja texto.
+
+**Ao atualizar:** as três chaves novas são opcionais (`knowledge.instructionsBudget`, `language.names` e o `team:` que já existia, que agora também liga o gancho de retomada). Sem elas, nada muda além do env: o `install.mjs` acrescenta `CLAUDE_CODE_AUTO_COMPACT_WINDOW` (250000) ao `.claude/settings.json`, sem sobrescrever valor que o projeto já tenha. Com `team:`, ele também mescla o gancho `SessionStart`/`compact`. Para usar o teto, declare `knowledge.instructionsBudget` e ponha `node .claude/pipeline/core/document-budget.mjs` no `gate.final`.
+
 ## 0.4.0 — 2026-10-23
 
 **Módulo de landing page (opt-in).** Conduz uma landing do briefing aos tickets e à validação da página construída. Os fatos do projeto ficam no bloco `landing:` do profile e na extensão `landing.md`.

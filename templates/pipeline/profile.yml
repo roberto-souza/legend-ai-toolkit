@@ -39,7 +39,7 @@ gate:
   tests: true
   ci: none
 
-language: { artifacts: pt, conversation: pt }
+language: { artifacts: pt, conversation: pt } # opcional: names: <idioma de nomes de pasta, arquivo e branch>
 
 knowledge:
   stackSkills: [] # ex.: - { paths: [apps/api/**], skill: <skill de stack> }
@@ -48,6 +48,7 @@ knowledge:
   # adrs: docs/adr/
   # memories: <índice da memória versionada>
   # verification: .claude/pipeline/verification.md # obrigatória com team:
+  # instructionsBudget: <bytes> # teto do arquivo de instruções; o guard document-budget.mjs entra no gate.final
 
 # Sem security.md, desligue o revisor de segurança do gate; com ele, declare a baseline.
 security:

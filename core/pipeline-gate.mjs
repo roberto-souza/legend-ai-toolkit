@@ -7,10 +7,11 @@
  * (a named `#n` is an issue or a PR; without one, the request covers every PR whose closing issues are In review, and the
  * PRs that close none). `carry` copies a validation seal to a new PR head when the delta since
  * the sealed head touches no file of a kind that requires it. `prose` tells whether a git range changes only files of
- * `review.proseOnly`, for the reviewer model. No override or skip flag exists. `gh` and `git` are called without a shell.
+ * `review.proseOnly`, for the reviewer model. `resume` (SessionStart, matcher `compact`) points the team orchestrator
+ * back to the `team.note` after a compaction, and prints nothing without `team`. No override or skip flag exists. `gh` and `git` are called without a shell.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -374,6 +375,24 @@ export function carryProblem(seal, deltaFiles, profile) {
   return needed ? `the delta touches ${needed.kinds.join(', ')}, which requires pipeline/${seal}` : null;
 }
 
+export function resumeInstruction(profile) {
+  const note = profile?.team?.note;
+  return note ? `If you are the team orchestrator, read the note "${note}" before acting.` : '';
+}
+
+async function resume() {
+  try {
+    const file = path.join(ROOT, '.claude/pipeline/profile.yml');
+    if (!existsSync(file)) return 0;
+    const { parse } = await import('yaml');
+    const instruction = resumeInstruction(parse(readFileSync(file, 'utf8')));
+    if (instruction) print(instruction);
+  } catch (error) {
+    printError(`resume instruction not printed: ${error.message}`);
+  }
+  return 0;
+}
+
 async function authorize() {
   try {
     const authorization = parseAuthorization(normalize(String(JSON.parse(readFileSync(0, 'utf8'))?.prompt ?? '')));
@@ -543,14 +562,14 @@ async function carry(args) {
   return 0;
 }
 
-const COMMANDS = { stamp, check, hook, authorize, prose, carry };
+const COMMANDS = { stamp, check, hook, authorize, prose, carry, resume };
 
 async function main() {
   const [commandName, ...commandArgs] = process.argv.slice(2);
   const failureCode = commandName === 'hook' ? 2 : 1;
   try {
     if (!COMMANDS[commandName]) {
-      throw new Error('usage: pipeline-gate.mjs <stamp|check|hook|authorize|prose|carry> [flags]');
+      throw new Error('usage: pipeline-gate.mjs <stamp|check|hook|authorize|prose|carry|resume> [flags]');
     }
     process.exitCode = await COMMANDS[commandName](commandArgs);
   } catch (error) {

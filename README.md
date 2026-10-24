@@ -19,7 +19,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-7a1f2b" alt="Licença MIT"></a>
-  <img src="https://img.shields.io/badge/vers%C3%A3o-0.4.0-c9a227" alt="Versão 0.4.0">
+  <img src="https://img.shields.io/badge/vers%C3%A3o-0.5.0-c9a227" alt="Versão 0.5.0">
   <img src="https://img.shields.io/badge/node-%E2%89%A522-3b2a1a" alt="Node 22 ou mais novo">
   <img src="https://img.shields.io/badge/idioma-pt--BR-2f5d50" alt="Em português do Brasil">
 </p>
@@ -81,7 +81,9 @@ O `install.mjs`:
 - remove do espaço do toolkit (`.claude/pipeline/core/`, `.claude/skills/pipeline-*`, `.claude/agents/pipeline-*.md`) tudo o que ele não traz, inclusive sobra de um core copiado à mão;
 - recusa escrever através de link simbólico e confere o `settings.json` antes de escrever qualquer coisa;
 - mescla os três ganchos do gate no `.claude/settings.json`, sem duplicar e sem apagar o que já está lá;
-- **nunca toca** em `profile.yml`, nas extensões nem em skill que não seja `pipeline-*`.
+- põe `env.CLAUDE_CODE_AUTO_COMPACT_WINDOW` (250000) no mesmo arquivo, sem trocar o valor que o projeto já tenha;
+- com `team:` no profile, mescla o gancho `SessionStart` (`compact`) que manda o orquestrador reler a nota do time; sem `team:`, não põe e tira o que tiver posto;
+- lê o `profile.yml`, mas **nunca escreve** nele, nas extensões nem em skill que não seja `pipeline-*`.
 
 Rodar duas vezes não muda nada na segunda vez.
 

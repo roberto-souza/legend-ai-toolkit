@@ -75,6 +75,7 @@ description: |
 5. **Module map defasado é bug:** mudou o módulo e o mapa não mudou → achado.
 6. **Mudança estrutural** (pasta, comando, variável, tooling) sem `README.md`/`<knowledge.projectInstructions>` no mesmo PR → achado.
 7. **Base errada:** só com range terminando em `HEAD`, `git merge-base --is-ancestor origin/<branches.base> HEAD` precisa passar; branch cortada da branch de outro ticket é achado estrutural. Detalhe: `.claude/skills/pipeline-review-diff/reference/porques.md`, seção "Base errada".
+8. **Idioma de nomes** (só com `language.names`): pasta ou arquivo novo (`git diff --name-only --diff-filter=AR $RANGE`) e o nome da branch fora de `<language.names>` → achado, NIT. Sem a chave, pule. Detalhe: `.claude/pipeline/core/profile-schema.md`, seção "`language`".
 
 **4. Correção de verdade.**
 
