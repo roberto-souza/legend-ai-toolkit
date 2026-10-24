@@ -39,7 +39,7 @@ Detalhe: `.claude/pipeline/core/profile-schema.md` (schema com defaults e valore
 
 1. Confira toda linha das tabelas abaixo, junte todas as falhas e pare com a lista exata do que falta ou está errado, antes de qualquer outra ação. Não contorne a falha adivinhando o valor: profile incompleto se corrige no profile, não na execução.
 2. A mensagem nomeia a chave (a que falta, como `team.roles.ux.audience`, ou a que guarda o valor suspeito). Nas linhas de valor suspeito (`team.credentials`, `team.e2e.users.<papel>.credentials.<nome>`, `team.e2e.login.signCommand`) a mensagem **nunca repete o valor suspeito**; as demais mensagens não têm essa regra.
-3. Grupo de tabela cuja chave está ausente é pulado: sem `team:`, `team.e2e`, `team.devices`, `seals`, `review` ou `landing`, nada a conferir naquele grupo.
+3. Grupo de tabela cuja chave está ausente é pulado: sem `team:`, `team.e2e`, `team.devices`, `seals`, `review`, `landing` ou `knowledge.instructionsBudget`, nada a conferir naquele grupo.
 
 Topo e combinações (sempre):
 
@@ -52,7 +52,6 @@ Topo e combinações (sempre):
 | `issues.titleUnit: repo` | `topology` diferente de `polyrepo`. |
 | `branches.base` ≠ `branches.default` | `closing.mode` diferente de `close-references-mutation`. |
 | `closing.mode: close-references-mutation` | sem `closing.workflow`. |
-| `knowledge.instructionsBudget` | presente e não é inteiro positivo. |
 
 Detalhe: `.claude/skills/pipeline-project-profile/reference/motivos.md`, seção "Combinações obrigatórias".
 
@@ -117,6 +116,14 @@ Detalhe: `.claude/skills/pipeline-project-profile/reference/motivos.md`, seção
 | `landing.taste` | presente e nem `default` nem caminho terminado em `.md`. |
 
 Detalhe: `.claude/skills/pipeline-project-profile/reference/motivos.md`, seção "Landing".
+
+`knowledge.instructionsBudget` (só com a chave):
+
+| Chave | Recusa quando |
+| --- | --- |
+| `knowledge.instructionsBudget` | não é inteiro positivo. |
+
+Detalhe: `.claude/skills/pipeline-project-profile/reference/motivos.md`, seção "Teto do arquivo de instruções".
 
 ## Passo 3 — Trava de repositório
 

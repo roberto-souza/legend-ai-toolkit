@@ -1,7 +1,7 @@
 /**
  * Verify the pipeline gate reads the human's merge request in free text, refuses what is not one, carries a
- * validation seal only when the delta does not require it, lets a malformed hook payload through, and after a compaction
- * points the team orchestrator back to its note.
+ * validation seal only when the delta does not require it, lets a malformed hook payload through, and after a
+ * compaction points the team orchestrator back to its note.
  */
 
 import assert from 'node:assert/strict';
@@ -12,7 +12,13 @@ import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { carryProblem, mentionsMerge, normalize, parseAuthorization, resumeInstruction } from '../core/pipeline-gate.mjs';
+import {
+  carryProblem,
+  mentionsMerge,
+  normalize,
+  parseAuthorization,
+  resumeInstruction,
+} from '../core/pipeline-gate.mjs';
 
 const GATE = resolve(fileURLToPath(new URL('.', import.meta.url)), '../core/pipeline-gate.mjs');
 const PROFILE = {
@@ -139,8 +145,8 @@ test('the resume entrypoint prints the note of an installed project and nothing 
   };
   write('node_modules/yaml/package.json', JSON.stringify({ name: 'yaml', type: 'module', main: 'index.js' }));
   write('node_modules/yaml/index.js', 'export const parse = JSON.parse;\n');
-  const resume = () =>
-    spawnSync(process.execPath, [join(directory, '.claude/pipeline/core/pipeline-gate.mjs'), 'resume'], { encoding: 'utf8' });
+  const gate = join(directory, '.claude/pipeline/core/pipeline-gate.mjs');
+  const resume = () => spawnSync(process.execPath, [gate, 'resume'], { encoding: 'utf8' });
 
   write('.claude/pipeline/profile.yml', JSON.stringify({ team: { note: 'state' } }));
   assert.equal(resume().stdout, 'If you are the team orchestrator, read the note "state" before acting.\n');

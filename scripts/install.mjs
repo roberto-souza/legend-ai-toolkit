@@ -131,7 +131,9 @@ function readSettings(project) {
 
   const settings = readJson(file);
   if (!isPlainObject(settings)) throw new Error(`${SETTINGS} must be a JSON object`);
-  if (settings.env !== undefined && !isPlainObject(settings.env)) throw new Error(`${SETTINGS}: "env" must be an object`);
+  if (settings.env !== undefined && !isPlainObject(settings.env)) {
+    throw new Error(`${SETTINGS}: "env" must be an object`);
+  }
   if (settings.hooks === undefined) return settings;
   if (!isPlainObject(settings.hooks)) throw new Error(`${SETTINGS}: "hooks" must be an object`);
 

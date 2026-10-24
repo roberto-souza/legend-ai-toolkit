@@ -11,10 +11,10 @@ Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcion
   - com `team:` no profile, o install mescla o gancho `SessionStart` (matcher `compact`) que roda o subcomando novo `pipeline-gate.mjs resume`: ele lê `team.note` e imprime "If you are the team orchestrator, read the note "<team.note>" before acting.". Sem `team:`, o gancho não entra, e o que tiver entrado sai (saída nova `UNHOOK`). O install detecta `team:` sem parser de YAML, e o `resume` sem `team` não imprime nada;
   - seção nova no schema, "O que o install põe no `settings.json`", com os ganchos e o env;
   - o `pipeline-maestro` deixa de assumir o env por conta própria e aponta para essa seção;
-  - doctor, item 28 (**Contexto**): env ausente é `AVISO`; com `team:`, gancho ausente é `FALHA`.
+  - doctor, item 28 (**Contexto**): env ou `settings.json` ausente é `AVISO`; `settings.json` inválido é `FALHA`; com `team:`, gancho ausente é `FALHA`.
 - **Arquivo de instruções como índice:**
   - chave opcional `knowledge.instructionsBudget` (bytes), sem default; o Passo 2 do `pipeline-project-profile` recusa valor que não seja inteiro positivo;
-  - guard novo `core/document-budget.mjs`: `Document budget check passed.`, ou `<arquivo>: <n> bytes, limit <m>` no stderr e exit 1; sem a chave ou sem `profile.yml`, aviso e exit 0, mesmo sem o pacote `yaml` (a chave é procurada antes de carregá-lo);
+  - guard novo `core/document-budget.mjs`: `Document budget check passed.`, ou `<arquivo>: <n> bytes, limit <m>` no stderr e exit 1; sem a chave ou sem `profile.yml`, aviso e exit 0, mesmo sem o pacote `yaml` (a chave é procurada no texto antes de carregá-lo, em estilo de bloco ou de fluxo; linha comentada não conta);
   - regra nova em `core/format.md`, seção "Arquivo de instruções do projeto": regra em uma linha e ponteiro, histórico e detalhe fora;
   - doctor, item 29: com a chave, roda o guard e procura o guard no `gate.final`; sem ela, `OK` com nota.
 

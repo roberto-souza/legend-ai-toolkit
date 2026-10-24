@@ -26,3 +26,7 @@ Os motivos das recusas e da trava do `pipeline-project-profile`; as ações est�
 - `landing.formatCommand` exige `{files}`: comando de projeto sem o lugar do argumento é a falha silenciosa mais provável (formata tudo, ou nada), e a recusa é barata, como em `{udid}` e `{bodyFile}`.
 - `landing.lineBudget` aceita só `logic` e `section`: chave de outro nome é erro de digitação (`sections`) que, sem recusa, vira o default em silêncio.
 - `landing.app` e `landing.handoff` são relativos, sem `..`, e diferentes: o profile é versionado, e o handoff pode ser ignorado pelo git enquanto o app não; apontar os dois para o mesmo lugar mistura ou versiona o que não devia.
+
+## Teto do arquivo de instruções
+
+- `knowledge.instructionsBudget` é um inteiro positivo, em bytes: o guard `document-budget.mjs` compara o tamanho do arquivo com ele. Texto, zero, negativo ou fração é erro de digitação que, sem a recusa, só apareceria no gate, como falha do guard.

@@ -125,14 +125,14 @@ Opcional. Com a chave `team:` no profile, a skill `pipeline-maestro` monta um ti
 
 | Camada | Onde vive | Quem muda |
 | --- | --- | --- |
-| **Core** — contrato, formato dos arquivos, princípios, gate de selos, guarda de deriva e os modelos do módulo de landing | `.claude/pipeline/core/` | só o toolkit |
+| **Core** — contrato, formato dos arquivos, princípios, gate de selos, guarda de deriva, guarda do teto do arquivo de instruções e os modelos do módulo de landing | `.claude/pipeline/core/` | só o toolkit |
 | **Skills e agents `pipeline-*`** | `.claude/skills/pipeline-*`, `.claude/agents/pipeline-*.md` | só o toolkit |
 | **Profile** — repositório, board, gate, idioma, stack, time | `.claude/pipeline/profile.yml` | o projeto |
 | **Extensões** — `rules.md`, `ticket.md`, `security.md`, `verification.md`, `landing.md` (opt-in) | `.claude/pipeline/` | o projeto |
 | **Módulo de landing (opt-in)** — comando e skill `pipeline-landing`, ligado por `landing:` no profile e pela extensão `landing.md` | `.claude/skills/pipeline-landing*`, `.claude/pipeline/core/landing/` | só o toolkit; os fatos, o projeto |
 | **Skills de stack e as demais** | `.claude/skills/<outra>` | o projeto |
 
-As ferramentas opcionais de landing, em [`tools/landing/`](tools/landing/), não são instaladas: rodam do clone do toolkit, e nada no core depende delas. O prefixo `pipeline-` é do toolkit: o instalador remove dali o que ele não traz. **Extensão acrescenta regra, nunca remove gate do core.** O schema do profile está em [`core/profile-schema.md`](core/profile-schema.md), e os templates em branco, em [`templates/pipeline/`](templates/pipeline/).
+As ferramentas opcionais de landing, em [`tools/landing/`](tools/landing/), não são instaladas: rodam do clone do toolkit, e nada no core depende delas. O prefixo `pipeline-` é do toolkit: o instalador remove dali o que ele não traz. **Extensão acrescenta regra, nunca remove gate do core.** Opcional: com `knowledge.instructionsBudget` no profile, o `document-budget.mjs` no gate do projeto reprova o arquivo de instruções acima do teto, porque ele é índice (regra em uma linha e ponteiro; o detalhe mora fora). O schema do profile está em [`core/profile-schema.md`](core/profile-schema.md), e os templates em branco, em [`templates/pipeline/`](templates/pipeline/).
 
 ## 07 / Mude o códice
 

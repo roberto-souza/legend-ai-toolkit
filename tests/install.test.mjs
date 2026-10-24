@@ -1,6 +1,7 @@
 /**
  * Verify the installer copies the toolkit into a project, is idempotent, merges the gate hooks without duplicating
- * them or dropping other settings, sets the compaction window and follows `team:` with the resume hook, removes only the files the previous lock owned, and never touches project files.
+ * them or dropping other settings, sets the compaction window and follows `team:` with the resume hook, removes only
+ * the files the previous lock owned, and never touches project files.
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
@@ -294,7 +295,13 @@ test('an existing resume hook is not duplicated, and other SessionStart hooks st
       env   : { [ENV]: '250000' },
       hooks : {
         SessionStart: [
-          { matcher: 'compact', hooks: [{ type: 'command', command: 'echo mine' }, { type: 'command', command: RESUME }] },
+          {
+            matcher : 'compact',
+            hooks   : [
+              { type: 'command', command: 'echo mine' },
+              { type: 'command', command: RESUME },
+            ],
+          },
           { matcher: 'startup', hooks: [{ type: 'command', command: 'echo startup' }] },
         ],
       },

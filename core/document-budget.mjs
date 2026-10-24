@@ -5,8 +5,9 @@
  * The project instructions file (`knowledge.projectInstructions`) is an index: a one-line rule and a pointer, with the
  * history and the detail elsewhere (`.claude/pipeline/core/format.md`). With `knowledge.instructionsBudget` (bytes) in
  * the profile, this fails naming the file, its size and the limit when the file is larger. Without the key, or
- * without a profile, it warns and passes, so a project that has not chosen a budget is not blocked. It looks for the
- * key (block style) before loading the `yaml` package, so only a project with a budget needs that package.
+ * without a profile, it warns and passes, so a project that has not chosen a budget is not blocked. It loads the `yaml`
+ * package only when a line that is not a comment names `instructionsBudget:` (block or flow style), so only a project
+ * with a budget needs that package; the parsed `knowledge.instructionsBudget` then decides.
  */
 import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import * as path from 'node:path';
@@ -14,12 +15,14 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('../../..', import.meta.url));
 const PROFILE = '.claude/pipeline/profile.yml';
-const BUDGET_KEY = /^\s+(["']?)instructionsBudget\1\s*:/m;
+const BUDGET_KEY = /^(?![ \t]*#).*\binstructionsBudget\b["']?[ \t]*:/m;
 
 /** Return the problem with the instructions file, or null when it fits. `sizeOf` maps a relative path to bytes. */
 export function budgetProblem(knowledge, sizeOf) {
   const { projectInstructions: file, instructionsBudget: limit } = knowledge;
-  if (!Number.isInteger(limit) || limit <= 0) throw new Error('knowledge.instructionsBudget must be a positive integer');
+  if (!Number.isInteger(limit) || limit <= 0) {
+    throw new Error('knowledge.instructionsBudget must be a positive integer');
+  }
   if (typeof file !== 'string' || !file) throw new Error('knowledge.projectInstructions is missing');
 
   const size = sizeOf(file);

@@ -8,7 +8,8 @@
  * PRs that close none). `carry` copies a validation seal to a new PR head when the delta since
  * the sealed head touches no file of a kind that requires it. `prose` tells whether a git range changes only files of
  * `review.proseOnly`, for the reviewer model. `resume` (SessionStart, matcher `compact`) points the team orchestrator
- * back to the `team.note` after a compaction, and prints nothing without `team`. No override or skip flag exists. `gh` and `git` are called without a shell.
+ * back to the `team.note` after a compaction, and prints nothing without `team`. No override or skip flag exists. `gh`
+ * and `git` are called without a shell.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs';
