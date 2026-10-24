@@ -4,10 +4,11 @@
  *
  * The project instructions file (`knowledge.projectInstructions`) is an index: a one-line rule and a pointer, with the
  * history and the detail elsewhere (`.claude/pipeline/core/format.md`). With `knowledge.instructionsBudget` (bytes) in
- * the profile, this fails naming the file, its size and the limit when the file is larger. Without the key it warns
- * and passes, so a project that has not chosen a budget is not blocked.
+ * the profile, this fails naming the file, its size and the limit when the file is larger. Without the key, or without a
+ * profile, it warns and passes, so a project that has not chosen a budget is not blocked. It reads the profile with the
+ * `yaml` package, like `pipeline-gate.mjs`.
  */
-import { readFileSync, realpathSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -24,8 +25,21 @@ export function budgetProblem(knowledge, sizeOf) {
   return size > limit ? `${file}: ${size} bytes, limit ${limit}` : null;
 }
 
+function sizeOf(file) {
+  const full = path.join(ROOT, file);
+  if (!existsSync(full)) throw new Error(`${file} (knowledge.projectInstructions) does not exist`);
+  return statSync(full).size;
+}
+
 async function main() {
-  const { parse } = await import('yaml');
+  if (!existsSync(path.join(ROOT, PROFILE))) {
+    process.stderr.write(`document-budget: no ${PROFILE}, nothing checked\n`);
+    return 0;
+  }
+
+  const { parse } = await import('yaml').catch(() => {
+    throw new Error('the yaml package is not installed in this project; the pipeline gate needs it too');
+  });
   const knowledge = parse(readFileSync(path.join(ROOT, PROFILE), 'utf8'))?.knowledge ?? {};
 
   if (knowledge.instructionsBudget === undefined) {
@@ -33,7 +47,7 @@ async function main() {
     return 0;
   }
 
-  const problem = budgetProblem(knowledge, file => statSync(path.join(ROOT, file)).size);
+  const problem = budgetProblem(knowledge, sizeOf);
   if (problem) {
     process.stderr.write(`${problem}\n`);
     return 1;

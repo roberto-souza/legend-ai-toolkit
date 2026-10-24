@@ -209,7 +209,7 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24 e 27 rodam as r
     case "<landing.taste>" in ""|default) ;; *) test -f "<landing.taste>" || echo "FALHA landing.taste: <landing.taste> não existe" ;; esac
     git check-ignore -q "<landing.handoff>/" && echo "handoff ignorado pelo git" || echo "handoff versionado"
     ```
-28. **Contexto.** Regra: `.claude/pipeline/core/profile-schema.md`, seção "`team`". `env.CLAUDE_CODE_AUTO_COMPACT_WINDOW`
+28. **Contexto.** Regra: `.claude/pipeline/core/profile-schema.md`, seção "O que o install põe no `settings.json`". `env.CLAUDE_CODE_AUTO_COMPACT_WINDOW`
     ausente de `.claude/settings.json` → `AVISO`, ação "reinstale pelo prompt 02-atualizar"; presente → `OK` com o valor
     (o do projeto vale, mesmo diferente de 250000). Sem `team:` no profile, o gancho não é cobrado. Com `team:`, sem
     `hooks.SessionStart` de matcher `compact` chamando `pipeline-gate.mjs resume` → `FALHA`, a mesma ação. Comando, da

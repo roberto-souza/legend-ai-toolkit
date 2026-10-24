@@ -1,7 +1,7 @@
 /**
  * Verify the instructions budget guard passes a file within the limit, names the file, size and limit when it is
- * larger, and warns and passes without `knowledge.instructionsBudget`. The profile is JSON, which is valid YAML, read
- * through a stub `yaml` package so the test needs no dependency.
+ * larger, warns and passes without `knowledge.instructionsBudget` or without a profile, and fails on a missing file.
+ * The profile is JSON, which is valid YAML, read through a stub `yaml` package so the test needs no dependency.
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
@@ -27,8 +27,8 @@ function guarded(t, knowledge, instructions) {
   spawnSync(process.execPath, [path.join(TOOLKIT, 'scripts', 'install.mjs'), '--to', directory]);
   write(directory, 'node_modules/yaml/package.json', JSON.stringify({ name: 'yaml', type: 'module', main: 'index.js' }));
   write(directory, 'node_modules/yaml/index.js', 'export const parse = JSON.parse;\n');
-  write(directory, '.claude/pipeline/profile.yml', JSON.stringify({ knowledge }));
-  write(directory, 'CLAUDE.md', instructions);
+  if (knowledge) write(directory, '.claude/pipeline/profile.yml', JSON.stringify({ knowledge }));
+  if (instructions !== undefined) write(directory, 'CLAUDE.md', instructions);
   return spawnSync(process.execPath, [path.join(directory, '.claude/pipeline/core/document-budget.mjs')], {
     encoding: 'utf8',
   });
@@ -50,6 +50,18 @@ test('without the key it warns and passes', t => {
   const result = guarded(t, { projectInstructions: 'CLAUDE.md' }, 'x'.repeat(100));
   assert.equal(result.status, 0);
   assert.match(result.stderr, /no knowledge\.instructionsBudget/);
+});
+
+test('without a profile it warns and passes', t => {
+  const result = guarded(t, null, 'x');
+  assert.equal(result.status, 0);
+  assert.match(result.stderr, /no \.claude\/pipeline\/profile\.yml/);
+});
+
+test('a missing instructions file fails and is named', t => {
+  const result = guarded(t, { projectInstructions: 'CLAUDE.md', instructionsBudget: 10 }, undefined);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /CLAUDE\.md \(knowledge\.projectInstructions\) does not exist/);
 });
 
 test('a budget that is not a positive integer is refused', () => {

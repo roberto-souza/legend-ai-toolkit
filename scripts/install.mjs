@@ -155,10 +155,13 @@ function sameMatcher(entry, matcher) {
   return current === matcher;
 }
 
-/** Tell whether the project profile declares a top-level `team:` key, without a YAML parser. */
+/**
+ * Tell whether the project profile declares a top-level `team` key, quoted or not, without a YAML parser. A `team:`
+ * whose value is empty still counts: the resume hook then prints nothing.
+ */
 function declaresTeam(project) {
   const file = path.join(project, PROFILE);
-  return existsSync(file) && /^team:/m.test(readFileSync(file, 'utf8'));
+  return existsSync(file) && /^(["']?)team\1\s*:/m.test(readFileSync(file, 'utf8'));
 }
 
 const hookLabel = hook => `${hook.event}${hook.matcher ? ` ${hook.matcher}` : ''}`;
@@ -169,14 +172,15 @@ function removeHook(hooks, hook) {
   if (!entries) return false;
 
   let removed = false;
-  for (const entry of entries.filter(item => sameMatcher(item, hook.matcher))) {
-    const kept = (entry.hooks ?? []).filter(item => item?.command !== hook.command);
-    removed ||= kept.length !== (entry.hooks ?? []).length;
+  for (const entry of entries.filter(item => sameMatcher(item, hook.matcher) && item.hooks)) {
+    const kept = entry.hooks.filter(item => item?.command !== hook.command);
+    if (kept.length === entry.hooks.length) continue;
     entry.hooks = kept;
+    removed = true;
   }
   if (!removed) return false;
 
-  hooks[hook.event] = entries.filter(entry => !sameMatcher(entry, hook.matcher) || entry.hooks.length > 0);
+  hooks[hook.event] = entries.filter(entry => !sameMatcher(entry, hook.matcher) || entry.hooks?.length !== 0);
   if (hooks[hook.event].length === 0) delete hooks[hook.event];
   return true;
 }

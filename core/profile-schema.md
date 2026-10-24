@@ -133,10 +133,6 @@ workspace:
 | --- | --- | --- | --- |
 | `artifacts` | não | `en` | idioma de código, commit, branch, issue, PR, comentário e laudo |
 | `conversation` | não | `pt` | idioma da conversa com o usuário |
-| `names` | não | — | idioma de nomes de pasta, arquivo e branch, com o valor que o projeto escolher; ausente = o pipeline não cobra idioma de nome |
-
-- Com `names`, o nome da branch segue `names`, não `artifacts`.
-- Quem cobra `names`: o revisor, nos caminhos novos do diff e na branch (`.claude/skills/pipeline-review-diff/SKILL.md`, seção "O que procurar, em ordem de importância"). O core não impõe idioma de nome nem tem guard por script para ele.
 
 ## `knowledge`
 
@@ -180,7 +176,7 @@ workspace:
 ## `team`
 
 - Opcional. Ausente = o repositório não orquestra o time e a skill `pipeline-maestro` para; só ela lê a chave, além do `resume` do gate.
-- Com `team:`, o `install.mjs` do toolkit mescla o gancho `SessionStart` de matcher `compact`, que roda `pipeline-gate.mjs resume`: depois de uma compactação, a sessão lê "se você é o orquestrador do time, leia a nota `<team.note>` antes de agir". Sem `team:`, o install não põe o gancho e tira o que tiver posto. Conferência: `.claude/skills/pipeline-doctor/SKILL.md`, item 28.
+- Com `team:`, o install põe o gancho de retomada depois da compactação: seção "O que o install põe no `settings.json`".
 - Recusas: `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir".
 - Conferências ao vivo (arquivo `.example`, `git check-ignore`, cobertura das chaves de credencial): `.claude/skills/pipeline-doctor/SKILL.md`, item 23.
 
@@ -343,6 +339,20 @@ landing:
 - `lineBudget` é teto por arquivo e não muda o corte de tamanho do ticket do fluxo de tickets: seção que passa desse corte vira dois tickets.
 - `{files}` não é a notação `<chave>` do pipeline: quem formata o troca, na hora, pela lista de arquivos.
 - Os modelos do módulo vêm com o core, em `.claude/pipeline/core/landing/`: briefing, validação, manifesto do handoff, contexto de tickets, checklist de descoberta e o `taste` padrão. A skill de landing copia os moldes para `<landing.handoff>`, e o projeto preenche a cópia; o checklist e o `taste` não se copiam.
+
+## O que o install põe no `settings.json`
+
+O `install.mjs` do toolkit mescla em `.claude/settings.json`, sem duplicar e sem apagar o que o projeto já tem:
+
+| O quê | Quando | Para quê |
+| --- | --- | --- |
+| ganchos `PreToolUse` (`hook`) e `UserPromptSubmit` (`authorize`) do `pipeline-gate.mjs` | sempre | o gate de selos e a autorização de merge (`.claude/pipeline/core/seals.md`) |
+| `env.CLAUDE_CODE_AUTO_COMPACT_WINDOW: "250000"` | sempre, só se o projeto não tem valor | teto de contexto de toda sessão do Claude Code no projeto; o valor do projeto vale, mesmo diferente de 250000 |
+| gancho `SessionStart` de matcher `compact` (`resume`) | só com `team:` no profile | depois de uma compactação, a sessão lê "se você é o orquestrador do time, leia a nota `<team.note>` antes de agir" |
+
+- Sem `team:`, o install não põe o gancho `resume` e tira o que tiver posto; o `resume` também não imprime nada sem `team`.
+- O install detecta `team:` sem parser de YAML: chave `team` no topo do arquivo, com ou sem aspas.
+- Conferência: `.claude/skills/pipeline-doctor/SKILL.md`, item 28.
 
 ## As extensões
 

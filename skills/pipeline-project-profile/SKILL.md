@@ -53,7 +53,6 @@ Topo e combinações (sempre):
 | `branches.base` ≠ `branches.default` | `closing.mode` diferente de `close-references-mutation`. |
 | `closing.mode: close-references-mutation` | sem `closing.workflow`. |
 | `knowledge.instructionsBudget` | presente e não é inteiro positivo. |
-| `language.names` | presente e não é texto não vazio. |
 
 Detalhe: `.claude/skills/pipeline-project-profile/reference/motivos.md`, seção "Combinações obrigatórias".
 

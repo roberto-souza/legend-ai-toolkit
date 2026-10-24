@@ -323,3 +323,19 @@ test('an install refuses a settings file whose env is not an object', t => {
   assert.equal(result.status, 1);
   assert.match(result.stderr, /"env" must be an object/);
 });
+
+test('a quoted team key also gets the resume hook', t => {
+  const directory = project(t);
+  write(directory, PROFILE, '"team":\n  note: <nota>\n');
+  install(directory);
+  assert.equal(resumeEntries(JSON.parse(read(directory, SETTINGS))).length, 1);
+});
+
+test('without team: a project compact entry that has no resume hook is left as it was', t => {
+  const directory = project(t);
+  write(directory, SETTINGS, JSON.stringify({ hooks: { SessionStart: [{ matcher: 'compact' }] } }));
+  const result = install(directory);
+  assert.equal(result.status, 0, result.stderr);
+  assert.doesNotMatch(result.stdout, /UNHOOK/);
+  assert.deepEqual(JSON.parse(read(directory, SETTINGS)).hooks.SessionStart, [{ matcher: 'compact' }]);
+});

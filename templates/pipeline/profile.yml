@@ -39,7 +39,7 @@ gate:
   tests: true
   ci: none
 
-language: { artifacts: pt, conversation: pt } # opcional: names: <idioma de nomes de pasta, arquivo e branch>
+language: { artifacts: pt, conversation: pt }
 
 knowledge:
   stackSkills: [] # ex.: - { paths: [apps/api/**], skill: <skill de stack> }
