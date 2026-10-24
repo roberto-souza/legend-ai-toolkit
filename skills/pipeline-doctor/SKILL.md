@@ -13,7 +13,7 @@ em `FALHA`, senão `DOCTOR: RED — <n> falhas`. `AVISO` não conta para o vered
 
 O schema de referência é `.claude/pipeline/core/profile-schema.md`.
 
-Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24, 27 e 29 rodam as recusas de `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir", sem parar nelas: cada recusa é `FALHA` que nomeia a chave e nunca repete o valor.
+Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24 e 27 rodam as recusas de `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir", sem parar nelas: cada recusa é `FALHA` que nomeia a chave e nunca repete o valor.
 
 1. **Core local.** Existem as sete `.claude/skills/pipeline-{project-profile,github-tickets,write-ticket,execute-ticket,review-diff,security-audit,maestro}/SKILL.md`,
    os quatro `.claude/skills/pipeline-maestro/roles/{executor,validador-api,validador-ui,ux}.md`, os quatro `.claude/agents/pipeline-{ticket-writer,implementer,reviewer,security-reviewer}.md` e os seis `.claude/pipeline/core/{principles,profile-schema,seals-reference,ux-reference,format,entrada}.md`.
@@ -231,9 +231,9 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24, 27 e 29 rodam 
     '
     ```
 29. **Teto do arquivo de instruções.** Regra: `.claude/pipeline/core/format.md`, seção "Arquivo de instruções do projeto".
-    Sem `knowledge.instructionsBudget` → `OK`, com a nota "sem teto declarado". Com a chave: (Passo 2) a recusa de
-    `knowledge.instructionsBudget`; `node .claude/pipeline/core/document-budget.mjs` sai 0 → `OK`; senão `FALHA` com a
-    linha que ele imprime e a ação "mova histórico e detalhe para fora de `<knowledge.projectInstructions>`, deixando a
-    regra em uma linha e o ponteiro".
+    Sem `knowledge.instructionsBudget` → `OK`, com a nota "sem teto declarado". Com a chave (valor que não é inteiro
+    positivo já é recusa do item 5): `node .claude/pipeline/core/document-budget.mjs` sai 0 → `OK`; senão `FALHA` com a
+    linha que ele imprime e a ação "mova histórico e detalhe para fora de `<knowledge.projectInstructions>`, deixando a regra
+    em uma linha e o ponteiro".
     Gate: como no item 26, siga `<gate.final>` até achar `document-budget.mjs` → `OK`; senão `AVISO` ("ponha o
     `document-budget.mjs` no gate").
