@@ -138,3 +138,24 @@ test('doctor item 28 keeps the project value, ignores another resume command and
   );
   assert.equal(runIn(t, { '.claude/settings.json': '{ broken' }), 'FALHA settings.json não é JSON válido\n');
 });
+
+test('doctor item 25 skips pointers to optional extensions the project does not have, and checks them when present', t => {
+  const directory = mkdtempSync(path.join(tmpdir(), 'legend-doctor-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  spawnSync('git', ['init', '-q', directory]);
+  mkdirSync(path.join(directory, '.claude/pipeline'), { recursive: true });
+  writeFileSync(path.join(directory, '.claude/pipeline/profile.yml'), 'project: x\n');
+  spawnSync(process.execPath, [path.join(TOOLKIT, 'scripts/install.mjs'), '--to', directory]);
+  const run = () => spawnSync('bash', ['-c', doctorCommand(25)], { cwd: directory, encoding: 'utf8' });
+
+  const bare = run();
+  assert.equal(bare.status, 0, bare.stderr);
+  assert.doesNotMatch(bare.stdout, /FALHA .*\.claude\/pipeline\/[a-z-]+\.md/, 'no extension, no module: no pointer failure');
+
+  writeFileSync(path.join(directory, '.claude/pipeline/observability.md'), '# Observabilidade\n');
+  writeFileSync(path.join(directory, '.claude/pipeline/ticket.md'), '# Ticket\n');
+  writeFileSync(path.join(directory, '.claude/pipeline/rules.md'), '- See `.claude/pipeline/ticket.md`, seção "Missing".\n');
+  const present = run();
+  assert.doesNotMatch(present.stdout, /observability\.md/, 'an extension that exists resolves');
+  assert.match(present.stdout, /FALHA \.claude\/pipeline\/rules\.md:1: \.claude\/pipeline\/ticket\.md sem a seção "Missing"/, 'a present extension is still checked');
+});

@@ -142,7 +142,7 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24, 27 e 30 rodam 
     `pipeline-gate.mjs hook`, e `hooks.UserPromptSubmit` chamando `authorize`; `node -e "import('yaml')"` resolvendo;
     `echo '{"tool_input":{"command":"ls"}}' | node .claude/pipeline/core/pipeline-gate.mjs hook` e `echo null | node .claude/pipeline/core/pipeline-gate.mjs hook` saindo 0, e um comando com `gh pr` e `merge` fora da forma permitida saindo 2 (prova que o CLI roda); `carry` listado no uso do script. Com `team:` e sem
     `seals.kinds` → "a orquestração do time exige `seals.kinds`"; com `seals`, as recusas de `seals` (Passo 2).
-25. **Formato (checklist + ponteiros).** (a) Todo ponteiro canônico (`.claude/pipeline/core/format.md`, seção "Ponteiro") dentro de `.claude/skills/pipeline-*/`, `.claude/agents/pipeline-*.md` e `.claude/pipeline/` resolve: o arquivo existe e, com `, seção "<título>"`, o arquivo tem uma linha de cabeçalho cujo texto, depois dos `#` iniciais e de um espaço, é igual ao título → senão `FALHA` com `arquivo:linha`; (b) arquivo principal acima de 150 linhas → `AVISO` com a contagem. O `AVISO` do teto aparece nos arquivos ainda não convertidos e não muda o veredito `GREEN`. Ação para (a): corrigir o caminho ou o título, ou restaurar a seção. Comandos, da raiz do repositório (bash):
+25. **Formato (checklist + ponteiros).** (a) Todo ponteiro canônico (`.claude/pipeline/core/format.md`, seção "Ponteiro") dentro de `.claude/skills/pipeline-*/`, `.claude/agents/pipeline-*.md` e `.claude/pipeline/` resolve: o arquivo existe e, com `, seção "<título>"`, o arquivo tem uma linha de cabeçalho cujo texto, depois dos `#` iniciais e de um espaço, é igual ao título → senão `FALHA` com `arquivo:linha`. Ponteiro para extensão do projeto (`.claude/pipeline/<x>.md`, fora de `core/`) cujo arquivo não existe é pulado: a extensão é opcional, e quem cobra a presença dela é o item do módulo (17, 18, 27 e 30); existindo, a seção é conferida; (b) arquivo principal acima de 150 linhas → `AVISO` com a contagem. O `AVISO` do teto aparece nos arquivos ainda não convertidos e não muda o veredito `GREEN`. Ação para (a): corrigir o caminho ou o título, ou restaurar a seção. Comandos, da raiz do repositório (bash):
 
     ```bash
     grep -rnoE '`[^`[:space:]<>*{}]+\.md`(, seção "[^"]+")?' .claude/skills/pipeline-*/ .claude/agents/pipeline-*.md .claude/pipeline/ |
@@ -151,6 +151,7 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24, 27 e 30 rodam 
       path=$(printf '%s\n' "$ptr" | sed -E 's/^`([^`]+)`.*/\1/')
       title=$(printf '%s\n' "$ptr" | sed -nE 's/^`[^`]+`, seção "(.*)"$/\1/p')
       case "$path" in */*) ;; *) [ -n "$title" ] || continue ;; esac
+      case "$path" in .claude/pipeline/*/*) ;; .claude/pipeline/*.md) [ -f "$path" ] || continue ;; esac
       [ -f "$path" ] || { echo "FALHA $loc: $path não existe"; continue; }
       [ -z "$title" ] || grep -E '^#+ ' "$path" | sed -E 's/^#+ //' | grep -qxF "$title" || echo "FALHA $loc: $path sem a seção \"$title\""
     done
