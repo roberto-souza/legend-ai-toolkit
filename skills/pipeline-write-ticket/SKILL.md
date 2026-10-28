@@ -39,6 +39,7 @@ description: |
 
 1. Deixe o usuário descrever a demanda inteira; nenhuma pergunta técnica na primeira frase.
 2. Devolva uma reformulação de duas frases do que entendeu, em termos de problema, não de solução. → reformulação errada: refaça antes de seguir (você teria escrito o ticket errado).
+3. Demanda que traz um arquivo de contexto (a da triagem de erros de produção, `/pipeline-triage`): leia o arquivo inteiro como a descrição; o passo 2 vale igual. Formato: `.claude/skills/pipeline-triage-errors/reference/laudo.md`, seção "Contexto do ticket".
 
 ## Fase 1 — Ler o terreno ANTES de perguntar
 
@@ -124,8 +125,8 @@ Motivo: `.claude/skills/pipeline-write-ticket/reference/fatiamento.md`, seção 
 Os passos 1 a 5 são do orquestrador; os passos 6 a 18 são as regras do corpo, que o escritor segue e o orquestrador confere.
 
 1. Com o recorte confirmado, lance um `pipeline-ticket-writer` por ticket, em paralelo (Agent tool). Sem subagentes (fora do Claude Code), escreva cada corpo você mesmo pelos passos 6 a 18: `.claude/pipeline/core/entrada.md`, seção "Fora do Claude Code".
-2. O brief de cada escritor leva: a demanda; o recorte inteiro com o slug de cada ticket; a linha dele (título, unidade, tipo, módulo, blocked by); cada decisão da entrevista que o toca; os arquivos lidos e o que reusar; a proposta visual aprovada (o ASCII literal ou o link do mockup) e a data da aprovação; o caminho absoluto `<scratchpad>/ticket-<slug>.md`. Ticket do recorte citado no corpo vai como `#<slug>`. → o que só o usuário decide tem de estar no brief: o escritor não fala com ele.
-3. Recebido o relatório, leia o corpo inteiro e confira contra os passos 6 a 18, `<issues.template>` e `.claude/pipeline/ticket.md`.
+2. O brief de cada escritor leva: a demanda; o recorte inteiro com o slug de cada ticket; a linha dele (título, unidade, tipo, módulo, blocked by); cada decisão da entrevista que o toca; os arquivos lidos e o que reusar; a proposta visual aprovada (o ASCII literal ou o link do mockup) e a data da aprovação; na demanda da triagem, o bloco do grupo do ticket, com a linha de vínculo; o caminho absoluto `<scratchpad>/ticket-<slug>.md`. Ticket do recorte citado no corpo vai como `#<slug>`. → o que só o usuário decide tem de estar no brief: o escritor não fala com ele.
+3. Recebido o relatório, leia o corpo inteiro e confira contra os passos 6 a 18, `<issues.template>` e `.claude/pipeline/ticket.md`. Demanda da triagem → pare se o `### Context` não traz, literal, a linha de vínculo (`Link line`) do grupo do ticket: sem ela o PR não leva a linha de **PR** do `observability.md`.
 4. Correção vai ao **mesmo** escritor por `SendMessage`; pergunta aberta dele que só o usuário decide vira uma rodada de `AskUserQuestion`, e a resposta volta ao escritor.
 5. Crie a issue só com o corpo conferido (Fase 5).
 6. Leia `<issues.template>`: um `### <label>` por `label:`, na ordem, com os cabeçalhos exatos (o executor faz o parse deles). O exemplo preenchido está no corpo de exemplo do `.claude/pipeline/ticket.md`. Detalhe: `.claude/skills/pipeline-write-ticket/reference/corpo-do-ticket.md`, seção "Por que o template manda".

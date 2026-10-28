@@ -6,7 +6,7 @@ O contrato que todo arquivo principal e toda referência do pipeline seguem; o `
 
 - Arquivo principal é o `SKILL.md` de `.claude/skills/pipeline-*`, os `.claude/agents/pipeline-*.md` e os `.claude/skills/pipeline-maestro/roles/*.md`.
 - Layout: frontmatter com as chaves inalteradas; `## Entrada` primeiro quando a skill é interna (o item 22 do doctor exige o título); depois as seções **na ordem de execução, com os nomes de hoje** (Fase N, Passo N, item N, "Mover o card"…), para quem as cita não quebrar; dentro de cada uma, passos numerados.
-- Exceção declarada: os comandos (skills com `model:` no frontmatter — hoje `pipeline-ticket`, `pipeline-execute`, `pipeline-security` e `pipeline-landing`) são frontmatter, leitura da skill interna por caminho e tratamento de argumentos, sem passos numerados.
+- Exceção declarada: os comandos (skills com `model:` no frontmatter — hoje `pipeline-ticket`, `pipeline-execute`, `pipeline-security`, `pipeline-landing` e `pipeline-triage`) são frontmatter, leitura da skill interna por caminho e tratamento de argumentos, sem passos numerados.
 
 ## Passo
 

@@ -339,6 +339,22 @@ landing:
 - `{files}` não é a notação `<chave>` do pipeline: quem formata o troca, na hora, pela lista de arquivos.
 - Os modelos do módulo vêm com o core, em `.claude/pipeline/core/landing/`: briefing, validação, manifesto do handoff, contexto de tickets, checklist de descoberta e o `taste` padrão. A skill de landing copia os moldes para `<landing.handoff>`, e o projeto preenche a cópia; o checklist e o `taste` não se copiam.
 
+## `observability`
+
+- Opcional. Ausente = módulo de triagem de erros de produção desligado, e nada muda no projeto. Presente = módulo ligado, e `provider` é obrigatória dentro dele.
+- Os fatos (organização, projetos, servidor MCP, ambiente, janela, tags, formato do id, vínculo e dado pessoal) vivem na extensão `observability.md`, descrita em seção "As extensões", abaixo.
+- O servidor MCP do provedor fica no `.mcp.json` do projeto, sem token; nunca em configuração global da máquina.
+- Recusas: `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir". Conferências ao vivo (extensão, `.mcp.json`, token versionado): `.claude/skills/pipeline-doctor/SKILL.md`, item 30.
+
+```yaml
+observability:
+  provider: sentry
+```
+
+| Chave | Obrigatória | Default | Suportado | O que é |
+| --- | --- | --- | --- | --- |
+| `observability.provider` | sim, com `observability` | — | `sentry` | provedor de observabilidade que a triagem lê pelo MCP dele |
+
 ## O que o install põe no `settings.json`
 
 O `install.mjs` do toolkit mescla em `.claude/settings.json`, sem duplicar e sem apagar o que o projeto já tem:
@@ -364,6 +380,7 @@ Ao lado do `profile.yml`, em `.claude/pipeline/`, vivem as extensões em prosa; 
 | `security.md` | `pipeline-security-audit`, `pipeline-execute-ticket` (gatilho) | perfis de atacante, threat model com ponteiros, eixos do sweep, `## Triggers`; com o eixo opt-in `supply-chain`, a seção `## Supply chain` (comandos e arquivos que o eixo lê) |
 | `verification.md` | `pipeline-maestro` | critério de verificação do PR depois de aberto: API, tela, app (com `team.devices`), nota de UX, PR sem tela nem rota; o `pipeline-execute-ticket` o cita na Fase 7 |
 | `landing.md` | o módulo de landing (opt-in; existe só com `landing:` no profile, e então o `/pipeline-doctor` a exige) | sete seções `##` fixas, nesta ordem: `## Produto`, `## Público`, `## Ação` (rótulos **Ação única** e **Canal**), `## Proibições`, `## Fontes` (rótulos **Spec**, **Protótipo** e **Copy**; a hierarquia entre eles é regra do core), `## Hospedagem` (rótulos **CDN**, **Analytics** e **Bordas**) e `## Descoberta` (respostas do checklist de descoberta, preenchidas no fluxo de landing) |
+| `observability.md` | o módulo de triagem (opt-in; existe só com `observability:` no profile, e então o `/pipeline-doctor` a exige); o `pipeline-execute-ticket`, no corpo do PR | quatro seções `##` fixas, nesta ordem: `## Provedor` (rótulos **Organização**, **Projetos** e **Servidor MCP**), `## Triagem` (**Ambiente**, **Janela** e **Tags**), `## Vínculo` (**Id**, com `{n}` no lugar do sufixo, que casa `[0-9A-Z]+`; **Issue** e **PR**, com `{id}`) e `## Dado pessoal` (**Regra**, que só restringe a regra do core) |
 
 **Extensão acrescenta regra, nunca remove gate do core.** Um `rules.md` não pode desligar o teto de rodadas nem mudar o formato do laudo, e um `security.md` não pode
 relaxar a regra de prova. O único interruptor declarado é `security.diffGate`.

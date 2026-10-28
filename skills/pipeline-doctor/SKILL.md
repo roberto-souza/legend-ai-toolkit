@@ -13,7 +13,7 @@ em `FALHA`, senão `DOCTOR: RED — <n> falhas`. `AVISO` não conta para o vered
 
 O schema de referência é `.claude/pipeline/core/profile-schema.md`.
 
-Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24 e 27 rodam as recusas de `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir", sem parar nelas: cada recusa é `FALHA` que nomeia a chave e nunca repete o valor.
+Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24, 27 e 30 rodam as recusas de `.claude/skills/pipeline-project-profile/SKILL.md`, seção "Passo 2 — Conferir", sem parar nelas: cada recusa é `FALHA` que nomeia a chave e nunca repete o valor.
 
 1. **Core local.** Existem as sete `.claude/skills/pipeline-{project-profile,github-tickets,write-ticket,execute-ticket,review-diff,security-audit,maestro}/SKILL.md`,
    os quatro `.claude/skills/pipeline-maestro/roles/{executor,validador-api,validador-ui,ux}.md`, os quatro `.claude/agents/pipeline-{ticket-writer,implementer,reviewer,security-reviewer}.md` e os seis `.claude/pipeline/core/{principles,profile-schema,seals-reference,ux-reference,format,entrada}.md`.
@@ -237,3 +237,58 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24 e 27 rodam as r
     em uma linha e o ponteiro".
     Gate: como no item 26, siga `<gate.final>` até achar `document-budget.mjs` → `OK`; senão `AVISO` ("ponha o
     `document-budget.mjs` no gate").
+30. **Triagem (`observability`).** Sem `observability:` no profile → `OK`, com a nota "módulo de triagem desligado". Com
+    `observability:`, `FALHA` e `AVISO` nomeiam a chave, o arquivo ou o rótulo, **nunca o valor de um token**:
+    - (Passo 2) as recusas de `observability`;
+    - extensão `observability.md` ausente em `.claude/pipeline` → `FALHA`, ação "criar pelo template `observability.md` do
+      toolkit e preencher"; presente, cada seção (`## Provedor`, `## Triagem`, `## Vínculo`, `## Dado pessoal`) ou rótulo
+      (`Organização`, `Projetos`, `Servidor MCP`, `Ambiente`, `Janela`, `Tags`, `Id`, `Issue`, `PR`, `Regra`) que falta ou
+      está sem valor → `FALHA`; `<...>` do template ainda sem preencher → `FALHA` com as linhas (a triagem para nele); **Id** sem `{n}`, ou
+      **Issue** ou **PR** sem `{id}` → `FALHA` com o rótulo;
+    - `.mcp.json` na raiz ausente ou inválido → `FALHA`; sem o servidor de **Servidor MCP** em `mcpServers` → `FALHA`, ação
+      "declarar o servidor no `.mcp.json` do projeto (README do toolkit, seção da triagem)"; servidor com `type` diferente de
+      `http` → `FALHA`; com `headers` ou `env` → `FALHA` "credencial no `.mcp.json`: a autenticação é OAuth, por `/mcp`";
+      com `provider: sentry` e `url` fora de `https://mcp.sentry.dev/mcp` → `AVISO` com a chave; `url` escopada a um projeto
+      com mais de um em **Projetos** → `FALHA` "o servidor não alcança os outros projetos: escope a `url` só à organização";
+    - token do provedor (prefixo `sntryu_`/`sntrys_`, ou valor literal de `SENTRY_*TOKEN`) em arquivo versionado, em `.mcp.json`
+      ou em `.claude/settings*.json`, versionado ou não → `FALHA` com o arquivo e a linha, ação "remova o token, revogue-o no provedor e autentique por `/mcp`";
+    - `.mcp.json` fora do git → `AVISO` "o servidor não chega a quem clona";
+    - skill do módulo: `.claude/skills/pipeline-triage/SKILL.md` com `model:` no frontmatter,
+      `.claude/skills/pipeline-triage-errors/SKILL.md` com `disable-model-invocation: true` e `## Entrada`, e
+      `.claude/skills/pipeline-triage-errors/reference/laudo.md` existem → senão `FALHA` com o arquivo, ação "reinstale pelo
+      prompt 02-atualizar".
+
+    Comandos, da raiz do repositório (bash):
+
+    ```bash
+    node -e '
+    const fs = require("fs");
+    const O = ".claude/pipeline/observability.md";
+    if (!fs.existsSync(O)) { console.log("FALHA observability.md ausente"); process.exit(); }
+    const text = fs.readFileSync(O, "utf8");
+    for (const t of ["Provedor", "Triagem", "Vínculo", "Dado pessoal"]) if (!text.split("\n").includes(`## ${t}`)) console.log(`FALHA observability.md sem ## ${t}`);
+    const label = name => text.match(new RegExp(`^- \\*\\*${name}:\\*\\* *(.*)$`, "m"))?.[1];
+    for (const r of ["Organização", "Projetos", "Servidor MCP", "Ambiente", "Janela", "Tags", "Id", "Issue", "PR", "Regra"]) if (label(r) == null) console.log(`FALHA observability.md sem o rótulo ${r}`); else if (!label(r).replace(/[`.]/g, "").trim()) console.log(`FALHA rótulo ${r} sem valor`);
+    text.split("\n").forEach((l, i) => { if (/<[^>]*>/.test(l) && /^- \*\*/.test(l)) console.log(`FALHA ${O}:${i + 1} ainda com <...>`); });
+    if (label("Id") != null && !label("Id").includes("{n}")) console.log("FALHA rótulo Id sem {n}");
+    for (const r of ["Issue", "PR"]) if (label(r) != null && !label(r).includes("{id}")) console.log(`FALHA rótulo ${r} sem {id}`);
+    const name = (label("Servidor MCP") ?? "").replace(/[`.]/g, "").trim();
+    let mcp;
+    try { mcp = JSON.parse(fs.readFileSync(".mcp.json", "utf8")); } catch { console.log("FALHA .mcp.json ausente ou inválido"); process.exit(); }
+    const server = mcp.mcpServers?.[name];
+    if (!server) { console.log(`FALHA .mcp.json sem mcpServers.${name}`); process.exit(); }
+    if (server.type !== "http") console.log(`FALHA mcpServers.${name}.type não é http`);
+    for (const k of ["headers", "env"]) if (server[k] != null) console.log(`FALHA mcpServers.${name}.${k}: credencial no .mcp.json`);
+    const url = String(server.url ?? "");
+    if (!url.startsWith("https://mcp.sentry.dev/mcp")) console.log(`AVISO mcpServers.${name}.url fora de https://mcp.sentry.dev/mcp (vale só com provider: sentry)`);
+    const projects = (label("Projetos") ?? "").split(",").filter(p => p.replace(/[`.]/g, "").trim()).length;
+    if (projects > 1 && url.replace(/^https:\/\/[^/]+\/mcp\/?/, "").split("/").filter(Boolean).length > 1) console.log(`FALHA mcpServers.${name}.url escopada a um projeto, com ${projects} em Projetos`);
+    console.log(`OK servidor ${name}`);
+    '
+    { git grep -nIE 'sntry[us]_[A-Za-z0-9]|SENTRY_[A-Z_]*TOKEN *[:=] *["'"'"']?[^$"'"'"'{[:space:]]' -- . ':!*.lock'; grep -nE 'sntry[us]_[A-Za-z0-9]|"[A-Z_]*(TOKEN|AUTH)[A-Z_]*" *: *"[^"$]' .mcp.json .claude/settings*.json 2>/dev/null; } | cut -d: -f1,2 | sort -u | sed 's/^/FALHA token em /'
+    git ls-files --error-unmatch .mcp.json >/dev/null 2>&1 || echo "AVISO .mcp.json fora do git"
+    for f in .claude/skills/pipeline-triage/SKILL.md .claude/skills/pipeline-triage-errors/SKILL.md .claude/skills/pipeline-triage-errors/reference/laudo.md; do test -f "$f" || echo "FALHA $f ausente"; done
+    grep -q '^model:' .claude/skills/pipeline-triage/SKILL.md 2>/dev/null || echo "FALHA pipeline-triage sem model:"
+    grep -q '^disable-model-invocation: true' .claude/skills/pipeline-triage-errors/SKILL.md 2>/dev/null || echo "FALHA pipeline-triage-errors sem disable-model-invocation: true"
+    grep -q '^## Entrada' .claude/skills/pipeline-triage-errors/SKILL.md 2>/dev/null || echo "FALHA pipeline-triage-errors sem ## Entrada"
+    ```

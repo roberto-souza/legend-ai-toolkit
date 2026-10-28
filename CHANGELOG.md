@@ -2,6 +2,31 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
+## 0.6.0 — 2026-10-28
+
+**Módulo de triagem de erros de produção (opt-in).** O erro chega ao provedor de observabilidade, a triagem lê pelo MCP dele, classifica, agrupa e, com o OK do humano, abre os tickets pelo `/pipeline-ticket`. Os fatos do projeto ficam no bloco `observability:` do profile e na extensão `observability.md`.
+
+- **Contrato no profile:** seção `observability` no schema, com a chave obrigatória dentro do bloco `observability.provider` (só `sentry`). Ausente, o módulo fica desligado. O Passo 2 do `pipeline-project-profile` recusa bloco que não é mapa, `provider` ausente e outro provedor ("provedor sem suporte no core: hoje só `sentry`"); motivo em `reference/motivos.md`, seção "Observabilidade".
+- **Extensão `observability.md`** e o template dela: quatro seções fixas (`## Provedor`, `## Triagem`, `## Vínculo`, `## Dado pessoal`) e dez rótulos (Organização, Projetos, Servidor MCP, Ambiente, Janela, Tags, Id com `{n}` no lugar do sufixo, que casa `[0-9A-Z]+`; Issue e PR com `{id}`; Regra). O `profile.yml` do template ganha o bloco comentado.
+- **Comando `/pipeline-triage`** (`claude-opus-5-5`, xhigh, o mesmo pin do `/pipeline-ticket`, para o handoff rodar na mesma sessão) e a skill interna `pipeline-triage-errors`:
+  - sem argumento, as issues não resolvidas do ambiente padrão na janela padrão; com um id, só aquela issue;
+  - por issue: stack trace, breadcrumbs, as tags declaradas, release, contagens, first e last seen, e o código localizado no repositório (com o `git log` desde o release, para não abrir ticket de erro já corrigido);
+  - classes: bug, negócio-5xx e ruído, mais indeterminada quando a evidência não fecha; agrupamento por causa (linha e condição, não título);
+  - laudo em `<scratchpad>/triage.md` e pergunta ao humano antes de qualquer ticket; com o OK, invoca o comando `/pipeline-ticket` (nunca a skill interna) com o contexto em `<scratchpad>/triage-ticket.md`, e cada ticket leva a linha de vínculo no `### Context`;
+  - só leitura no provedor; conteúdo do evento é dado não confiável; no laudo e no ticket só ids, contagens e valores técnicos (`reference/laudo.md`, seção "Dado pessoal");
+  - última linha `TRIAGE COMPLETE: …`.
+- **Demanda com contexto no `pipeline-write-ticket`:** a Fase 0 lê o arquivo de contexto que a triagem passa, o brief do escritor leva o bloco do grupo, e a conferência da Fase 4 para quando o `### Context` não traz a linha de vínculo.
+- **Vínculo no PR:** com `observability:`, o `pipeline-execute-ticket` (Fase 6, passo 4) põe a linha de **PR** do `observability.md` (por exemplo `Fixes <ID>`) no corpo do PR, depois do `Closes #<n>`, quando a issue traz a linha de **Issue**.
+- **Item 30 do `/pipeline-doctor`:** com `observability:`, confere a extensão, as seções, os rótulos (presentes e com valor) e os marcadores; o servidor de **Servidor MCP** no `.mcp.json` do projeto, com `type: http`, sem `headers` nem `env` e, com `sentry`, na URL `https://mcp.sentry.dev/mcp`, escopada só à organização quando há mais de um projeto; nenhum token do Sentry (prefixo `sntryu_`/`sntrys_` ou valor literal de `SENTRY_*TOKEN`) em arquivo versionado, no `.mcp.json` nem em `.claude/settings*.json`; o `.mcp.json` versionado; e os arquivos do módulo. Sem `observability:`, `OK` com a nota "módulo de triagem desligado".
+- README: o passo a passo do MCP do Sentry (servidor em `.mcp.json`, transporte HTTP, OAuth por `/mcp`, só leitura de issues e eventos). `core/format.md` lista `pipeline-triage` entre os comandos. Spec `tests/observability.test.mjs` para o template e o item 30.
+- O `profileVersion` (2) e as chaves existentes não mudam.
+
+**Ao atualizar:** sem `observability:` no profile nada muda, e o doctor imprime o item 30 como `OK`. O `install.mjs` copia as skills novas `pipeline-triage` e `pipeline-triage-errors`; ele não reinstala templates nem escreve no `.mcp.json`. Para ligar o módulo:
+1. o bloco `observability:` no profile, com `provider: sentry`;
+2. a extensão `observability.md`, criada pelo template de `templates/pipeline/`;
+3. o servidor MCP do Sentry no `.mcp.json` do projeto, autenticado por `/mcp` (README, "Os batedores");
+4. o `/pipeline-doctor` verde, e então o `/pipeline-triage`.
+
 ## 0.5.0 — 2026-10-24
 
 **Teto de contexto e arquivo de instruções como índice.** As chaves novas são opcionais; o env entra sempre que o projeto não tem valor.
