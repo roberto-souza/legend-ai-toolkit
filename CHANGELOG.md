@@ -2,6 +2,17 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
+## 0.6.1 — 2026-10-28
+
+**Correção: o doctor ficava RED em projeto sem a extensão de um módulo opcional.**
+
+- O item 25 (a) do `/pipeline-doctor` reprovava os ponteiros das skills `pipeline-triage` e `pipeline-triage-errors` para `.claude/pipeline/observability.md` quando o módulo de triagem estava desligado e o arquivo não existia. O item 30 dizia `OK` ao mesmo tempo, e o doctor se contradizia.
+- A regra agora pula o ponteiro para extensão do projeto (`.claude/pipeline/<x>.md`, fora de `core/`) cujo arquivo não existe. A presença da extensão é cobrada pelo item do módulo (17, 18, 27 e 30). Existindo o arquivo, a seção continua conferida. A regra está em `core/format.md`, seção "Ponteiro".
+- A correção vale para a classe inteira: `rules.md`, `ticket.md` e `security.md`, opcionais pelo item 17 ou desligados por `security.diffGate: false`, tinham o mesmo risco.
+- Spec nova em `tests/docs.test.mjs`: projeto instalado sem extensão nenhuma passa sem falha de ponteiro, e uma extensão presente continua conferida.
+
+**Ao atualizar:** só mudam `core/format.md` e `skills/pipeline-doctor/SKILL.md` (e o lock). O profile e as extensões não mudam.
+
 ## 0.6.0 — 2026-10-28
 
 **Módulo de triagem de erros de produção (opt-in).** O erro chega ao provedor de observabilidade, a triagem lê pelo MCP dele, classifica, agrupa e, com o OK do humano, abre os tickets pelo `/pipeline-ticket`. Os fatos do projeto ficam no bloco `observability:` do profile e na extensão `observability.md`.

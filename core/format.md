@@ -24,6 +24,7 @@ O contrato que todo arquivo principal e toda referência do pipeline seguem; o `
 
 - Sintaxe canônica: caminho a partir da raiz do repositório, entre crases, terminado em `.md`, sem `<`, `>`, `*`, `{` nem `}`, opcionalmente seguido de `, seção "<título exato do cabeçalho, sem o #>"`.
 - O item 25 confere todo caminho `.md` entre crases que contém `/` ou leva `, seção`. Nome solto sem `/` e sem `, seção` (o nome curto de uma extensão, por exemplo) é menção, não ponteiro. Caminho com marcador ou glob não é conferido.
+- Ponteiro para extensão do projeto (`.claude/pipeline/<x>.md`, fora de `core/`) só é conferido quando o arquivo existe: extensão é opcional, e a presença dela é cobrada pelo item do doctor que a exige.
 - Seção do mesmo arquivo cita-se só por `seção "<título>"`, sem caminho, e um placeholder de pasta (`<roles>`, por exemplo) definido no próprio arquivo dispensa o caminho inteiro; nenhum dos dois é conferido.
 - Parágrafo em negrito dentro de uma seção se cita nomeando o parágrafo antes do ponteiro canônico da seção: ``parágrafo **<X>.** de `<caminho>`, seção "<título>"``.
 
