@@ -28,6 +28,7 @@ Closes #<n>
 - `## Decisions` é **opcional** e recebe o porquê desta mudança: trade-off aceito, alternativa descartada, atalho consciente. Omita quando não houve decisão; não a preencha com resumo do que o PR faz, que já está no topo. Regra que vai sobreviver a este PR não é decisão de PR: vai para o module map ou para um ADR.
 - `## Decisions` também carrega as linhas `NIT not applied: <título> (<arquivo>:<linha>)`; a regra mora em `.claude/skills/pipeline-execute-ticket/SKILL.md`, seção "A triagem".
 - `## Test plan` e `Closes #<n>` ficam sempre.
+- Issue nascida da triagem de erros de produção (`observability:` no profile) traz no `### Context` a linha de **Issue** do `observability.md`; o corpo do PR leva, depois do `Closes #<n>`, a linha de **PR** com o mesmo id, uma por id. É ela que liga o PR à issue no provedor, que a resolve quando o release com o merge sai.
 
 ## Comentário de conclusão
 

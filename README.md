@@ -19,7 +19,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-7a1f2b" alt="Licença MIT"></a>
-  <img src="https://img.shields.io/badge/vers%C3%A3o-0.5.0-c9a227" alt="Versão 0.5.0">
+  <img src="https://img.shields.io/badge/vers%C3%A3o-0.6.0-c9a227" alt="Versão 0.6.0">
   <img src="https://img.shields.io/badge/node-%E2%89%A522-3b2a1a" alt="Node 22 ou mais novo">
   <img src="https://img.shields.io/badge/idioma-pt--BR-2f5d50" alt="Em português do Brasil">
 </p>
@@ -101,7 +101,20 @@ Rodar duas vezes não muda nada na segunda vez.
 | 4 · Selos | (interna) | o push, o PR e o selo `pipeline/review` no SHA da cabeça; os validadores gravam os demais | PR selado |
 | 5 · Merge | o humano pede | o portão confere os selos e o pedido em texto livre | PR mergeado |
 
-Outros comandos: `/pipeline-doctor` (o reino está pronto?), `/pipeline-security` (varredura da superfície inteira, com prova de exploração; o eixo `supply-chain`, opt-in, audita dependências, runtime e imagens pela saída das ferramentas do projeto, sem prova de exploração), `/pipeline-maestro` (a távola, na seção 05) e `/pipeline-landing` (módulo opt-in de landing page: do briefing aos tickets e à validação da página construída, com `landing:` no profile). Várias issues viram uma pilha, executada na ordem pedida; um `blockedBy` aberto espera o merge do bloqueador.
+Outros comandos: `/pipeline-doctor` (o reino está pronto?), `/pipeline-security` (varredura da superfície inteira, com prova de exploração; o eixo `supply-chain`, opt-in, audita dependências, runtime e imagens pela saída das ferramentas do projeto, sem prova de exploração), `/pipeline-maestro` (a távola, na seção 05) `/pipeline-landing` (módulo opt-in de landing page: do briefing aos tickets e à validação da página construída, com `landing:` no profile) e `/pipeline-triage` (módulo opt-in de triagem de erros de produção, abaixo). Várias issues viram uma pilha, executada na ordem pedida; um `blockedBy` aberto espera o merge do bloqueador.
+
+**Os batedores: triagem de erros de produção (opt-in).** Com `observability: { provider: sentry }` no profile e a extensão `observability.md` preenchida pelo [template](templates/pipeline/observability.md), o `/pipeline-triage` lê pelo MCP do Sentry as issues não resolvidas do ambiente padrão na janela padrão (ou só a issue cujo id você passar), localiza o código, classifica cada uma em bug, cenário de negócio tratado como 5xx ou ruído, agrupa por causa e mostra um laudo. Só com o seu OK ele chama o `/pipeline-ticket`, e o id do Sentry vai no corpo da issue e, como `Fixes <ID>`, no corpo do PR. Ele nunca resolve, arquiva, ignora nem comenta nada no Sentry, e dado pessoal não entra no laudo nem no ticket. Para ligar o MCP, uma vez por projeto:
+
+1. declare o servidor no `.mcp.json` da raiz do projeto (escopo de projeto, versionado, sem token; nunca no `~/.claude.json`), com o transporte HTTP e a URL do MCP remoto oficial do Sentry, escopada à organização e ao projeto (com mais de um projeto em **Projetos**, escope só à organização, `https://mcp.sentry.dev/mcp/<organização>`, ou o servidor não alcança os outros):
+
+   ```json
+   { "mcpServers": { "sentry": { "type": "http", "url": "https://mcp.sentry.dev/mcp/<organização>/<projeto>" } } }
+   ```
+
+   ou, pelo terminal, `claude mcp add --scope project --transport http sentry https://mcp.sentry.dev/mcp/<organização>/<projeto>`. O nome do servidor (`sentry`) é o mesmo do rótulo **Servidor MCP** do `observability.md`;
+2. abra o Claude Code no projeto, aprove o servidor do `.mcp.json` quando ele perguntar e rode `/mcp` → o servidor → autenticar: o login é OAuth, no navegador, com a sua conta do Sentry, e a credencial fica no Claude Code, fora do repositório;
+3. no consentimento, a triagem precisa só de leitura de issues e eventos. Para travar a escrita também do lado do Claude Code, ponha em `permissions.deny` do `.claude/settings.json` as ferramentas do servidor que mudam issue, pelos nomes que o `/mcp` lista;
+4. rode o `/pipeline-doctor`: o item 30 confere o `.mcp.json`, a extensão e que nenhum token ficou em arquivo versionado nem em `.claude/settings*.json`.
 
 ## 04 / Os selos e o portão
 
@@ -128,8 +141,9 @@ Opcional. Com a chave `team:` no profile, a skill `pipeline-maestro` monta um ti
 | **Core** — contrato, formato dos arquivos, princípios, gate de selos, guarda de deriva, guarda do teto do arquivo de instruções e os modelos do módulo de landing | `.claude/pipeline/core/` | só o toolkit |
 | **Skills e agents `pipeline-*`** | `.claude/skills/pipeline-*`, `.claude/agents/pipeline-*.md` | só o toolkit |
 | **Profile** — repositório, board, gate, idioma, stack, time | `.claude/pipeline/profile.yml` | o projeto |
-| **Extensões** — `rules.md`, `ticket.md`, `security.md`, `verification.md`, `landing.md` (opt-in) | `.claude/pipeline/` | o projeto |
+| **Extensões** — `rules.md`, `ticket.md`, `security.md`, `verification.md`, `landing.md` e `observability.md` (opt-in) | `.claude/pipeline/` | o projeto |
 | **Módulo de landing (opt-in)** — comando e skill `pipeline-landing`, ligado por `landing:` no profile e pela extensão `landing.md` | `.claude/skills/pipeline-landing*`, `.claude/pipeline/core/landing/` | só o toolkit; os fatos, o projeto |
+| **Módulo de triagem (opt-in)** — comando `pipeline-triage` e skill `pipeline-triage-errors`, ligado por `observability:` no profile, pela extensão `observability.md` e pelo servidor MCP no `.mcp.json` | `.claude/skills/pipeline-triage*` | só o toolkit; os fatos e o `.mcp.json`, o projeto |
 | **Skills de stack e as demais** | `.claude/skills/<outra>` | o projeto |
 
 As ferramentas opcionais de landing, em [`tools/landing/`](tools/landing/), não são instaladas: rodam do clone do toolkit, e nada no core depende delas. O prefixo `pipeline-` é do toolkit: o instalador remove dali o que ele não traz. **Extensão acrescenta regra, nunca remove gate do core.** Opcional: com `knowledge.instructionsBudget` no profile, o `document-budget.mjs` no gate do projeto reprova o arquivo de instruções acima do teto, porque ele é índice (regra em uma linha e ponteiro; o detalhe mora fora). O schema do profile está em [`core/profile-schema.md`](core/profile-schema.md), e os templates em branco, em [`templates/pipeline/`](templates/pipeline/).

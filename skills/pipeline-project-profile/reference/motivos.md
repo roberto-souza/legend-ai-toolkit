@@ -27,6 +27,11 @@ Os motivos das recusas e da trava do `pipeline-project-profile`; as ações est�
 - `landing.lineBudget` aceita só `logic` e `section`: chave de outro nome é erro de digitação (`sections`) que, sem recusa, vira o default em silêncio.
 - `landing.app` e `landing.handoff` são relativos, sem `..`, e diferentes: o profile é versionado, e o handoff pode ser ignorado pelo git enquanto o app não; apontar os dois para o mesmo lugar mistura ou versiona o que não devia.
 
+## Observabilidade
+
+- `observability.provider` aceita só `sentry`: o processo da triagem é genérico, mas a leitura pelo MCP, o formato do id e o vínculo pelo PR foram conferidos só nesse provedor. Outro valor seria um provedor que o core nunca leu, e a triagem falharia no meio, depois de gastar a sessão.
+- Os fatos ficam na extensão `observability.md`, e não no profile, como os do `landing.md`: são prosa e rótulos que só o módulo lê.
+
 ## Teto do arquivo de instruções
 
 - `knowledge.instructionsBudget` é um inteiro positivo, em bytes: o guard `document-budget.mjs` compara o tamanho do arquivo com ele. Texto, zero, negativo ou fração é erro de digitação que, sem a recusa, só apareceria no gate, como falha do guard.

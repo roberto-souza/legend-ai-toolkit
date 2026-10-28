@@ -80,3 +80,8 @@ security:
 #   lineBudget: { logic: 400, section: 1000 }
 #   formatCommand: <comando do formatador> {files}
 #   taste: default # ou <arquivo .md do projeto>, que substitui o padrão
+
+# Opcional: triagem de erros de produção (schema, seção `observability`); os fatos vão em observability.md, ao lado
+# deste arquivo, e o servidor MCP do provedor no .mcp.json do projeto, sem token.
+# observability:
+#   provider: sentry
