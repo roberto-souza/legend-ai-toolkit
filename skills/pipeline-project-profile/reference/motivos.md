@@ -35,3 +35,8 @@ Os motivos das recusas e da trava do `pipeline-project-profile`; as ações est�
 ## Teto do arquivo de instruções
 
 - `knowledge.instructionsBudget` é um inteiro positivo, em bytes: o guard `document-budget.mjs` compara o tamanho do arquivo com ele. Texto, zero, negativo ou fração é erro de digitação que, sem a recusa, só apareceria no gate, como falha do guard.
+
+## Ferramenta de captura
+
+- `team.capture.command` exige `{scenarios}`, `{sha}`, `{out}` e `{root}`: sem um deles, a ferramenta captura o arquivo errado, o SHA errado, grava fora da pasta da rodada ou não acha a credencial do checkout principal, sem sintoma, como em `{udid}` e `{bodyFile}`.
+- `team.capture` exige `team.roles.ux`: com a ferramenta, quem lê as capturas e grava os selos `screen` e `ux` é a UX, e as capturas vão para `team.roles.ux.dir`.

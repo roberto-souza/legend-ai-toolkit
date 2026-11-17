@@ -61,6 +61,7 @@ security:
 #   roles: { maestro: …, executor: …, validatorApi: …, validatorUi: … }
 #   dev: { up: <comando que sobe os apps> }
 #   credentials: { file: .env, keys: [<VARIAVEL>] }
+#   capture: { command: "<ferramenta de captura com {scenarios}, {sha}, {out} e {root}>" } # opcional (.claude/pipeline/core/capture.md)
 
 # Opcional: tipos de PR por caminho, para os selos de validação (.claude/pipeline/core/seals.md).
 # seals:

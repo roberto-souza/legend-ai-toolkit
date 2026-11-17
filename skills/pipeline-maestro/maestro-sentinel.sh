@@ -9,8 +9,12 @@
 # A line carrying `PILHA PRONTA: `, `CAPTURAS PRONTAS: ` or `TRAVADO: ` prints one SENTINEL line. A screen unchanged for <idle-minutes>
 # prints STALLED (repeated every <idle-minutes>) and, once it changes again, "resumed after stall".
 # Failures print one line: `check failed` (exits 1) or `note edit failed: <line>` (keeps polling).
-# Usage: maestro-sentinel.sh <executor terminal> <note name> [idle-minutes=20] [poll-seconds=60]
+# Each <request id> names an open capture request: a `CAPTURAS PRONTAS: ` line whose last ` — ` field, trailing spaces
+# trimmed, is `pedido <request id>` is reported even when it is already on screen at the first poll (the maestro was busy
+# while the executor finished). The id is new for every request, so an older line for the same folder never matches.
+# Usage: maestro-sentinel.sh <executor terminal> <note name> [idle-minutes=20] [poll-seconds=60] [<request id>...]
 terminal=$1; note=$2; idle_min=${3:-20}; poll=${4:-60}
+expected=("${@:5}")
 limit=$((idle_min * 60)); stalled=0; last_alert=0; first=1; prev=""; changed_at=$(date +%s); prev_keys=""
 
 extract() {
@@ -31,7 +35,16 @@ while true; do
     nth=$(printf '%s' "$cur_keys" | grep -cxF -- "$found")
     cur_keys+="$found"$'\n'
     before=$(printf '%s' "$prev_keys" | grep -cxF -- "$found")
-    (( first || nth + 1 <= before )) && continue
+    if (( first )); then
+      awaited=0
+      if [[ $found == "CAPTURAS PRONTAS: "* ]]; then
+        last=${found##* — }; last=${last%"${last##*[![:space:]]}"}
+        for id in "${expected[@]}"; do [[ $last == "pedido $id" ]] && awaited=1; done
+      fi
+      (( awaited && nth == 0 )) || continue
+    elif (( nth + 1 <= before )); then
+      continue
+    fi
     case $found in
       "PR #"*)
         if ! maestri note edit "$note" "## Em execução" "## Em execução\\n$found — $(date +%F)" >/dev/null 2>&1; then

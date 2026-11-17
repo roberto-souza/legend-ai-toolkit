@@ -35,13 +35,13 @@ Pacote fora de qualquer tipo conta como só `review`: é decisão do repositóri
 | --- | --- | --- |
 | `review` | quem orquestra o ticket (`pipeline-execute-ticket`), a partir do laudo | logo depois do push (e do retarget) |
 | `e2e` | validador de API (`team.roles.validatorApi`) | `APROVADO` do roteiro |
-| `screen` | validador de tela e de app (`team.roles.validatorUi`); um selo para navegador e aparelho | `APROVADO` do **último** roteiro do PR |
+| `screen` | validador de tela e de app (`team.roles.validatorUi`); um selo para navegador e aparelho. Com `team.capture`, no PR só de navegador: a UX, na leitura única | `APROVADO` do **último** roteiro do PR, ou da leitura única |
 | `ux` | especialista de UX (`team.roles.ux`) | `PRONTO` |
 
 - O validador de reserva (`team.roles.validatorBackup`) recebe o comando do selo do papel que substitui.
-- Nunca grava o selo de outro papel, e o **maestro não grava nenhum**.
-- Validador só grava no `APROVADO` (UX: `PRONTO`), nunca em `REPROVADO`, `AJUSTAR`, `AMBIENTE FORA` ou `TRAVADO`. Roda o comando do roteiro literalmente e cola a linha `stamped pipeline/<selo> on <sha> for PR #<n>` na resposta. O `ux` só roda esse comando.
-- A UX não lê código nem edita nada; o selo é o único comando que ela roda.
+- Nunca grava o selo de outro papel, e o **maestro não grava nenhum**. Na leitura única (`team.capture`), o `screen` é da UX, em chamada separada da do `ux`.
+- Validador só grava no `APROVADO` (UX: `PRONTO`), nunca em `REPROVADO`, `AJUSTAR`, `AMBIENTE FORA` ou `TRAVADO`. Roda o comando do roteiro literalmente e cola a linha `stamped pipeline/<selo> on <sha> for PR #<n>` na resposta. O `ux` só roda esse comando (na leitura única, também o do `screen`).
+- A UX não lê código nem edita nada; os selos são os únicos comandos que ela roda.
 
 ### Roteamento do maestro
 

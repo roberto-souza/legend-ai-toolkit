@@ -68,6 +68,7 @@ Detalhe: `.claude/skills/pipeline-project-profile/reference/motivos.md`, seção
 | `team.roles.ux` | presente sem `command`, `dir` ou `audience`. |
 | `team.roles.ux.siblings` | chave que não é `app` de nenhum item de `team.portals` ou `team.devices`; item de `team.roles.ux.siblings.<app>` sem `name`, `route` ou `pattern`; `name` repetido dentro do mesmo `app`. A mensagem nomeia a chave com o índice a partir de 0: `team.roles.ux.siblings.<app>[2].pattern`, `team.roles.ux.siblings.<app>[3].name`. |
 | `team.portals` | vazio, ou item sem `name` ou `url`. |
+| `team.capture` | presente sem `command`; `command` sem `{scenarios}`, `{sha}`, `{out}` ou `{root}` (a mensagem nomeia o que falta); presente sem `team.roles.ux` ("a leitura única das capturas é da UX"). Motivo: `.claude/skills/pipeline-project-profile/reference/motivos.md`, seção "Ferramenta de captura". |
 | `team.credentials` | falta `file` ou `keys`; item de `keys` que não casa `^[A-Z][A-Z0-9_]*$`; `file`/`createdBy` com `=` seguido de valor, ou `:` seguido de espaço e valor (a forma `chave: valor`). Dois-pontos colado, como em `pnpm infra:up`, é nome de script e passa. |
 
 `team.e2e` (só com `team.e2e`):

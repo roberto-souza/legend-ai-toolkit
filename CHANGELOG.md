@@ -2,6 +2,30 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
+## 0.7.0 — 2026-11-17
+
+**Validação de tela mais rápida e mais certeira, com a ferramenta de captura do projeto (opt-in).** A tela passa a ter o que a API já tem: medidas que reprovam sozinhas, uma ferramenta de captura reaproveitável, uma leitura visual só e validação PR a PR. Os dois selos continuam, e quem os grava continua sendo um agente de contexto limpo, nunca o executor.
+
+- **Chave opcional `team.capture.command`**, com `{scenarios}`, `{sha}`, `{out}` e `{root}`. O contrato fica em `core/capture.md`, e cada projeto implementa a ferramenta, versionada no repositório dele (não é spec nem roda no `check`):
+  - arquivo de cenários em JSON (`<pasta>/cenarios.json`): `id`, app, rota, viewport, tema, ações (`click`, `fill`, `waitFor`, `press`, `route` com atraso ou `abort`), o que fotografar, estado transitório, medidas e erros de console esperados;
+  - saída: os PNG, o `capturas.md` no formato de linha de hoje e o `medidas.json`, com valor, limite e `OK` ou `FALHA` por medida;
+  - medidas: alvo de toque, contraste, estouro (`scrollWidth > clientWidth`), `aria-*` e nome acessível, URL e parâmetros, console e sobreposição.
+- **Executor** (`roles/executor.md`, seção "Pedido de capturas pela ferramenta"): escreve só o arquivo de cenários, a partir das linhas `— verify:` e dos cenários "(verificação)" do ticket, e roda o comando.
+- **Medida com `FALHA` reprova o PR sem leitura visual.** A UX só confirma que a captura sustenta a medida (`roles/ux.md`, seção "Confirmação de medida"), e o caminho é o de "Achado do validador".
+- **Varredura pelo diff** (`reference/captura.md`, seção "Varredura pelo diff"): desktop claro e celular claro do estado inicial de toda tela tocada; tema escuro só quando o diff mexe em cor, token ou classe de tema; cenário no celular só com layout responsivo ou quando o critério pede. O pedido de capturas lista as variantes e o porquê. Na dúvida, a variante entra.
+- **Uma leitura, dois laudos** (`reference/validacao-ux.md`, seção "Leitura única"): a UX lê cada captura uma vez, com o `medidas.json`, e dá o laudo de tela (`APROVADO` ou `REPROVADO — passo <k>`) e o de UX (`PRONTO` ou `AJUSTAR`). Ela grava `screen` e `ux` em duas chamadas separadas. O validador de tela fica com os passos pontuais de portal, sem selo no navegador, e com o roteiro de app, que não muda.
+- **Conferência do `PRONTO` por amostra:** o maestro abre as capturas citadas num `[BLOQUEIA]` ou num `FALHA`, as de estado transitório e, por tela, uma de cenário e uma de varredura, e registra `capturas conferidas pelo maestro: <q> de <total> (amostra e bloqueios)`.
+- **Validação PR a PR** (`SKILL.md`, seção "Validação PR a PR"): o executor captura o PR k+1 enquanto a UX lê o PR k. A UX lê um PR por vez. Com a ferramenta, a linha fixa ganha `— pedido <id>`, e o `maestro-sentinel.sh` aceita os ids dos pedidos abertos como argumentos e reporta o `CAPTURAS PRONTAS` deles mesmo quando a linha já estava na tela ao ser armado; linha antiga da mesma pasta não casa. Spec nova: `tests/maestro-sentinel.test.mjs`.
+- **Ticket com os cenários:** com `team.capture`, o `pipeline-write-ticket` escreve o `— verify:` de cada critério de tela como cenário (`route`, `viewport`, `theme`, `actions`, `measures`, `shows`).
+- **Profile e doctor:** o Passo 2 do `pipeline-project-profile` recusa `team.capture` sem `command`, comando sem `{scenarios}`, `{sha}`, `{out}` ou `{root}`, e a chave sem `team.roles.ux`. O item 23 do `/pipeline-doctor` confere que o comando resolve (programa, arquivo e script do `package.json`).
+- `core/seals.md` e `core/seals-reference.md` dizem quem grava o `screen` na leitura única. O tipo dos selos e o `pipeline-gate.mjs` não mudam.
+
+**Ao atualizar:** sem `team.capture`, nada muda: o executor escreve o script no scratchpad, a varredura tem as quatro variantes, o validador de tela e a UX leem as capturas e o maestro confere todas. O sentinela sem pastas extras se comporta como antes. Para ligar:
+1. escreva a ferramenta de captura no repositório, no contrato de `.claude/pipeline/core/capture.md` (login, build por SHA, proxy da API, saída e medidas);
+2. declare `team.capture.command` no profile;
+3. ajuste o `verification.md` (seção "PR de tela": o tamanho do desktop e a varredura pelo diff);
+4. rode o `/pipeline-doctor` até ficar verde.
+
 ## 0.6.1 — 2026-10-28
 
 **Correção: o doctor ficava RED em projeto sem a extensão de um módulo opcional.**
