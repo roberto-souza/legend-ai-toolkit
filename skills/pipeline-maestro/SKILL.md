@@ -51,9 +51,9 @@ Demanda nova, sem ticket: o maestro não escreve ticket, recruta o escritor e sa
 4. **Contexto limpo por ticket.** Todo ticket (o primeiro e cada um depois de `PILHA PRONTA`) começa com o executor reiniciado: `maestri recruit "<EXEC>" --command "<team.roles.executor.command>" --dir <raiz do clone> --replace "<EXEC>"`, depois **Papel do executor.** e **Conferir o executor.**; recusa de `--command`/`--dir` ou diretório errado → dispense, recrute sem `--replace` e reconecte (`.claude/skills/pipeline-maestro/reference/armadilhas.md`, seção "Terminais e papéis").
 5. **Correção.** Vai a um executor reiniciado (passo 4), com `/pipeline-execute #<n>` e o pedido: PR, branch, passo reprovado, evidência e, em achado de tela, `volta <k> da tela <rota>`; nunca "mesmo executor" (`.claude/skills/pipeline-maestro/reference/despacho.md`, seção "Um executor limpo por ticket").
 6. **Despacho.** Ticket a ticket: `maestri ask "<EXEC>" "/pipeline-execute #<n> --parent <branch do ticket anterior>"`, o primeiro sem `--parent` (`.claude/skills/pipeline-execute-ticket/SKILL.md`, seção "A fila"); a pilha vai para `## Em execução`. A cada `PILHA PRONTA` de ticket que não é o último: anote o PR, reinicie o executor (passo 4) e despache o próximo; a validação só começa depois do último.
-7. **Monitor.** Depois de cada despacho, correção e pedido de capturas, arme `Monitor` com `.claude/skills/pipeline-maestro/maestro-sentinel.sh "<EXEC>" "<team.note>" 20 60` e re-arme ao expirar; nunca `maestri check` em laço. Fora do Claude Code, rode o script em segundo plano e leia a saída, com a mesma regra (`.claude/skills/pipeline-maestro/reference/despacho.md`, seção "O maestro acorda só por evento").
+7. **Monitor.** Depois de cada despacho, correção e pedido de capturas, arme `Monitor` com `.claude/skills/pipeline-maestro/maestro-sentinel.sh "<EXEC>" "<team.note>" 20 60`, seguido da `<pasta>` de cada pedido de capturas ainda sem `CAPTURAS PRONTAS`, e re-arme ao expirar; nunca `maestri check` em laço. Fora do Claude Code, rode o script em segundo plano e leia a saída, com a mesma regra (`.claude/skills/pipeline-maestro/reference/despacho.md`, seção "O maestro acorda só por evento").
    - Antes de armar, olhe a tela (o retorno do `maestri ask` vale, senão `maestri check`): `PILHA PRONTA`/`CAPTURAS PRONTAS`/`TRAVADO` ainda não tratado na nota → trate como evento (passo **Eventos.**).
-8. **Eventos.** Pare o `Monitor` e aja só nas linhas do sentinela. `PILHA PRONTA` de ticket intermediário: anote o PR em `## Em execução` e siga o passo 6; do último ticket ou de correção: por PR, de baixo para cima, "PR aberto pelo executor" e troque a linha do sentinela pelo item de "Nota de estado". `CAPTURAS PRONTAS`: "Validação de tela", passo 3 (reprodução de passo pontual: passo 6). `TRAVADO`: `maestri notify` e a pergunta ao usuário; re-arme com a resposta. `STALLED`: um `maestri check` e **uma** cutucada; o segundo vira `TRAVADO` (`.claude/skills/pipeline-execute-ticket/SKILL.md`, seção "O sentinela"). `check failed`/`note edit failed`: confira terminal e nota e re-arme. Leia `.claude/skills/pipeline-maestro/reference/despacho.md`, seção "Eventos do sentinela", e siga os passos.
+8. **Eventos.** Pare o `Monitor` e aja só nas linhas do sentinela. `PILHA PRONTA` de ticket intermediário: anote o PR em `## Em execução` e siga o passo 6; do último ticket ou de correção: por PR, de baixo para cima, "PR aberto pelo executor" e troque a linha do sentinela pelo item de "Nota de estado". `CAPTURAS PRONTAS`: "Validação de tela", passo 3 (reprodução de passo pontual: passo 6); com `team.capture`, o passo 4 de "Passos com a ferramenta". `TRAVADO`: `maestri notify` e a pergunta ao usuário; re-arme com a resposta. `STALLED`: um `maestri check` e **uma** cutucada; o segundo vira `TRAVADO` (`.claude/skills/pipeline-execute-ticket/SKILL.md`, seção "O sentinela"). `check failed`/`note edit failed`: confira terminal e nota e re-arme. Leia `.claude/skills/pipeline-maestro/reference/despacho.md`, seção "Eventos do sentinela", e siga os passos.
 
 ### PR aberto pelo executor
 
@@ -127,6 +127,8 @@ O critério está em `<crit>`, seção "PR de API"; antes de escrever o roteiro,
 
 O critério está em `<crit>`, seção "PR de tela"; antes de escrever o roteiro, leia `.claude/skills/pipeline-maestro/reference/validacao-tela.md`, seção "Passos", e siga os passos (1 a 16). Sem `<team.roles.ux>` → pare e diga ao humano que as capturas vão para a pasta de `team.roles.ux`, que precisa estar declarada.
 
+**Com `team.capture`.** No navegador, os passos 2 a 7 abaixo dão lugar a `.claude/skills/pipeline-maestro/reference/validacao-tela.md`, seção "Passos com a ferramenta": variantes pelo diff, o executor escreve só cenários, medida em `FALHA` reprova sem leitura visual, passos pontuais sem selo e a leitura única da UX, que grava `screen` e `ux`. Sem a chave, nada muda.
+
 1. Leia o critério. Aplique ao PR de tela e à parte de tela do PR misto; PR de API sem `team.e2e` não recebe pedido de capturas (vira passo de portal). `<pasta>` é `<raiz>/<team.roles.ux.dir>/pr-<n>/` (`k` ≥ 2: `.../rodada-<k>/`).
 2. **Pedido de capturas** (passo 3 do detalhe): `maestri ask "<EXEC>"` com PR, branch, SHA, `#<n>`, `k`, `<pasta>`, variante base de cada front, `url` de `<team.portals>` com `{slug}`, credenciais só pelo nome e as irmãs; logo depois, arme o sentinela (passo **Monitor.**).
 3. **`CAPTURAS PRONTAS`** (passo 4 do detalhe). Abra `<pasta>/capturas.md`. Linha `FALHA DO SCRIPT` → pergunte ao executor se o defeito é do script (novo pedido no mesmo SHA e rodada) ou do código (siga "Achado do validador" como `REPROVADO`); o executor não corrige código sem essa ordem.
@@ -134,6 +136,15 @@ O critério está em `<crit>`, seção "PR de tela"; antes de escrever o roteiro
 5. Antes de aceitar `APROVADO`, abra cada captura de estado transitório; linha que afirma elemento aberto com imagem sem ele → `REPROVADO` do roteiro, não do PR (redespache o passo).
 6. **Artefato do portal** (passo 14 do detalhe). Captura e comportamento divergem mesmo depois de `getAnimations().finish()` → `.claude/skills/pipeline-maestro/reference/captura.md`, seção "Artefato do portal": a captura do script prevalece no navegador e o achado é descartado com "artefato do portal" na nota; divergência reproduzida é achado.
 7. Confira `stamped pipeline/screen …` (parágrafo **Resposta sem selo.**); com `APROVADO` e `<team.roles.ux>`, siga "Validação de UX".
+
+### Validação PR a PR
+
+Só com `team.capture`; sem a chave, cada PR da pilha passa por todas as etapas antes do próximo.
+
+1. Depois dos passos 5 e 6 de "Passos com a ferramenta" do PR k, o checkout principal fica livre: rode "PR aberto pelo executor" do PR k+1 (de baixo para cima) e mande o pedido de capturas dele, com o sentinela armado pela `<pasta>` do PR k+1.
+2. Só então mande a leitura única do PR k. O executor captura o k+1 enquanto a UX lê o k.
+3. A UX lê um PR por vez; nunca duas leituras em paralelo. A etapa E2E do PR k+1 roda antes da leitura dele, como no PR misto.
+4. Correção do PR k (`REPROVADO`, `AJUSTAR`) com captura do k+1 em curso: espere o `CAPTURAS PRONTAS` do k+1 antes de reiniciar o executor, e volte o checkout ao PR k só no `PILHA PRONTA` da correção.
 
 ## Validação de app
 
@@ -146,7 +157,7 @@ O critério está em `<crit>`, seção "PR de app"; aqui fica a mecânica. Sem `
 
 ## Validação de UX
 
-Régua: `.claude/skills/pipeline-maestro/roles/ux.md`; critério: `<crit>`, seção "Nota de UX"; irmãs e conferência: `.claude/pipeline/core/ux-reference.md`. Leia `.claude/skills/pipeline-maestro/reference/validacao-ux.md`, seção "Passos" (1 a 12), e siga os passos. Sem `<team.roles.ux>` → pule esta seção.
+Régua: `.claude/skills/pipeline-maestro/roles/ux.md`; critério: `<crit>`, seção "Nota de UX"; irmãs e conferência: `.claude/pipeline/core/ux-reference.md`. Leia `.claude/skills/pipeline-maestro/reference/validacao-ux.md`, seção "Passos" (1 a 12), e siga os passos. Sem `<team.roles.ux>` → pule esta seção. Com `team.capture`, a tela web segue `.claude/skills/pipeline-maestro/reference/validacao-ux.md`, seção "Leitura única", no lugar dos passos 1 a 5.
 
 1. Confira o roteiro de tela ou app `APROVADO` e `pipeline/ux` no `check`.
 2. Reúna as capturas (tela web: as do executor, com novo pedido na rodada `k` se voltou da "Conferência do `PRONTO`"; app: roteiro fechado ao `<VAL-UI>`, um aparelho × claro/escuro) e as irmãs de `<team.roles.ux.siblings>`; envie `maestri ask "<UX>"` com PR/branch/SHA, descrição de cada tela, irmãs como referência e, só no `PRONTO`, `<gate> stamp ux --pr <pr> --sha <sha> --evidence "<…>"` (passos 2 a 5 do detalhe).
@@ -157,7 +168,7 @@ Régua: `.claude/skills/pipeline-maestro/roles/ux.md`; critério: `<crit>`, seç
 
 ### Conferência do `PRONTO`
 
-1. Abra uma a uma todas as capturas das telas do PR na rodada final, todas as variantes (`Read`, no Claude Code); irmãs não contam. Registre `capturas conferidas pelo maestro: <q> arquivos (rodada <k>)` no item do PR.
+1. Abra uma a uma todas as capturas das telas do PR na rodada final, todas as variantes (`Read`, no Claude Code); irmãs não contam. Registre `capturas conferidas pelo maestro: <q> arquivos (rodada <k>)` no item do PR. Com `team.capture`, abra só as citadas num `[BLOQUEIA]` ou num `FALHA`, as de estado transitório e uma de varredura por tela, e registre `capturas conferidas pelo maestro: <q> de <total> (amostra e bloqueios)` (`.claude/pipeline/core/ux-reference.md`, seção "Conferência do `PRONTO`").
 2. Captura cortada, tela errada, variante faltando ou divergência das irmãs não vista pela UX → recuse: registre `PRONTO da UX recusado pelo maestro: <motivo> — o selo pipeline/ux de <sha curto> não vale`; não mova a `## Pronto para merge` nem notifique; refaça captura e rodada desde o passo 2 de "Validação de UX" ou devolva código como `AJUSTAR`. Não há revogação de selo (`.claude/pipeline/core/ux-reference.md`, seção "O selo `pipeline/ux`").
 
 ## Nota de estado

@@ -18,3 +18,21 @@ Régua: `.claude/skills/pipeline-maestro/roles/ux.md`; critério: `<knowledge.ve
 10. Faça `.claude/skills/pipeline-maestro/SKILL.md`, seção "Conferência do `PRONTO`", antes de aceitar.
 11. Aceito e `check --pr <pr>` saindo 0 → `.claude/skills/pipeline-maestro/SKILL.md`, seção "PR validado"; merge só com todas as telas da pilha em `PRONTO` aceito, `.claude/skills/pipeline-maestro/SKILL.md`, seção "Merge".
 12. Não crie arquivo além das capturas na pasta ignorada pelo git.
+
+## Leitura única
+
+Só com `team.capture` no profile e na parte web do PR. A UX lê cada captura uma vez, com o `medidas.json`, e emite dois laudos: o de tela e o de UX. Sem `team.capture`, vale "Passos": dois leitores, o validador de tela e a UX. Motivo: `.claude/pipeline/core/ux-reference.md`, seção "Uma leitura, dois laudos".
+
+1. Confira: `medidas.json` sem cenário em `FALHA` e os passos pontuais `APROVADO` ou ausentes (passos 5 e 6 de `.claude/skills/pipeline-maestro/reference/validacao-tela.md`, seção "Passos com a ferramenta").
+2. Envie `maestri ask "[UX] <team.roles.ux.tool>" "<mensagem>"`, com:
+   - PR, branch, SHA e a instrução de seguir `.claude/skills/pipeline-maestro/roles/ux.md`, seção "Leitura única";
+   - um passo numerado por cenário de `medidas.json` (irmã não entra), com o caminho da captura, o `kind`, o `ref`, a evidência esperada, cada medida com valor, limite e resultado, e o console; os passos pontuais aprovados, com a captura e a linha da nota;
+   - a descrição de cada tela e as irmãs, como no passo 5 de "Passos";
+   - dois comandos de selo, cada um para uma chamada sozinha: `node <raiz do checkout principal>/.claude/pipeline/core/pipeline-gate.mjs stamp screen --pr <pr> --sha <sha> --evidence "<…>"`, só no `APROVADO` e só quando não vem roteiro de app depois; e `node <raiz do checkout principal>/.claude/pipeline/core/pipeline-gate.mjs stamp ux --pr <pr> --sha <sha> --evidence "<…>"`, só com `APROVADO` e `PRONTO`.
+3. Leia a resposta por `.claude/skills/pipeline-maestro/roles/ux.md`, seção "Leitura única": a linha do laudo de tela, o laudo de UX e a última linha `MÉDIA …`. Registre `UX: MÉDIA <n>/10 — PRONTO|AJUSTAR (rodada <k>)` no item do PR.
+4. `REPROVADO` → `.claude/skills/pipeline-maestro/SKILL.md`, seção "Achado do validador"; com `AJUSTAR` na mesma resposta, uma correção só ao executor, com os passos reprovados e os `[BLOQUEIA]` conferidos (passo 7 de "Passos").
+5. `APROVADO` sem `stamped pipeline/screen …`, ou `PRONTO` sem `stamped pipeline/ux …`, ou com erro → pare e pergunte ao humano: parágrafo **Resposta sem selo.** de `.claude/skills/pipeline-maestro/SKILL.md`, seção "Roteamento por tipo de PR".
+6. PR com navegador e app: a leitura única não grava `screen`, que sai do roteiro de app, e o `ux` só sai depois da leitura das capturas do app (passos 2 a 5 de "Passos").
+7. `APROVADO` e `PRONTO` → `.claude/skills/pipeline-maestro/SKILL.md`, seção "Conferência do `PRONTO`", na forma com a ferramenta.
+8. Revalidação depois de correção: pedido de capturas pela ferramenta das telas com `REPROVADO` ou `AJUSTAR`, mais uma tela aprovada como smoke, na rodada `k`; leitura única dessas telas, com os dois selos no SHA novo.
+9. Não crie arquivo na pasta além das capturas e dos arquivos da ferramenta (`cenarios.json`, `capturas.md`, `medidas.json`).

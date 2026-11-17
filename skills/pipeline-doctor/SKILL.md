@@ -132,9 +132,13 @@ Os itens 3–6 e as linhas marcadas `(Passo 2)` dos itens 23, 24, 27 e 30 rodam 
       versionada";
     - cada `team.portals[].url` começa com `http://` ou `https://` (o placeholder `{slug}` é permitido) → senão `FALHA`,
       com a URL;
+    - com `team.capture`, o comando resolve na raiz do repositório: a primeira palavra existe (`command -v <palavra>`), cada palavra
+      relativa com `/` e sem `{` existe como arquivo (`test -e <palavra>`) e, com `npm`, `pnpm` ou `yarn` seguido de
+      `run <script>` ou de um nome de script, o script consta em `scripts` do `package.json` da raiz → senão `FALHA`
+      "ferramenta de captura não encontrada: <palavra>"; a recusa de `{scenarios}`, `{sha}` e `{out}` vem do Passo 2;
     - notas `OK`: sem `team.e2e` "sem validação de API por E2E"; sem `team.devices` "sem validação de app"; aparelho sem
       `offline` "cenário offline sem corte de rede em <name>"; sem `team.roles.ux` "sem validação de UX"; sem
-      `team.roles.ux.siblings` "UX sem telas irmãs"; sem `team.roles.illustrator` "sem ilustrador no Maestri";
+      `team.roles.ux.siblings` "UX sem telas irmãs"; sem `team.capture` "captura pelo script do executor"; sem `team.roles.illustrator` "sem ilustrador no Maestri";
     - `team.roles.illustrator` declarado sem `landing:` no profile → `AVISO` "ilustrador sem módulo de landing; ninguém o
       recruta".
 24. **Selos (`seals`).** `FALHA` com a ação se faltar: `.claude/pipeline/core/seals.md` e `pipeline-gate.mjs`; em

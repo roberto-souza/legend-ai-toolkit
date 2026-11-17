@@ -55,6 +55,14 @@ o `pipeline-project-profile` recusa.
 2. Registra no item do PR: `capturas conferidas pelo maestro: <q> arquivos (rodada <k>)`, com `<q>` os arquivos abertos.
 3. Aceita: segue o fluxo de hoje (`## Pronto para merge`, `maestri notify` com a pilha inteira).
 
+Com `team.capture`, a conferência é por amostra (seção "Uma leitura, dois laudos"):
+
+1. O maestro abre toda captura citada num `[BLOQUEIA]` ou num `FALHA` (de medida ou do laudo de tela), toda captura de estado
+   transitório (`transient: true` em `medidas.json`) e uma captura de varredura por tela do PR.
+2. Registra no item do PR: `capturas conferidas pelo maestro: <q> de <total> (amostra e bloqueios)`, com `<total>` os PNG da
+   rodada sem as irmãs.
+3. Uma captura da amostra que não sustenta o `PRONTO` → abra as demais da mesma tela antes de recusar.
+
 Recusa, quando a captura não sustenta o `PRONTO`:
 
 | Achado | Caminho |
@@ -65,6 +73,18 @@ Recusa, quando a captura não sustenta o `PRONTO`:
 
 Na recusa o maestro não move o item para `## Pronto para merge`, não notifica e escreve no item
 `PRONTO da UX recusado pelo maestro: <motivo> — o selo pipeline/ux de <sha curto> não vale`.
+
+## Uma leitura, dois laudos
+
+Só com `team.capture`. Sem a chave, o validador de tela confere as capturas, a UX as lê de novo e o maestro abre todas.
+
+- Três leituras em série das mesmas imagens custavam mais que a captura. Com a medida calculada pela ferramenta
+  (`.claude/pipeline/core/capture.md`), o que sobra para o olho é o que só o olho vê: a evidência do cenário e a régua de UX.
+- Um papel de contexto limpo, a UX, lê cada captura uma vez e dá o laudo de tela e o de UX. Os selos continuam dois,
+  `screen` e `ux`, gravados por ela em duas chamadas, cada uma sozinha. O executor nunca grava nenhum dos dois.
+- O maestro não relê tudo: confere o que a leitura bloqueou ou reprovou, o estado transitório (o que mais engana a captura)
+  e uma amostra por tela, que pega captura cortada, tela errada ou variante faltando.
+- A medida em `FALHA` reprova sem leitura visual; a UX só confirma que a captura a sustenta.
 
 ## O selo `pipeline/ux`
 

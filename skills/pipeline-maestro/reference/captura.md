@@ -12,6 +12,30 @@ Os motivos dos passos de `.claude/skills/pipeline-maestro/roles/executor.md`, se
 - O script vive no `<scratchpad>` do executor, fora do repositório: verificação é validação, não spec.
 - O que o headless não prova (atalho de teclado, foco, colar) entra em `## Fora do script` do manifesto e vira passo pontual de portal.
 
+## Captura pela ferramenta
+
+Os motivos de `.claude/skills/pipeline-maestro/roles/executor.md`, seção "Pedido de capturas pela ferramenta". Vale só com `team.capture` no profile; sem a chave, vale a seção "Captura pelo script". Contrato: `.claude/pipeline/core/capture.md`.
+
+- O script descartável refazia build, servidor, login e seletores a cada pedido. A ferramenta é do projeto, versionada, e se reaproveita entre PRs e pilhas.
+- O executor escreve só os cenários, a partir das linhas `— verify:` e dos cenários "(verificação)" do ticket: menos interpretação, e a mesma captura sai de novo no mesmo SHA.
+- A medida (alvo de toque, contraste, estouro, `aria-*`, URL, console, sobreposição) é número. Lida em imagem, ela erra; calculada no navegador, ela reprova sozinha, como o `FALHA` de um E2E.
+- O `cenarios.json` fica na pasta da rodada, ao lado das capturas: o maestro e a UX leem o que foi pedido, e a reprodução usa o mesmo arquivo.
+
+## Varredura pelo diff
+
+Só com `team.capture`. Sem a chave, a varredura é a de "Captura pelo script": o estado inicial de toda tela tocada nas quatro variantes.
+
+| Variante | Entra quando |
+| --- | --- |
+| desktop claro e celular claro do estado inicial | sempre, em toda tela tocada |
+| tema escuro do estado inicial | o diff mexe em cor, token de tema ou classe de tema |
+| cenário no celular | o diff mexe em layout responsivo (breakpoint, `@media`, classe responsiva) ou o critério pede celular |
+| cenário na variante base | sempre (desktop claro; celular claro no front que `<team.roles.ux.audience>` declara mobile-first) |
+
+- O maestro decide pelo diff do PR contra a base dele (`git diff <base do PR>...HEAD`) e escreve no pedido cada variante com o porquê: `escuro: sim — <arquivo> muda token de cor` ou `escuro: não — o diff não toca cor, token nem tema`.
+- Na dúvida, a variante entra. Uma captura a mais custa segundos; uma variante quebrada que ninguém viu vai para produção.
+- As irmãs saem nas variantes de varredura da tela do PR.
+
 ## Captura transitória
 
 O `getAnimations()` vale só para os passos pontuais de portal; a conferência do maestro vale para toda captura de estado transitório. Com a janela do portal sem foco, transições e animações CSS congelam: painel pela metade ou modal transparente. Nunca desligar o `transform` no DOM, porque desloca painéis. Modal, menu, painel e toast precisam de prova com o elemento aberto. `document.getAnimations().forEach(a => a.finish())` antes do `maestri portal screenshot` encerra a animação antes da captura. A linha da nota descreve o que a imagem mostra (título do modal, itens do menu, texto do toast), nunca o esperado.

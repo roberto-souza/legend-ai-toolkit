@@ -8,7 +8,7 @@ Lido por `pipeline-maestro` depois que o PR abre; o `pipeline-execute-ticket` o 
 
 ## PR de tela
 
-<Roteiro do validador de tela: telas, viewports, capturas.>
+<Roteiro do validador de tela: telas, viewports (com o tamanho do desktop), capturas.>
 
 ## Nota de UX
 

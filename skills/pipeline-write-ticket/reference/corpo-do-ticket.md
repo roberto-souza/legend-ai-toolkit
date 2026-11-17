@@ -39,6 +39,13 @@ Motivos e exemplos das regras de `## Fase 4 — Escrever o corpo` de `.claude/sk
 - Exemplo de comando: ``- [ ] `pnpm check` passes — verify: `pnpm check` exits 0``.
 - Exemplo de captura: `- [ ] The empty state is shown when the list has no rows — verify: screen capture of the list at 1280x800 in the light theme shows the empty-state card`.
 
+## Critério de tela como cenário
+
+- Com `team.capture`, o executor copia o critério de tela para o arquivo de cenários da ferramenta (`.claude/pipeline/core/capture.md`, seção "Arquivo de cenários"). Critério já escrito como cenário reduz a interpretação dele e torna a captura repetível no mesmo SHA.
+- Os nomes dos campos (`route`, `viewport`, `theme`, `actions`, `measures`, `shows`) e os valores de `viewport` e `theme` são os do contrato, em qualquer idioma do ticket; `actions` e `measures` podem faltar quando o critério não pede ação nem medida.
+- Medida é número que a ferramenta calcula: alvo de toque, contraste, estouro (`overflow`), `aria-*` e nome acessível, URL e parâmetros, erro de console e sobreposição. Critério que hoje se confere no olho e é número vira medida.
+- Exemplo: `- [ ] The empty state is shown when the list has no rows — verify: screen — route: /items?filter=none; viewport: desktop; theme: claro; actions: wait for the empty-state card; measures: overflow on the empty-state card, touch target of the "New item" button; shows: the empty-state card with the "New item" button`.
+
 ## Proposta visual no corpo
 
 - O executor e o revisor leem só o corpo da issue, nunca a conversa; aprovação que vive só na entrevista não existe para eles (o mesmo motivo da linha de autorização do ticket conjunto).
