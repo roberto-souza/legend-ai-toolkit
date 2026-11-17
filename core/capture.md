@@ -5,9 +5,9 @@ Contrato entre o pipeline e a ferramenta de captura que cada projeto implementa 
 ## O que a ferramenta é
 
 - Código versionado no repositório do projeto. Não é spec: não roda no `check` nem no `gate`, e não é teste.
-- O executor a roda no clone isolado, pelo `team.capture.command`, com `{scenarios}` (o caminho do arquivo de cenários), `{sha}` (o SHA do pedido) e `{out}` (a pasta de saída) resolvidos.
+- O executor a roda no clone isolado, pelo `team.capture.command`, com `{scenarios}` (o caminho do arquivo de cenários), `{sha}` (o SHA do pedido), `{out}` (a pasta de saída) e `{root}` (a raiz do checkout principal) resolvidos.
 - Ela builda o SHA, serve o build numa porta livre fora das portas de `team.portals`, faz o login, roda os cenários num navegador headless com foco e encerra tudo o que subiu.
-- A credencial é lida de `team.credentials.file` pelo nome da variável e nunca é impressa.
+- A credencial é lida de `{root}/<team.credentials.file>` pelo nome da variável e nunca é impressa: o arquivo é ignorado pelo git e só existe no checkout principal.
 - Saída 0: rodou todos os cenários, mesmo com medida em `FALHA`. Saída diferente de 0: a ferramenta não rodou (build, API fora do ar, login), e o executor responde `TRAVADO: <motivo>`.
 - Os nomes de valor do contrato (`claro`, `escuro`, `celular`, `cenario`, `varredura`, `irma`) são fixos e em português, como os nomes de arquivo das capturas.
 
@@ -35,6 +35,7 @@ JSON, um por PR e por rodada, escrito pelo executor em `<pasta>/cenarios.json`.
         { "click": "<seletor>" },
         { "fill": "<seletor>", "value": "<texto>" },
         { "waitFor": "<seletor>" },
+        { "press": "<tecla, como Escape ou Control+K>" },
         { "route": "<padrão de URL da requisição>", "delayMs": 3000 },
         { "route": "<padrão de URL da requisição>", "abort": true }
       ],
@@ -65,12 +66,12 @@ JSON, um por PR e por rodada, escrito pelo executor em `<pasta>/cenarios.json`.
 | `ref` | o cenário ou o critério do ticket de onde veio a linha; `varredura` e `irma` repetem o `kind` |
 | `viewport` | `desktop` (o tamanho que o projeto declara em `knowledge.verification`, seção "PR de tela") ou `celular` (390 × 844, agente de usuário móvel e toque) |
 | `theme` | `claro` ou `escuro`, trocado pelo controle de tema da tela, nunca por CSS injetado |
-| `actions` | em ordem, depois de abrir a rota: `click`, `fill`, `waitFor` (espera o elemento visível), `route` (atraso ou `abort` da requisição) |
+| `actions` | em ordem, depois de abrir a rota: `click`, `fill`, `waitFor` (espera o elemento visível), `press` (tecla ou atalho no elemento com foco), `route` (atraso ou `abort` da requisição) |
 | `capture` | `page` (a página inteira), `viewport` ou um seletor (só o elemento) |
 | `transient` | `true` quando a evidência é modal, menu, painel ou toast aberto; a captura sai depois do `waitFor`, nunca com `getAnimations()` nem `transform` mexido |
 | `measures` | as medidas do cenário (seção "Medidas"); varredura e irmã podem vir sem |
 | `consoleAllow` | erros de console esperados no cenário; ausente = nenhum |
-| `outOfScript` | o que vira passo pontual de portal; a ferramenta copia cada item para `## Fora do script` do manifesto |
+| `outOfScript` | o que vira passo pontual de portal (colar, permissão do navegador); a ferramenta copia cada item para `## Fora do script` do manifesto |
 
 ## Medidas
 
@@ -86,7 +87,7 @@ Todo cenário mede o console. As outras medidas só rodam quando o cenário as d
 | `console` | `console` do tipo `error` e `pageerror` | erro fora de `consoleAllow` |
 | `overlap` | as bounding boxes dos elementos do seletor, duas a duas | duas caixas se cruzam |
 
-Seletor que não acha elemento é `FALHA` da medida, com o valor `seletor sem elemento`.
+Seletor de medida que não acha elemento não reprova o PR: o cenário sai `FALHA DO SCRIPT: seletor sem elemento <seletor>`, porque o erro costuma ser do arquivo de cenários.
 
 ## Saída
 
@@ -116,7 +117,7 @@ Tudo em `{out}`. A ferramenta apaga antes só o que ela mesma grava (os PNG, `ca
 }
 ```
 
-- `result` do cenário: `FALHA` com uma medida em `FALHA`, `FALHA DO SCRIPT` quando a ação não se cumpriu, senão `OK`.
+- `result` do cenário: `FALHA DO SCRIPT` quando a ação não se cumpriu ou um seletor de medida não achou elemento, `FALHA` com uma medida em `FALHA`, senão `OK`.
 - `value` e `limit` são texto, para caber qualquer medida.
 
 ## Por que assim

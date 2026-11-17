@@ -8,7 +8,7 @@ Selo = status de commit `pipeline/<selo>` com `success` no **SHA da cabeça do P
 | --- | --- | --- |
 | todo PR | `review` | `review`: quem executa o ticket, depois do push |
 | `api` | `e2e` | `e2e`: validador de API, no `APROVADO` |
-| `screen`, `app` | `screen`, `ux` | `screen`: validador de tela/app, no `APROVADO` do último roteiro (com `team.capture`, na parte web: a UX, no `APROVADO` da leitura única); `ux`: UX, no `PRONTO` |
+| `screen`, `app` | `screen`, `ux` | `screen`: validador de tela/app, no `APROVADO` do último roteiro (com `team.capture`, no PR só de navegador: a UX, no `APROVADO` da leitura única); `ux`: UX, no `PRONTO` |
 
 Fallbacks: sem `seals.kinds` ou `team:` só `review`; `api` sem `team.e2e` pede `screen` no lugar de `e2e`; `ux` só com `team.roles.ux`; `app` sem `team.devices` só `review`. O validador de reserva grava o selo do papel que substitui.
 

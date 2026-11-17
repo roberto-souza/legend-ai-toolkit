@@ -58,10 +58,14 @@ o `pipeline-project-profile` recusa.
 Com `team.capture`, a conferência é por amostra (seção "Uma leitura, dois laudos"):
 
 1. O maestro abre toda captura citada num `[BLOQUEIA]` ou num `FALHA` (de medida ou do laudo de tela), toda captura de estado
-   transitório (`transient: true` em `medidas.json`) e uma captura de varredura por tela do PR.
+   transitório (`transient: true` em `medidas.json` e as dos passos pontuais) e, por tela do PR, uma captura de cenário e uma
+   de varredura.
 2. Registra no item do PR: `capturas conferidas pelo maestro: <q> de <total> (amostra e bloqueios)`, com `<total>` os PNG da
    rodada sem as irmãs.
 3. Uma captura da amostra que não sustenta o `PRONTO` → abra as demais da mesma tela antes de recusar.
+4. Na recusa, a rodada nova é pedido pela ferramenta e leitura única
+   (`.claude/skills/pipeline-maestro/reference/validacao-ux.md`, seção "Leitura única"), e a linha de recusa diz que nem
+   `pipeline/screen` nem `pipeline/ux` daquele SHA valem.
 
 Recusa, quando a captura não sustenta o `PRONTO`:
 

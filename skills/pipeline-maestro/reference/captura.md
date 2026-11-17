@@ -28,8 +28,8 @@ Só com `team.capture`. Sem a chave, a varredura é a de "Captura pelo script": 
 | Variante | Entra quando |
 | --- | --- |
 | desktop claro e celular claro do estado inicial | sempre, em toda tela tocada |
-| tema escuro do estado inicial | o diff mexe em cor, token de tema ou classe de tema |
-| cenário no celular | o diff mexe em layout responsivo (breakpoint, `@media`, classe responsiva) ou o critério pede celular |
+| tema escuro do estado inicial | o diff mexe em cor, token de tema ou classe de tema, ou cria tela nova |
+| cenário no celular ou no escuro | o diff mexe em layout responsivo (breakpoint, `@media`, classe responsiva), ou o critério pede essa variante (o ticket vale sobre o diff) |
 | cenário na variante base | sempre (desktop claro; celular claro no front que `<team.roles.ux.audience>` declara mobile-first) |
 
 - O maestro decide pelo diff do PR contra a base dele (`git diff <base do PR>...HEAD`) e escreve no pedido cada variante com o porquê: `escuro: sim — <arquivo> muda token de cor` ou `escuro: não — o diff não toca cor, token nem tema`.

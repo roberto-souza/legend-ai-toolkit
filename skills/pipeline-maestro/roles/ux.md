@@ -24,4 +24,4 @@ Quando a mensagem do maestro pede a leitura única, você lê cada captura uma v
 
 ## Confirmação de medida
 
-Quando a mensagem pede só a confirmação de medidas em `FALHA`: para cada passo, abra a captura e diga se ela sustenta a medida (o texto passa da borda, o alvo é pequeno, o contraste é baixo, os elementos se cruzam). Responda em uma linha: `REPROVADO — passo <k>: <o que a captura mostra>` quando ao menos uma medida se sustenta, senão `MEDIDA SEM SUPORTE — passo <k>: <o que a captura mostra>`. Sem nota, sem laudo de UX e sem selo.
+Quando a mensagem pede só a confirmação de medidas em `FALHA`: para cada passo, abra a captura e diga se ela sustenta a medida (o texto passa da borda, o alvo é pequeno, o contraste é baixo, os elementos se cruzam). Responda uma linha por passo: `passo <k> — REPROVADO|SEM SUPORTE — <o que a captura mostra>`. Sem nota, sem laudo de UX e sem selo.

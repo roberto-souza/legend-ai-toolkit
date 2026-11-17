@@ -209,7 +209,7 @@ team:
   portals:
     - { name: <nome do portal>, app: <unidade>, url: "<URL com {slug} quando o host leva o tenant>" }
   capture:
-    command: "<comando da ferramenta de captura do projeto, com {scenarios}, {sha} e {out}>"
+    command: "<comando da ferramenta de captura do projeto, com {scenarios}, {sha}, {out} e {root}>"
   devices:
     - { name: <nome do portal de aparelho>, app: <unidade>, platform: ios | android, formFactor: phone | tablet, appId: <bundle id ou package>, build: "<comando com {udid}>", offline: "<comando com {udid}>", online: "<comando com {udid}>" }
   credentials:
@@ -248,7 +248,7 @@ team:
 | `portals` | sim, não vazio | — | portais que o validador de tela abre |
 | `devices` | não | ausente = o maestro não valida PR de app | portais de aparelho do PR de app, criados pelo validador de tela |
 | `capture` | não | ausente = o executor escreve o script de captura no scratchpad a cada pedido, a varredura tem as quatro variantes e o validador de tela e a UX leem as capturas | ferramenta de captura do projeto, versionada no repositório dele. Com ela, o executor escreve só o arquivo de cenários, medida em `FALHA` reprova sem leitura visual, a varredura segue o diff, a UX faz a leitura única e grava `screen` e `ux`, e a validação anda PR a PR. Exige `roles.ux`. Contrato: `.claude/pipeline/core/capture.md` |
-| `capture.command` | sim, com `capture` | — | comando rodado pelo executor no clone, com `{scenarios}` (arquivo de cenários), `{sha}` e `{out}` (pasta da rodada) |
+| `capture.command` | sim, com `capture` | — | comando rodado pelo executor no clone, com `{scenarios}` (arquivo de cenários), `{sha}`, `{out}` (pasta da rodada) e `{root}` (raiz do checkout principal, onde está `credentials.file`) |
 | `credentials.file` | sim | — | arquivo local de onde a credencial de teste é lida; ignorado pelo git; um `<credentials.file>.example` versionado declara os nomes de variável |
 | `credentials.keys` | sim | — | nomes de variável dentro de `file` (`^[A-Z][A-Z0-9_]*$`) |
 | `credentials.createdBy` | não | — | comando que cria a credencial no ambiente local |

@@ -38,7 +38,7 @@ Os motivos dos passos de `.claude/skills/pipeline-maestro/SKILL.md`, seção "De
 - Cada despertar relê o contexto inteiro do maestro; despertar por PR e `maestri check` em laço multiplicam o custo.
 - O script grava o andamento na nota, que é o estado; o maestro lê a nota quando precisa, não o chat.
 - A validação começa no `PILHA PRONTA`, não por PR: o solicitante aceitou essa consequência.
-- Com `team.capture`, a validação anda PR a PR depois do `PILHA PRONTA`: a captura do PR k+1 corre enquanto a UX lê o PR k, porque a leitura não usa o ambiente de dev. O sentinela recebe as pastas dos pedidos ainda abertos e reporta o `CAPTURAS PRONTAS` delas mesmo quando a linha já estava na tela ao ser armado (o maestro estava esperando a resposta da UX).
+- Com `team.capture`, a validação anda PR a PR depois do `PILHA PRONTA`: a captura do PR k+1 corre enquanto a UX lê o PR k, porque a leitura não usa o ambiente de dev. O sentinela recebe os ids dos pedidos ainda abertos e reporta o `CAPTURAS PRONTAS` deles mesmo quando a linha já estava na tela ao ser armado (o maestro estava esperando a resposta da UX). O id muda a cada pedido, então a linha de um pedido anterior na mesma pasta nunca passa pela do novo.
 - O sentinela do maestro para no `PILHA PRONTA`, no `CAPTURAS PRONTAS` e no `TRAVADO`, porque um executor parado durante a validação levantaria `STALLED` a cada 20 minutos.
 
 ## Uma sessão por demanda
@@ -91,7 +91,7 @@ Passos do passo 8 de `.claude/skills/pipeline-maestro/SKILL.md`, seção "Fila e
 8. **Eventos.** O maestro só age nas linhas do sentinela:
    - `PILHA PRONTA: …` de ticket que não é o último → pare o `Monitor`, anote o PR em `## Em execução` e siga o passo 6.
    - `PILHA PRONTA: …` do último ticket, ou de correção → pare o `Monitor`; para cada PR da pilha, na ordem de merge (`.claude/skills/pipeline-github-tickets/SKILL.md`, seção "PR empilhado"), siga "PR aberto pelo executor" e troque a linha do sentinela em `## Em execução` pelo item de "Nota de estado".
-   - `CAPTURAS PRONTAS: …` → pare o `Monitor` e siga "Validação de tela", passo 3; resposta a pedido de reproduzir passo pontual → passo 6. Com `team.capture`: `.claude/skills/pipeline-maestro/reference/validacao-tela.md`, seção "Passos com a ferramenta", passo 4, e re-arme com as pastas ainda abertas.
+   - `CAPTURAS PRONTAS: …` → pare o `Monitor` e siga "Validação de tela", passo 3; resposta a pedido de reproduzir passo pontual → passo 6. Com `team.capture`: `.claude/skills/pipeline-maestro/reference/validacao-tela.md`, seção "Passos com a ferramenta", passo 4 (reprodução: passo 10), e re-arme com os ids ainda abertos.
    - `TRAVADO: <motivo>` → pare o `Monitor`, `maestri notify` e leve a pergunta ao usuário; com a resposta mandada ao executor, re-arme.
    - `STALLED` → um `maestri check`; parado de fato → **uma** cutucada por `maestri ask`; segundo `STALLED` depois dela → trate como `TRAVADO` (`.claude/skills/pipeline-execute-ticket/SKILL.md`, seção "O sentinela").
    - `check failed` ou `note edit failed` → confira o terminal e a nota (`maestri check`/`maestri note read`), re-arme e ponha à mão a linha de PR que falhou.
