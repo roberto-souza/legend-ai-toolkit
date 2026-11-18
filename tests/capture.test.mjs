@@ -32,6 +32,7 @@ const GATED = [
   ['skills/pipeline-maestro/reference/validacao-ux.md', 'Leitura única'],
   ['skills/pipeline-maestro/reference/validacao-tela.md', 'Validação PR a PR'],
   ['core/ux-reference.md', 'Uma leitura, dois laudos'],
+  ['core/ux-reference.md', 'Âncoras da nota'],
   ['skills/pipeline-write-ticket/reference/corpo-do-ticket.md', 'Critério de tela como cenário'],
 ];
 
@@ -44,10 +45,11 @@ test('every section of the tool flow opens gated on team.capture', () => {
 
 test('the tool-flow sentences in the main files are gated on team.capture', () => {
   const skill = read('skills/pipeline-maestro/SKILL.md');
-  for (const phrase of ['**Com `team.capture`.**', 'Com `team.capture`, a tela web segue', 'Com `team.capture`, abra só as citadas', 'com `team.capture` seguido do id']) {
+  for (const phrase of ['**Com `team.capture`.**', 'Com `team.capture`, a tela web segue', 'Com `team.capture`, abra só as citadas', 'com `team.capture` seguido de `<id>@<epoch>=<pasta>`']) {
     assert.ok(skill.includes(phrase), phrase);
   }
   assert.match(read('skills/pipeline-maestro/roles/executor.md'), /Com `team\.capture` no profile, siga a seção "Pedido de capturas pela ferramenta"/);
+  assert.match(read('skills/pipeline-maestro/roles/ux.md'), /Com `team\.capture`, dê a nota pelas âncoras/);
 });
 
 test('the flow without team.capture is still the one written down', () => {
@@ -77,4 +79,22 @@ test('the scenario and output examples in the contract are valid JSON', () => {
   const blocks = [...read('core/capture.md').matchAll(/```json\n([\s\S]*?)```/g)].map(match => match[1]);
   assert.equal(blocks.length, 2);
   for (const block of blocks) assert.doesNotThrow(() => JSON.parse(block));
+});
+
+test('the contract documents waitFor on navigation, fullPage and the wait for animations', () => {
+  const contract = read('core/capture.md');
+  assert.match(contract, /\| `waitFor` \(de `click` e `press`\) \|/);
+  assert.match(contract, /\| `fullPage` \|/);
+  assert.match(section('core/capture.md', 'Espera antes da foto'), /document\.getAnimations\(\)/);
+  assert.match(contract, /o `medidas\.json` é o último arquivo que a ferramenta grava/);
+});
+
+test('the executor and the reader carry the evidence and the report-file rules', () => {
+  const executor = section('skills/pipeline-maestro/roles/executor.md', 'Pedido de capturas pela ferramenta');
+  for (const rule of [/nunca o critério/, /Dado que prova o critério/, /medida `url`/, /`waitFor` com um seletor da tela de destino/, /`CAPTURAS PRONTAS: PR #<pr> rodada <k> <sha>/, /começa a linha/]) {
+    assert.match(executor, rule);
+  }
+  const reader = section('skills/pipeline-maestro/roles/ux.md', 'Leitura única');
+  assert.match(reader, /Laudo em arquivo/);
+  assert.match(reader, /Leitura em partes/);
 });
