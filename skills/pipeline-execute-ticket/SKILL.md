@@ -140,10 +140,7 @@ description: |
 
 1. Vale para toda correção pedida depois que o PR existe (`REPROVADO`, `AJUSTAR`, review humano, CI vermelho com `gate.ci: checks`), antes do push; a correção em si segue a Fase 4.
 2. Antes de mandar a correção, conte as voltas da tela que ela toca (por tela e por PR; revisão anterior ao PR não conta). Sob o maestro a conta é dele: use o `k` de `volta <k> da tela <rota>`; fora do Maestri, conte na sessão. 3ª volta da mesma tela → pare de remendar: mockup HTML como Artifact, aprovação do humano (sob o maestro, `TRAVADO: <motivo>` com o link) e só então a correção, com o mockup no brief e no `## Decisions`; depois, as voltas se corrigem contra ele. Leia `.claude/skills/pipeline-execute-ticket/reference/review-gate.md`, seção "Contagem das voltas de tela", e siga os passos.
-3. Cabeça selada: a cabeça do PR antes do push (`gh pr view <pr> --json headRefOid --jq .headRefOid`), com `pipeline/review` em `success` (`gh api repos/<repo>/commits/<sha>/status`); range `<cabeça selada>..HEAD`, ou `<parent>...HEAD` se ela não tem selo de revisão.
-4. Lance um `pipeline-reviewer` novo na primeira rodada da correção, com spec, motivo e range, como nos passos 2 a 7 da Fase 5 (`model: sonnet` se o delta tem menos de 80 linhas e o gatilho não dispara sobre ele; senão o modelo do passo 2, consultado sobre o `<parent>...HEAD` do ticket, nunca o delta); da rodada 2 em diante, `SendMessage` ao mesmo, com o range `<Reviewed head da rodada anterior da correção>..HEAD` e os achados triados (`.claude/skills/pipeline-review-diff/SKILL.md`, seção "O que você recebe"). Avalie o gatilho de segurança sobre o delta.
-5. Mesma triagem; **teto de 3 rodadas por correção** → BLOCKER válido em pé na terceira: pare, escale e não dê push.
-6. Aprovado → Fase 6 (gate, push, selo `review` na cabeça nova). Rebase de pilha derruba os selos das branches acima.
+3. Cabeça selada, revisor da correção, teto e aprovação: leia `.claude/skills/pipeline-execute-ticket/reference/review-gate.md`, seção "Revisão delta: passos" (3 a 6), e siga os passos.
 
 ## Fase 6 — Validação e PR
 

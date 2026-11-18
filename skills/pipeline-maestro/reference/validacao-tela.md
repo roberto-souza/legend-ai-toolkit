@@ -39,3 +39,12 @@ Só com `team.capture` no profile, no lugar dos passos 3 a 16 de "Passos"; sem a
 8. **Ambiente livre.** Com os passos 5 a 7 resolvidos (e, no PR com `app`, o roteiro de app aprovado), o checkout principal não serve mais a este PR: siga `.claude/skills/pipeline-maestro/SKILL.md`, seção "Validação PR a PR", e só então mande a leitura.
 9. **Leitura única.** `.claude/skills/pipeline-maestro/reference/validacao-ux.md`, seção "Leitura única". O selo `screen` do PR só de navegador sai dela, não de um roteiro do validador de tela.
 10. **Artefato do portal.** Como o passo 14 de "Passos"; o pedido de reprodução cita `.claude/skills/pipeline-maestro/roles/executor.md`, seção "Pedido de capturas pela ferramenta", passo 7, com id de pedido novo.
+
+## Validação PR a PR
+
+Só com `team.capture`; sem a chave, cada PR da pilha passa por todas as etapas antes do próximo. Os passos de "Passos com a ferramenta" citados são os desta página.
+
+1. Depois do passo 8 de "Passos com a ferramenta" do PR k, o checkout principal fica livre: rode "PR aberto pelo executor" do PR k+1 (de baixo para cima), a etapa E2E dele quando cabe (a ordem do PR misto não muda) e mande o pedido de capturas dele, com o sentinela armado pelo id do pedido.
+2. Só então mande a leitura única do PR k. O executor captura o k+1 enquanto a UX lê o k.
+3. A UX lê um PR por vez; nunca duas leituras em paralelo.
+4. Correção ou reprodução de passo pontual do PR k com o k+1 em curso: enfileire até o `CAPTURAS PRONTAS` do k+1 e até o fim dos passos pontuais do k+1 (os que usam o checkout); só então reinicie o executor ou mande o pedido, e volte o checkout ao PR k no `PILHA PRONTA` da correção.

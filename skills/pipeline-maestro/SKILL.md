@@ -84,11 +84,7 @@ Demanda nova, sem ticket: o maestro não escreve ticket, recruta o escritor e sa
 
 1. `REPROVADO` volta ao executor **pelo maestro**, na mesma branch, com o passo que falhou, a evidência e, em achado de tela, `volta <k> da tela <rota>`; vale para o PR de qualquer posição da pilha; logo depois, arme o sentinela (passo **Monitor.**).
 2. O executor corrige no mesmo PR, com revisão delta e selo `review` novo (`.claude/skills/pipeline-execute-ticket/SKILL.md`, seção "Fase 5 — Gate de revisão, antes de existir PR").
-3. Só a partir do `PILHA PRONTA` que lista o PR corrigido, refaça os passos 1 e 2 de "PR aberto pelo executor" (SHA novo, depois do `git pull --ff-only`) e rode `<team.dev.migrate>` de novo (passo 3 de "PR aberto pelo executor"), mesmo com o ambiente já de pé: a correção pode trazer migration. Depois, revalidação parcial:
-   - para cada selo de validação que o PR exige, rode `<gate> carry <selo> --pr <pr> --from <cabeça selada>` (a cabeça do PR antes da correção); `carried …` → esse roteiro não roda de novo;
-   - o roteiro **reprovado**, com a cabeça selada ancestral da nova (`git merge-base --is-ancestor <cabeça selada> HEAD` sai 0) → redespache-o do passo reprovado até o fim, mais um smoke de 2–3 passos anteriores; a UX com `AJUSTAR`, só as telas com `AJUSTAR`. Pelo passo 1 de "Roteamento por tipo de PR";
-   - todo outro roteiro recusado (aprovado antes mas tocado pelo delta, nunca rodado, não ancestral, delta grande) e o reprovado sem ancestralidade ou quando o delta muda o fluxo do PR (rota, contrato, tela nova) → roteiro inteiro;
-   - contrato: `.claude/pipeline/core/seals.md`.
+3. Só a partir do `PILHA PRONTA` que lista o PR corrigido, refaça os passos 1 e 2 de "PR aberto pelo executor" (SHA novo, depois do `git pull --ff-only`) e rode `<team.dev.migrate>` de novo (passo 3 de "PR aberto pelo executor"), mesmo com o ambiente já de pé: a correção pode trazer migration. Depois, faça a revalidação parcial: leia `.claude/skills/pipeline-maestro/reference/despacho.md`, seção "Revalidação parcial", e siga os passos.
 4. Achado de passo pontual de tela cuja captura contradiz o comportamento → parágrafo **Artefato do portal.** de "Validação de tela" antes de voltar ao executor.
 5. `AMBIENTE FORA` não é achado: suba o ambiente (passo 3 de "PR aberto pelo executor") e redespache o roteiro.
 
@@ -139,12 +135,7 @@ O critério está em `<crit>`, seção "PR de tela"; antes de escrever o roteiro
 
 ### Validação PR a PR
 
-Só com `team.capture`; sem a chave, cada PR da pilha passa por todas as etapas antes do próximo.
-
-1. Depois do passo 8 de "Passos com a ferramenta" do PR k, o checkout principal fica livre: rode "PR aberto pelo executor" do PR k+1 (de baixo para cima), a etapa E2E dele quando cabe (a ordem do PR misto não muda) e mande o pedido de capturas dele, com o sentinela armado pelo id do pedido.
-2. Só então mande a leitura única do PR k. O executor captura o k+1 enquanto a UX lê o k.
-3. A UX lê um PR por vez; nunca duas leituras em paralelo.
-4. Correção ou reprodução de passo pontual do PR k com o k+1 em curso: enfileire até o `CAPTURAS PRONTAS` do k+1 e até o fim dos passos pontuais do k+1 (os que usam o checkout); só então reinicie o executor ou mande o pedido, e volte o checkout ao PR k no `PILHA PRONTA` da correção.
+Só com `team.capture`; sem a chave, cada PR da pilha passa por todas as etapas antes do próximo. Com a chave, o executor captura o PR k+1 enquanto a UX lê o k: leia `.claude/skills/pipeline-maestro/reference/validacao-tela.md`, seção "Validação PR a PR", e siga os passos.
 
 ## Validação de app
 
@@ -178,9 +169,7 @@ Régua: `.claude/skills/pipeline-maestro/roles/ux.md`; critério: `<crit>`, seç
 3. Cada item em uma linha: `#<n> <título> — PR #<pr> — <estado> — <última evidência> — <AAAA-MM-DD>` (sem PR, `PR —`).
 4. Item com tela leva `UX: …` e `capturas conferidas pelo maestro: …`; com reserva, quem validou.
 5. Registre em `## Decisões` o slug do tenant de teste e toda decisão do usuário, com data.
-6. A linha `PR #<pr> aberto para #<n>: <url> — <AAAA-MM-DD>` em `## Em execução` é o registro provisório do sentinela, trocada no `PILHA PRONTA` pelo item do passo 3.
-7. Conte nos itens do PR as voltas pós-PR de cada tela (`REPROVADO`, `AJUSTAR`, review humano); só achado de tela tem volta (PR só de API não tem). Toda correção mandada ao executor diz `volta <k> da tela <rota>`.
-8. A sessão compacta no `CLAUDE_CODE_AUTO_COMPACT_WINDOW` que o install põe em `.claude/settings.json` (`.claude/pipeline/core/profile-schema.md`, seção "O que o install põe no `settings.json`"), e o gancho `resume` aponta a nota depois da compactação; ao fim de cada pilha, deixe a nota em dia para retomar numa sessão nova se a compactação perder o fio.
+6. Registro provisório do sentinela, voltas de tela e compactação: leia `.claude/skills/pipeline-maestro/reference/nota-de-estado.md`, seção "Passos" (6 a 8), e siga os passos.
 
 ## Recursos do Maestri
 

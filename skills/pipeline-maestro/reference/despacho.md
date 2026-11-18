@@ -1,6 +1,6 @@
 # Despacho e acompanhamento: motivos
 
-Os motivos dos passos de `.claude/skills/pipeline-maestro/SKILL.md`, seção "Despacho e acompanhamento". Os passos e os comandos moram lá.
+Os motivos dos passos de `.claude/skills/pipeline-maestro/SKILL.md`, seção "Despacho e acompanhamento". As seções de passos continuam os passos que a skill manda ler; fora delas, os passos e os comandos moram lá.
 
 ## O maestro faz fetch e switch
 
@@ -95,3 +95,12 @@ Passos do passo 8 de `.claude/skills/pipeline-maestro/SKILL.md`, seção "Fila e
    - `TRAVADO: <motivo>` → pare o `Monitor`, `maestri notify` e leve a pergunta ao usuário; com a resposta mandada ao executor, re-arme.
    - `STALLED` → um `maestri check`; parado de fato → **uma** cutucada por `maestri ask`; segundo `STALLED` depois dela → trate como `TRAVADO` (`.claude/skills/pipeline-execute-ticket/SKILL.md`, seção "O sentinela").
    - `check failed` ou `note edit failed` → confira o terminal e a nota (`maestri check`/`maestri note read`), re-arme e ponha à mão a linha de PR que falhou.
+
+## Revalidação parcial
+
+Passos do passo 3 de `.claude/skills/pipeline-maestro/SKILL.md`, seção "Achado do validador", depois do `PILHA PRONTA` que lista o PR corrigido, do SHA novo e do `<team.dev.migrate>`.
+
+1. Para cada selo de validação que o PR exige, rode `<gate> carry <selo> --pr <pr> --from <cabeça selada>` (a cabeça do PR antes da correção); `carried …` → esse roteiro não roda de novo.
+2. O roteiro **reprovado**, com a cabeça selada ancestral da nova (`git merge-base --is-ancestor <cabeça selada> HEAD` sai 0) → redespache-o do passo reprovado até o fim, mais um smoke de 2–3 passos anteriores; a UX com `AJUSTAR`, só as telas com `AJUSTAR`. Pelo passo 1 de `.claude/skills/pipeline-maestro/SKILL.md`, seção "Roteamento por tipo de PR".
+3. Todo outro roteiro recusado (aprovado antes mas tocado pelo delta, nunca rodado, não ancestral, delta grande) e o reprovado sem ancestralidade ou quando o delta muda o fluxo do PR (rota, contrato, tela nova) → roteiro inteiro.
+4. Contrato: `.claude/pipeline/core/seals.md`.

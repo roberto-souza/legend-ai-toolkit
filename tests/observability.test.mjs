@@ -51,16 +51,18 @@ test('the template carries the four sections and the ten labels, in order', () =
 });
 
 test('the doctor item 30 and the schema name the same sections and labels as the template', () => {
-  const doctor = read('skills/pipeline-doctor/SKILL.md').split('\n30. **')[1];
+  const doctor = read('skills/pipeline-doctor/SKILL.md').split('\n30. **')[1] + doctorCommand();
   for (const name of [...SECTIONS, ...LABELS]) assert.ok(doctor.includes(`"${name}"`), `doctor checks ${name}`);
   const schema = read('core/profile-schema.md');
   for (const name of LABELS.filter(l => l !== 'Regra')) assert.ok(schema.includes(`**${name}**`), `schema names ${name}`);
 });
 
-/** The bash block of doctor item 30, without the list indentation. */
+/** The bash block of doctor item 30, which lives in the doctor reference the item points to. */
 function doctorCommand() {
   const item = read('skills/pipeline-doctor/SKILL.md').split('\n30. **')[1];
-  return item.match(/```bash\n([\s\S]*?)\n[ \t]*```/)[1].replace(/^ {4}/gm, '');
+  assert.ok(item.includes('`.claude/skills/pipeline-doctor/reference/comandos.md`, seção "Triagem (item 30)"'), 'doctor item 30 points to its commands');
+  const section = read('skills/pipeline-doctor/reference/comandos.md').split('\n## Triagem (item 30)\n')[1];
+  return section.match(/```bash\n([\s\S]*?)\n```/)[1];
 }
 
 /** Install the toolkit into a fresh git project with the given files tracked, and run the item 30 command there. */

@@ -2,6 +2,17 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
+## 0.7.1 — 2026-11-17
+
+**Correção: SKILL.md grandes demais para a guarda de tamanho de documentação do projeto.** Na 0.7.0 o `skills/pipeline-doctor/SKILL.md` passou de 28000 bytes, e o `pipeline-maestro` e o `pipeline-execute-ticket` estavam perto. O detalhe foi para o `reference/` de cada skill, lido sob demanda, sem mudança de comportamento:
+
+- **`/pipeline-doctor`** (28266 → 22998 bytes): os blocos de comando dos itens 27 (landing) e 30 (triagem) vão para `reference/comandos.md`, seções "Landing (item 27)" e "Triagem (item 30)", iguais aos de antes. Os itens apontam para elas; as regras, os estados e o item 23 (`team.capture`) não mudam.
+- **`pipeline-maestro`** (27848 → 26033 bytes): os passos de "Validação PR a PR" vão para `reference/validacao-tela.md`, a revalidação parcial do "Achado do validador" para `reference/despacho.md`, seção "Revalidação parcial", e os passos 6 a 8 da "Nota de estado" para `reference/nota-de-estado.md`.
+- **`pipeline-execute-ticket`** (26772 → 25876 bytes): os passos 3 a 6 da "Revisão delta (correção depois do PR)" vão para `reference/review-gate.md`, seção "Revisão delta: passos".
+- Spec nova: `tests/skill-size.test.mjs` mantém todo `skills/*/SKILL.md` pelo menos 1500 bytes abaixo de 28000. O teto não é chave do profile: a guarda é regra do projeto.
+
+**Ao atualizar:** só mudam arquivos de `skills/` (e o lock). O profile e as extensões não mudam. Rode o `/pipeline-doctor`: ele confere o mesmo que na 0.7.0.
+
 ## 0.7.0 — 2026-11-17
 
 **Validação de tela mais rápida e mais certeira, com a ferramenta de captura do projeto (opt-in).** A tela passa a ter o que a API já tem: medidas que reprovam sozinhas, uma ferramenta de captura reaproveitável, uma leitura visual só e validação PR a PR. Os dois selos continuam, e quem os grava continua sendo um agente de contexto limpo, nunca o executor.
