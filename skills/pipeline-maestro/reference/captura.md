@@ -20,6 +20,10 @@ Os motivos de `.claude/skills/pipeline-maestro/roles/executor.md`, seção "Pedi
 - O executor escreve só os cenários, a partir das linhas `— verify:` e dos cenários "(verificação)" do ticket: menos interpretação, e a mesma captura sai de novo no mesmo SHA.
 - A medida (alvo de toque, contraste, estouro, `aria-*`, URL, console, sobreposição) é número. Lida em imagem, ela erra; calculada no navegador, ela reprova sozinha, como o `FALHA` de um E2E.
 - O `cenarios.json` fica na pasta da rodada, ao lado das capturas: o maestro e a UX leem o que foi pedido, e a reprodução usa o mesmo arquivo.
+- A descrição do cenário diz o que a captura mostra, nunca o critério: o leitor confere a imagem contra ela, e uma descrição que afirma o que a captura não mostra reprova a captura sem defeito no app.
+- O critério precisa do dado que o prova na mesma captura (um caso de cada estado que ele cita). Estado sem nenhuma linha no tenant de teste não se prova, e a rodada volta sem defeito no app. O executor cria o dado pelo próprio app, só no tenant de teste, e o registra em `## Dados criados`.
+- A foto que sai antes da tela de destino carregar mostra a tela anterior com a URL nova. O `waitFor` da navegação e a espera do fim das animações (`.claude/pipeline/core/capture.md`, seção "Espera antes da foto") tiram essa volta.
+- Critério de URL ou parâmetro sem a medida `url` não se prova pela imagem.
 
 ## Varredura pelo diff
 

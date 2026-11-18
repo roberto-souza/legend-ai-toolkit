@@ -12,10 +12,29 @@
 # Each <request id> names an open capture request: a `CAPTURAS PRONTAS: ` line whose last ` — ` field, trailing spaces
 # trimmed, is `pedido <request id>` is reported even when it is already on screen at the first poll (the maestro was busy
 # while the executor finished). The id is new for every request, so an older line for the same folder never matches.
-# Usage: maestro-sentinel.sh <executor terminal> <note name> [idle-minutes=20] [poll-seconds=60] [<request id>...]
+# A <request id>=<folder> argument also watches <folder>/medidas.json (the tool writes it last, in one go): once its
+# modification time differs from the one seen at the first poll (absent counts as a time), the sentinel prints
+# `MEDIDAS PRONTAS: pedido <id> — <folder>/medidas.json`, because the executor does not always print its line. Each
+# request id is reported once, by whichever comes first: its `CAPTURAS PRONTAS` line or its new `medidas.json`.
+# Usage: maestro-sentinel.sh <executor terminal> <note name> [idle-minutes=20] [poll-seconds=60] [<request id>[=<folder>]...]
 terminal=$1; note=$2; idle_min=${3:-20}; poll=${4:-60}
-expected=("${@:5}")
+expected=(); folders=(); baseline=(); reported=" "
+for arg in "${@:5}"; do
+  if [[ $arg == *=* ]]; then expected+=("${arg%%=*}"); folders+=("${arg#*=}"); else expected+=("$arg"); folders+=(""); fi
+done
 limit=$((idle_min * 60)); stalled=0; last_alert=0; first=1; prev=""; changed_at=$(date +%s); prev_keys=""
+
+# Modification time of <folder>/medidas.json in seconds, or "absent". `date -r <file>` works on BSD and GNU date.
+stamp_of() {
+  local file="${1%/}/medidas.json"
+  if [[ -f $file ]]; then date -r "$file" +%s 2>/dev/null || echo absent; else echo absent; fi
+}
+
+# The request id of a `CAPTURAS PRONTAS: ` line: its last ` — ` field, trailing spaces trimmed, without `pedido `.
+request_of() {
+  local last=${1##* — }; last=${last%"${last##*[![:space:]]}"}
+  [[ $last == "pedido "* ]] && printf '%s' "${last#pedido }"
+}
 
 extract() {
   printf '%s\n' "$1" | sed -nE \
@@ -35,15 +54,20 @@ while true; do
     nth=$(printf '%s' "$cur_keys" | grep -cxF -- "$found")
     cur_keys+="$found"$'\n'
     before=$(printf '%s' "$prev_keys" | grep -cxF -- "$found")
+    request=""
+    [[ $found == "CAPTURAS PRONTAS: "* ]] && request=$(request_of "$found")
     if (( first )); then
       awaited=0
-      if [[ $found == "CAPTURAS PRONTAS: "* ]]; then
-        last=${found##* — }; last=${last%"${last##*[![:space:]]}"}
-        for id in "${expected[@]}"; do [[ $last == "pedido $id" ]] && awaited=1; done
+      if [[ -n $request ]]; then
+        for id in "${expected[@]}"; do [[ $request == "$id" ]] && awaited=1; done
       fi
       (( awaited && nth == 0 )) || continue
     elif (( nth + 1 <= before )); then
       continue
+    fi
+    if [[ -n $request ]]; then
+      [[ $reported == *" $request "* ]] && continue
+      reported+="$request "
     fi
     case $found in
       "PR #"*)
@@ -54,6 +78,15 @@ while true; do
     esac
   done <<< "$screen"
   prev_keys=$cur_keys
+  for i in "${!expected[@]}"; do
+    [[ -z ${folders[i]} ]] && continue
+    current=$(stamp_of "${folders[i]}")
+    if (( first )); then baseline[i]=$current; continue; fi
+    [[ $current == absent || $current == "${baseline[i]}" ]] && continue
+    [[ $reported == *" ${expected[i]} "* ]] && continue
+    reported+="${expected[i]} "
+    echo "SENTINEL $terminal: MEDIDAS PRONTAS: pedido ${expected[i]} — ${folders[i]%/}/medidas.json"
+  done
   first=0
   if [[ $screen != "$prev" ]]; then
     prev=$screen; changed_at=$now

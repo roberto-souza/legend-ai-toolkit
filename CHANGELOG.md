@@ -2,6 +2,28 @@
 
 Semver: quebra do contrato do profile sobe o major; skill, regra ou chave opcional nova sobe o minor; correção sobe o patch. Cada versão diz o que o projeto precisa fazer ao atualizar.
 
+## 0.8.0 — 2026-11-18
+
+**Validação de tela sem retrabalho de evidência (com `team.capture`).** O que ainda custava voltas na 0.7.1 não era defeito do app: cenário sem o dado que o prova, descrição que afirmava o que a captura não mostrava, foto antes de a tela carregar, laudo perdido com a sessão limpa, entrega que o sentinela não via, leitura grande demais para uma sessão e mensagem ao leitor escrita à mão, com juízo.
+
+- **Executor** (`roles/executor.md`, seção "Pedido de capturas pela ferramenta"):
+  - a descrição do cenário (`expected`) diz só o que a captura mostra, nunca o critério nem um juízo;
+  - todo critério de tela tem, na mesma captura, o dado que o prova, um caso de cada estado. Falta → o executor cria pelo próprio app, só no tenant de teste do pedido, e registra em `## Dados criados` do `capturas.md`;
+  - critério de URL ou parâmetro leva a medida `url`; toda navegação leva `waitFor` da tela de destino;
+  - a linha `CAPTURAS PRONTAS: PR #<pr> rodada <k> <sha> — <q> capturas — <pasta> — pedido <id>` é obrigatória e começa a linha.
+- **Contrato** (`core/capture.md`): `waitFor` no cenário (tela da rota) e em `click`/`press` que navegam, `fullPage: false` (só a janela, para cabeçalho preso) e a seção "Espera antes da foto": a ferramenta espera o fim das animações (`document.getAnimations()`, sem as infinitas) antes de cada foto, sem `finish()`. O `medidas.json` passa a ser o último arquivo gravado. Sem `waitFor`, a ferramenta segue como hoje.
+- **Leitor** (`roles/ux.md`, seção "Leitura única"): grava o laudo de tela e o de UX completos no arquivo que a mensagem dá antes de responder, e a resposta repete só as linhas fixas. Acima de 80 imagens, a leitura vai em partes, cada uma numa sessão limpa, e a última junta os laudos, a média e o `APROVADO`.
+- **Mensagem gerada** (`skills/pipeline-maestro/maestro-ux-message.mjs`): sai de `medidas.json`, `cenarios.json`, `capturas.md`, das telas tocadas pelo diff e das seções `## Decisions` e `## Sugestões futuras…` do corpo do PR, copiadas sem mudar. Nunca diz o que entrou, o que é ou não bloqueio, nem a severidade.
+- **Fila do leitor** (`skills/pipeline-maestro/maestro-ux-queue.sh`): recebe `<pr>:<rodada>`, faz uma leitura por vez (trava por pasta, com espera por pid), manda `/clear`, o papel e cada parte, grava um log por parte e imprime `enviado` e `fim — laudo <arquivo>` por PR. Laudo ausente para a fila ali, para o maestro responder a pergunta do leitor na mesma sessão.
+- **Sentinela** (`maestro-sentinel.sh`): o argumento `<id>=<pasta>` também vigia o `medidas.json` da pasta e imprime `MEDIDAS PRONTAS: pedido <id> — <arquivo>` quando ele muda. Cada id sai uma vez, pelo evento que chegar primeiro. O argumento só `<id>` segue como antes.
+- **Régua de UX** (`core/ux-reference.md`, seção "Âncoras da nota", só com `team.capture`): o que é 6, 7, 8 e 9 em Funcionalidade, Utilidade e Beleza, com exemplo genérico. Melhoria já registrada nas sugestões futuras, ou contrária a decisão registrada, não baixa a nota de novo.
+- Specs novas: `tests/maestro-ux.test.mjs` (mensagem e fila) e os casos de `medidas.json` em `tests/maestro-sentinel.test.mjs`; `tests/capture.test.mjs` confere as regras novas e o gate por `team.capture`.
+
+**Ao atualizar:** sem `team.capture`, nada muda. Com a chave:
+1. libere `.claude/skills/pipeline-maestro/maestro-*` no `.claude/settings.local.json` do maestro (antes só o sentinela);
+2. na ferramenta de captura do projeto, implemente `waitFor` no cenário e na ação que navega, `fullPage: false` e a espera do fim das animações, e grave o `medidas.json` por último (sem `waitFor` nos cenários, ela segue como hoje);
+3. rode o `/pipeline-doctor`.
+
 ## 0.7.1 — 2026-11-17
 
 **Correção: SKILL.md grandes demais para a guarda de tamanho de documentação do projeto.** Na 0.7.0 o `skills/pipeline-doctor/SKILL.md` passou de 28000 bytes, e o `pipeline-maestro` e o `pipeline-execute-ticket` estavam perto. O detalhe foi para o `reference/` de cada skill, lido sob demanda, sem mudança de comportamento:

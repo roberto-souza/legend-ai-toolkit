@@ -89,6 +89,30 @@ Só com `team.capture`. Sem a chave, o validador de tela confere as capturas, a 
 - O maestro não relê tudo: confere o que a leitura bloqueou ou reprovou, o estado transitório (o que mais engana a captura)
   e uma amostra por tela, que pega captura cortada, tela errada ou variante faltando.
 - A medida em `FALHA` reprova sem leitura visual; a UX só confirma que a captura a sustenta.
+- A mensagem da leitura sai de um script (`.claude/skills/pipeline-maestro/maestro-ux-message.mjs`), com só os fatos dos arquivos da rodada. Escrita à mão, ela carregava juízo ("o ajuste entrou", "isto não é bloqueio") que orienta a severidade e tira a independência do leitor.
+- O laudo vai para um arquivo antes da resposta: a sessão do leitor é limpa entre leituras, e o laudo só na conversa se perdia.
+- Acima de 80 imagens, a leitura vai em partes, cada uma numa sessão limpa: uma sessão só não abre todas as imagens de uma rodada grande.
+- A fila (`.claude/skills/pipeline-maestro/maestro-ux-queue.sh`) faz o `/clear`, reenvia o papel e garante uma leitura por vez, esperando por pid: a espera por nome de processo casava com a própria linha de comando.
+
+## Âncoras da nota
+
+Só com `team.capture`, junto da leitura única; sem a chave, a régua é a de `.claude/skills/pipeline-maestro/roles/ux.md`, passo 4, sem âncoras.
+
+A nota de cada eixo (`.claude/skills/pipeline-maestro/roles/ux.md`, passo 4) sai destas âncoras, para que a mesma tela, igual, tenha a mesma nota em leituras diferentes. A nota fica na âncora mais alta cujo texto a tela cumpre inteiro; meio ponto só entre duas âncoras vizinhas.
+
+| Nota | Funcionalidade | Utilidade | Beleza |
+| --- | --- | --- | --- |
+| 6 | a tarefa principal se completa, mas com tropeço: um estado (vazio, carregando, erro) sem mensagem, ou ação destrutiva sem confirmação | resolve o problema, mas o que importa não vem primeiro, ou há rótulo em jargão interno | hierarquia confusa ou espaçamento irregular; diverge das irmãs em lugar de filtro, ação ou estrutura de lista |
+| 7 | a tarefa se completa sem tropeço; os estados existem, um deles genérico (como "Erro" sem dizer o que fazer) | o que importa vem primeiro; um rótulo ou unidade pede esforço de quem usa | hierarquia clara, com um detalhe fora (alinhamento, contraste fraco num texto secundário, um espaçamento) |
+| 8 | todos os estados claros e específicos, confirmação antes de ação destrutiva, retorno visível depois de cada ação | resolve a tarefa real na ordem de quem usa, rótulos na língua de quem usa | hierarquia, espaçamento, alinhamento e contraste corretos; consistente com as irmãs e com o resto do sistema |
+| 9 | como 8, e a tela antecipa o erro (valida antes de enviar, desfaz a ação) | como 8, e encurta a tarefa (atalho, valor padrão certo, filtro já aplicado) | como 8, com cuidado nos detalhes que ninguém pediu (estado de foco, transição, ícone e texto alinhados) |
+
+Exemplo (genérico): lista com filtro, estado vazio "Nenhum registro" sem ação e ícone desalinhado no cabeçalho. Funcionalidade 7 (o vazio existe, genérico), Utilidade 8, Beleza 7 (um detalhe fora).
+
+- Abaixo de 6: a tarefa não se completa, ou a tela está quebrada; é `[BLOQUEIA]`.
+- 10 é raro: nada a melhorar em nenhum detalhe.
+- Melhoria já registrada nas sugestões futuras do PR, ou contrária a uma decisão registrada (`## Decisions` do PR, decisão do solicitante), não baixa a nota de novo: a leitura a cita como registrada. A nota só cai por ela se a tela piorou.
+- Mesma tela, mesmo estado e mesmo SHA de interface em outra rodada: a nota só muda pelo que mudou na captura.
 
 ## O selo `pipeline/ux`
 

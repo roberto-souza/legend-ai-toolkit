@@ -31,7 +31,9 @@ JSON, um por PR e por rodada, escrito pelo executor em `<pasta>/cenarios.json`.
       "route": "/<rota>",
       "viewport": "desktop",
       "theme": "claro",
+      "waitFor": "<seletor da tela da rota: título ou elemento declarado no cenário>",
       "actions": [
+        { "click": "<seletor que navega>", "waitFor": "<seletor da tela de destino>" },
         { "click": "<seletor>" },
         { "fill": "<seletor>", "value": "<texto>" },
         { "waitFor": "<seletor>" },
@@ -40,8 +42,9 @@ JSON, um por PR e por rodada, escrito pelo executor em `<pasta>/cenarios.json`.
         { "route": "<padrão de URL da requisição>", "abort": true }
       ],
       "capture": "page",
+      "fullPage": false,
       "transient": false,
-      "expected": "<evidência esperada, copiada do ticket>",
+      "expected": "<o que a captura mostra: tela, estado e dado visível>",
       "measures": [
         { "type": "touchTarget", "selector": "<seletor>", "min": 44 },
         { "type": "contrast", "selector": "<seletor>", "min": 4.5 },
@@ -66,12 +69,20 @@ JSON, um por PR e por rodada, escrito pelo executor em `<pasta>/cenarios.json`.
 | `ref` | o cenário ou o critério do ticket de onde veio a linha; `varredura` e `irma` repetem o `kind` |
 | `viewport` | `desktop` (o tamanho que o projeto declara em `knowledge.verification`, seção "PR de tela") ou `celular` (390 × 844, agente de usuário móvel e toque) |
 | `theme` | `claro` ou `escuro`, trocado pelo controle de tema da tela, nunca por CSS injetado |
+| `waitFor` (do cenário) | seletor da tela da rota (título ou elemento declarado no cenário); a ferramenta o espera visível depois de abrir a rota, antes da primeira ação; ausente = a ferramenta segue como hoje |
 | `actions` | em ordem, depois de abrir a rota: `click`, `fill`, `waitFor` (espera o elemento visível), `press` (tecla ou atalho no elemento com foco), `route` (atraso ou `abort` da requisição) |
+| `waitFor` (de `click` e `press`) | na ação que navega (muda a URL ou troca a tela), o seletor da tela de destino; a ferramenta o espera visível antes da ação seguinte e da foto; ausente = a ferramenta segue como hoje |
 | `capture` | `page` (a página inteira), `viewport` ou um seletor (só o elemento) |
-| `transient` | `true` quando a evidência é modal, menu, painel ou toast aberto; a captura sai depois do `waitFor`, nunca com `getAnimations()` nem `transform` mexido |
+| `fullPage` | com `capture: "page"`, `false` fotografa só a janela (o mesmo que `viewport`), para tela com cabeçalho ou rodapé preso, que a foto da página inteira repete ou desloca; ausente = `true` |
+| `transient` | `true` quando a evidência é modal, menu, painel ou toast aberto; a captura sai depois do `waitFor` e do fim das animações, nunca com `finish()` nem `transform` mexido |
+| `expected` | a descrição do cenário: só o que a captura mostra (tela, estado, dado visível, como "lista com uma linha em cada estado: pago, pendente e vencido"), nunca o critério nem um juízo ("o filtro funciona", "o ajuste entrou") |
 | `measures` | as medidas do cenário (seção "Medidas"); varredura e irmã podem vir sem |
 | `consoleAllow` | erros de console esperados no cenário; ausente = nenhum |
 | `outOfScript` | o que vira passo pontual de portal (colar, permissão do navegador); a ferramenta copia cada item para `## Fora do script` do manifesto |
+
+## Espera antes da foto
+
+Antes de cada foto, depois das ações e dos `waitFor`, a ferramenta espera o fim das transições e animações da página: `Promise.all(document.getAnimations().map(a => a.finished))`, sem as de duração infinita (`effect.getComputedTiming().endTime === Infinity`, como um indicador de carregando), com um prazo da própria ferramenta. Ela nunca chama `finish()` nem mexe em `transform`: a foto sai com a tela no estado final de fato. Menu, folha e painel que deslizam só aparecem inteiros depois dessa espera.
 
 ## Medidas
 
@@ -94,6 +105,7 @@ Seletor de medida que não acha elemento não reprova o PR: o cenário sai `FALH
 Tudo em `{out}`. A ferramenta apaga antes só o que ela mesma grava (os PNG, `capturas.md`, `medidas.json` e `irmas/`), nunca outra `rodada-<k>/` nem o `cenarios.json`.
 
 - **PNG:** um por cenário, em `{out}/<id>.png`.
+- **Ordem:** o `medidas.json` é o último arquivo que a ferramenta grava, de uma vez, depois dos PNG e do `capturas.md`: o sentinela do maestro trata o `medidas.json` novo como entrega do pedido.
 - **`capturas.md`:** uma linha por cenário, no formato de `.claude/skills/pipeline-maestro/roles/executor.md`, seção "Pedido de capturas", passo 12, mais `## Fora do script` com os itens de `outOfScript`. Cenário cuja ação não se cumpre (o elemento não aparece no prazo) grava o que a tela mostra e marca a linha `FALHA DO SCRIPT: <o que esperava>`.
 - **`medidas.json`:**
 
