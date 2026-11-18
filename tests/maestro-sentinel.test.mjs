@@ -5,7 +5,7 @@
  * `medidas.json` in that folder, once per id, whichever of the two events comes first.
  */
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import * as path from 'node:path';
@@ -110,4 +110,19 @@ test('a medidas.json that appears in an empty folder is reported', async t => {
 test('the executor line after the new medidas.json of the same request is not reported again', async t => {
   const output = await run(t, { baseline: '', later: NEW, setup: writeOldMeasures, onSecond: rewriteMeasures, expected: ['11-1-2={dir}/pr-11'] });
   assert.equal(output.split('\n').filter(Boolean).length, 1, output);
+});
+
+test('with the request time, a medidas.json written before the first poll but after the request is reported', async t => {
+  const setup = directory => {
+    writeOldMeasures(directory);
+    spawnSync('touch', ['-t', '203001010000', path.join(directory, 'pr-11', 'medidas.json')]);
+  };
+  const output = await run(t, { baseline: '', setup, expected: [`11-1-2@${Math.floor(Date.now() / 1000)}={dir}/pr-11`] });
+  assert.match(output, /^SENTINEL \[EXECUTOR\]: MEDIDAS PRONTAS: pedido 11-1-2 — /);
+  assert.equal(output.split('\n').filter(Boolean).length, 1);
+});
+
+test('with the request time, a medidas.json older than the request stays silent', async t => {
+  const output = await run(t, { baseline: '', setup: writeOldMeasures, expected: [`11-1-2@${Math.floor(Date.now() / 1000) + 3600}={dir}/pr-11`] });
+  assert.equal(output, '');
 });

@@ -5,9 +5,12 @@
 # `maestri ask`, which returns when the reader ends its turn. The reader output of each part goes to
 # `leitura-parte-<i>.log` next to it.
 # Prints, for the Monitor, one `UX-QUEUE: PR #<pr> rodada <k> enviado — <n> parte(s)` line before the first part and one
-# `UX-QUEUE: PR #<pr> rodada <k> fim — laudo <file>` after the last one. A reading that ends without `laudo.md` prints
-# `fim — laudo ausente <file>` and exits 3 without sending the next PR: the reader may have asked something, and the
-# maestro answers in that same session before the queue runs again. A missing message prints `sem mensagem` and moves
+# `UX-QUEUE: PR #<pr> rodada <k> fim — laudo <file>` after the last one. Each part must leave its report: `laudo.md`
+# for a single part, `laudo-parte-<i>.md` for part i of n (i < n), and `laudo.md` for the last. A part that ends without
+# it prints `fim — laudo ausente <file>` and exits 3 without sending anything else: the reader may have asked something,
+# and the maestro answers in that same session before the queue runs again. The message script removes old reports, so
+# a report already in the folder answers the current message: a part with its report is skipped, which makes running
+# the queue again (after an answer, or after its Monitor expired) resume where it stopped. A missing message prints `sem mensagem` and moves
 # on; a failed `maestri ask` prints `falha` and exits 1.
 # One queue per UX folder: a lock directory holds the pid of the queue that owns it. Another queue waits while that pid
 # is alive (`kill -0`) and takes a stale lock over. Every wait is on a pid, never on `pgrep -f`, whose pattern also
@@ -43,7 +46,9 @@ while ! mkdir "$lock" 2>/dev/null; do
   elif [[ -z $holder ]] && [[ -d $lock ]] && (( waiting < 2 )); then
     waiting=2; sleep 1  # the owner may be between mkdir and writing its pid
   else
-    rm -rf "$lock"
+    # Stale: only the queue whose rename succeeds removes it, so two queues never both take over.
+    mv "$lock" "$lock.stale.$$" 2>/dev/null && rm -rf "$lock.stale.$$"
+    waiting=0
   fi
 done
 echo "$$" > "$lock/pid"
@@ -67,14 +72,17 @@ for item in "$@"; do
   # Numeric order: parte-10 after parte-9.
   sorted=(); for (( i = 1; i <= ${#parts[@]}; i++ )); do sorted+=("$folder/leitura-parte-$i.md"); done
   echo "UX-QUEUE: PR #$pr rodada $round enviado — ${#sorted[@]} parte(s)"
-  for message in "${sorted[@]}"; do
-    log="${message%.md}.log"; : > "$log"
+  count=${#sorted[@]}
+  for (( i = 1; i <= count; i++ )); do
+    message="$folder/leitura-parte-$i.md"
     [[ -f $message ]] || { echo "UX-QUEUE: PR #$pr rodada $round falha — parte ausente $message"; exit 1; }
+    report="$folder/laudo.md"; (( i < count )) && report="$folder/laudo-parte-$i.md"
+    [[ -s $report ]] && continue
+    log="${message%.md}.log"; : > "$log"
     for text in "$clear_command" "$(cat "$role")" "$(cat "$message")"; do
       if ! ask "$text" "$log"; then echo "UX-QUEUE: PR #$pr rodada $round falha — maestri ask, log $log"; exit 1; fi
     done
+    [[ -s $report ]] || { echo "UX-QUEUE: PR #$pr rodada $round fim — laudo ausente $report"; exit 3; }
   done
-  report="$folder/laudo.md"
-  if [[ -s $report ]]; then echo "UX-QUEUE: PR #$pr rodada $round fim — laudo $report"
-  else echo "UX-QUEUE: PR #$pr rodada $round fim — laudo ausente $report"; exit 3; fi
+  echo "UX-QUEUE: PR #$pr rodada $round fim — laudo $folder/laudo.md"
 done

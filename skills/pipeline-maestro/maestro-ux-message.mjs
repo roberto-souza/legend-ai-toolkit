@@ -1,32 +1,33 @@
 #!/usr/bin/env node
 /**
  * Builds the single-reading message for the UX reader from the capture tool output, so the maestro never writes it by
- * hand. The message carries only facts: the files of the round (`cenarios.json`, `medidas.json`, `capturas.md`), the
+ * hand. The message carries only facts: the files of the round (`cenarios.json`, `medidas.json`, `dados-criados.md`), the
  * screens the diff touches (names only), recorded PR sections copied verbatim and the seal commands. It never says what
  * the PR fixed, what is or is not blocking, nor the expected severity.
  *
  * A round with more images than `--max-images` is split into parts, one clean session each: every part writes its own
  * report file, and the last one also reads the earlier reports and writes the final one (`laudo.md`).
  *
- * Writes `<dir>/leitura-parte-<i>.md` (removing older ones) and prints each path on its own line.
+ * Writes `<dir>/leitura-parte-<i>.md` and prints each path on its own line. Older parts and reports (`laudo.md`,
+ * `laudo-parte-<i>.md`) are removed first, so a report in the folder always answers the current message.
  *
  * Usage: node maestro-ux-message.mjs --dir <round folder> --pr <n> --branch <branch> --sha <sha> --round <k>
  *   --root <main checkout> --screens <screen>[,<screen>...] [--stamps screen,ux|ux|none] [--pr-body <file>]
  *   [--mobile-first <app>[,<app>...]] [--audience <app>=<text>]... [--pontual <png>=<validator line>]...
- *   [--max-images 80]
+ *   [--section <PR body heading>]... [--max-images 80]
  */
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const REPEATABLE = new Set(['audience', 'pontual']);
+const REPEATABLE = new Set(['audience', 'pontual', 'section']);
 const REQUIRED = ['dir', 'pr', 'branch', 'sha', 'round', 'root', 'screens'];
 const RECORDED_SECTIONS = [/^Decisions$/i, /^Decisões$/i, /^Sugestões futuras/i];
 const UX_ROLE = '.claude/skills/pipeline-maestro/roles/ux.md';
 
 /** Parses `--key value` pairs; repeatable keys collect into arrays. */
 export function parseArgs(argv) {
-  const flags = { audience: [], pontual: [] };
+  const flags = { audience: [], pontual: [], section: [] };
   for (let index = 0; index < argv.length; index += 2) {
     const key = argv[index];
     const value = argv[index + 1];
@@ -94,13 +95,15 @@ export function collect(dir, flags) {
     .sort((a, b) => a.rank[0] - b.rank[0] || a.rank[1] - b.rank[1] || a.order - b.order)
     .map(({ item }) => item);
   const siblings = items.filter(item => item.kind === 'irma');
-  const manifest = existsSync(path.join(dir, 'capturas.md')) ? readFileSync(path.join(dir, 'capturas.md'), 'utf8') : '';
-  return { steps, siblings, manifest, screens };
+  const createdFile = path.join(dir, 'dados-criados.md');
+  const created = existsSync(createdFile) ? readFileSync(createdFile, 'utf8').trim() : '';
+  return { steps, siblings, created, screens };
 }
 
 /** Packs the steps into parts by screen, each part under `max` images counting the siblings it repeats. */
 export function split(steps, siblingCount, max) {
-  const room = Math.max(1, max - siblingCount);
+  if (siblingCount >= max) throw new Error(`${siblingCount} sibling and pontual images leave no room under --max-images ${max}`);
+  const room = max - siblingCount;
   const groups = [];
   for (const step of steps) {
     const last = groups.at(-1);
@@ -133,27 +136,29 @@ function describeStep(number, step) {
   return lines.join('\n');
 }
 
+/** Double-quotes a value for a POSIX shell. */
+const quote = value => `"${String(value).replace(/[\\"$`]/g, '\\$&')}"`;
+
 function stampCommands(flags, report) {
-  const gate = `node ${flags.root}/.claude/pipeline/core/pipeline-gate.mjs`;
+  const gate = `node ${quote(`${flags.root}/.claude/pipeline/core/pipeline-gate.mjs`)}`;
   const lines = [];
   if (flags.stamps === 'screen,ux') {
-    lines.push(`- só no APROVADO: ${gate} stamp screen --pr ${flags.pr} --sha ${flags.sha} --evidence "leitura única rodada ${flags.round}: laudo ${report}"`);
+    lines.push(`- só no APROVADO: ${gate} stamp screen --pr ${flags.pr} --sha ${flags.sha} --evidence ${quote(`leitura única rodada ${flags.round}: laudo ${report}`)}`);
   }
   if (flags.stamps !== 'none') {
-    lines.push(`- só com APROVADO e PRONTO: ${gate} stamp ux --pr ${flags.pr} --sha ${flags.sha} --evidence "leitura única rodada ${flags.round}: MÉDIA <n>/10, laudo ${report}"`);
+    lines.push(`- só com APROVADO e PRONTO: ${gate} stamp ux --pr ${flags.pr} --sha ${flags.sha} --evidence ${quote(`leitura única rodada ${flags.round}: MÉDIA <n>/10, laudo ${report}`)}`);
   }
   return lines;
 }
 
 /** The text of every part. Pure: reads nothing, so the tests can check it. */
-export function render(flags, { steps, siblings, manifest, screens }, recorded) {
+export function render(flags, { steps, siblings, created, screens }, recorded) {
   const parts = split(steps, siblings.length + flags.pontual.length, flags.maxImages);
   const total = parts.length;
   const final = path.join(flags.dir, 'laudo.md');
   const reportOf = index => (total === 1 ? final : path.join(flags.dir, `laudo-parte-${index + 1}.md`));
   const audiences = flags.audience.map(value => pair(value, 'audience'));
   const pontuais = flags.pontual.map(value => pair(value, 'pontual'));
-  const created = sections(manifest, [/^Dados criados$/i]);
   let number = 0;
   return parts.map((part, index) => {
     const last = index === total - 1;
@@ -191,10 +196,10 @@ export function render(flags, { steps, siblings, manifest, screens }, recorded) 
     } else {
       out.push('Sem telas irmãs nesta rodada.');
     }
-    if (created.length) {
+    if (created) {
       out.push('');
-      out.push('Dados criados pelo executor no tenant de teste (capturas.md):');
-      out.push(created[0].body);
+      out.push('Dados criados pelo executor no tenant de teste (dados-criados.md):');
+      out.push(created);
     }
     for (const section of recorded) {
       out.push('');
@@ -214,10 +219,11 @@ export function render(flags, { steps, siblings, manifest, screens }, recorded) 
 function main(argv) {
   const flags = parseArgs(argv);
   flags.dir = path.resolve(flags.dir);
-  const recorded = flags['pr-body'] ? sections(readFileSync(flags['pr-body'], 'utf8'), RECORDED_SECTIONS) : [];
+  const extra = flags.section.map(title => new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i'));
+  const recorded = flags['pr-body'] ? sections(readFileSync(flags['pr-body'], 'utf8'), [...RECORDED_SECTIONS, ...extra]) : [];
   const texts = render(flags, collect(flags.dir, flags), recorded);
   for (const file of readdirSync(flags.dir)) {
-    if (/^leitura-parte-\d+\.md$/.test(file)) rmSync(path.join(flags.dir, file));
+    if (/^(leitura-parte-\d+\.(md|log)|laudo(-parte-\d+)?\.md)$/.test(file)) rmSync(path.join(flags.dir, file));
   }
   texts.forEach((text, index) => {
     const file = path.join(flags.dir, `leitura-parte-${index + 1}.md`);

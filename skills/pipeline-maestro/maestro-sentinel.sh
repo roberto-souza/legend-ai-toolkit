@@ -16,11 +16,15 @@
 # modification time differs from the one seen at the first poll (absent counts as a time), the sentinel prints
 # `MEDIDAS PRONTAS: pedido <id> — <folder>/medidas.json`, because the executor does not always print its line. Each
 # request id is reported once, by whichever comes first: its `CAPTURAS PRONTAS` line or its new `medidas.json`.
-# Usage: maestro-sentinel.sh <executor terminal> <note name> [idle-minutes=20] [poll-seconds=60] [<request id>[=<folder>]...]
+# `<request id>@<epoch>=<folder>` (the time the maestro sent the request) reports a `medidas.json` modified at or after
+# <epoch> even at the first poll, so a delivery that landed while no sentinel ran is not taken as the baseline.
+# Usage: maestro-sentinel.sh <executor terminal> <note name> [idle-minutes=20] [poll-seconds=60] [<request id>[@<epoch>][=<folder>]...]
 terminal=$1; note=$2; idle_min=${3:-20}; poll=${4:-60}
-expected=(); folders=(); baseline=(); reported=" "
+expected=(); folders=(); since=(); baseline=(); reported=" "
 for arg in "${@:5}"; do
-  if [[ $arg == *=* ]]; then expected+=("${arg%%=*}"); folders+=("${arg#*=}"); else expected+=("$arg"); folders+=(""); fi
+  folder=""; [[ $arg == *=* ]] && { folder=${arg#*=}; arg=${arg%%=*}; }
+  epoch=""; [[ $arg == *@* ]] && { epoch=${arg#*@}; arg=${arg%%@*}; }
+  expected+=("$arg"); folders+=("$folder"); since+=("$epoch")
 done
 limit=$((idle_min * 60)); stalled=0; last_alert=0; first=1; prev=""; changed_at=$(date +%s); prev_keys=""
 
@@ -81,8 +85,12 @@ while true; do
   for i in "${!expected[@]}"; do
     [[ -z ${folders[i]} ]] && continue
     current=$(stamp_of "${folders[i]}")
-    if (( first )); then baseline[i]=$current; continue; fi
-    [[ $current == absent || $current == "${baseline[i]}" ]] && continue
+    if [[ -n ${since[i]} ]]; then
+      [[ $current == absent ]] || (( current < since[i] )) && continue
+    else
+      if (( first )); then baseline[i]=$current; continue; fi
+      [[ $current == absent || $current == "${baseline[i]}" ]] && continue
+    fi
     [[ $reported == *" ${expected[i]} "* ]] && continue
     reported+="${expected[i]} "
     echo "SENTINEL $terminal: MEDIDAS PRONTAS: pedido ${expected[i]} — ${folders[i]%/}/medidas.json"

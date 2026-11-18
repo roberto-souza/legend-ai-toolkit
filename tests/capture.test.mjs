@@ -45,7 +45,7 @@ test('every section of the tool flow opens gated on team.capture', () => {
 
 test('the tool-flow sentences in the main files are gated on team.capture', () => {
   const skill = read('skills/pipeline-maestro/SKILL.md');
-  for (const phrase of ['**Com `team.capture`.**', 'Com `team.capture`, a tela web segue', 'Com `team.capture`, abra só as citadas', 'com `team.capture` seguido de `<id>=<pasta>`']) {
+  for (const phrase of ['**Com `team.capture`.**', 'Com `team.capture`, a tela web segue', 'Com `team.capture`, abra só as citadas', 'com `team.capture` seguido de `<id>@<epoch>=<pasta>`']) {
     assert.ok(skill.includes(phrase), phrase);
   }
   assert.match(read('skills/pipeline-maestro/roles/executor.md'), /Com `team\.capture` no profile, siga a seção "Pedido de capturas pela ferramenta"/);

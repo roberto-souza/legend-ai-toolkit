@@ -35,7 +35,8 @@ function round(directory, count = 3) {
     scenarios: scenarios.map(scenario => ({ id: scenario.id, file: `${scenario.id}.png`, result: 'OK',
       measures: [{ type: 'url', value: '/x?s=1', limit: '/x?s=1', result: 'OK' }, { type: 'console', value: 'sem erro', limit: 'nenhum erro', result: 'OK' }] })),
   }));
-  writeFileSync(path.join(directory, 'capturas.md'), 'linhas\n\n## Fora do script\n\n## Dados criados\n\na-list — um registro pago — cenário 1\n');
+  writeFileSync(path.join(directory, 'capturas.md'), 'linhas\n\n## Fora do script\n');
+  writeFileSync(path.join(directory, 'dados-criados.md'), 'a-list — um registro pago — cenário 1\n');
 }
 
 function generate(directory, extra = []) {
@@ -130,8 +131,7 @@ function fakeMaestri(directory, { slow = 0 } = {}) {
     '[ "$1" = ask ] || exit 0',
     `printf '%s\\n' "start ${'$'}{3:0:40}" >> "${calls}"`,
     slow ? `sleep ${slow}` : ':',
-    'report=$(printf "%s" "$3" | sed -nE "s/.*completos em ([^ ]+laudo\\.md)\\..*/\\1/p" | head -1)',
-    '[ -n "$report" ] && echo "MÉDIA 8/10 — PRONTO" > "$report"',
+    'printf "%s" "$3" | grep -oE "[^ (),]+/laudo(-parte-[0-9]+)?\\.md" | while read -r report; do echo "MÉDIA 8/10 — PRONTO" > "$report"; done',
     `printf '%s\\n' "end" >> "${calls}"`,
     'echo "resposta do leitor"',
     '',
@@ -239,4 +239,54 @@ test('a stale lock from a dead pid is taken over', async t => {
 
 test('the queue never waits by process-name match', () => {
   assert.doesNotMatch(readFileSync(QUEUE, 'utf8').replace(/^#.*$/gm, ''), /pgrep|pkill|ps aux/);
+});
+
+test('a split reading checks each part report, and a second run skips the parts already answered', async t => {
+  const directory = temp(t);
+  const ux = path.join(directory, 'ux');
+  const folder = path.join(ux, 'pr-11');
+  mkdirSync(folder, { recursive: true });
+  round(folder, 6);
+  generate(folder, ['--max-images', '4']);
+  writeFileSync(path.join(directory, 'papel.md'), 'papel');
+  const { calls, env } = fakeMaestri(directory);
+  const first = await queue(['[UX] claude', path.join(directory, 'papel.md'), ux, '11:1'], env);
+  assert.equal(first.status, 0, first.output);
+  assert.ok(existsSync(path.join(folder, 'laudo-parte-1.md')));
+  assert.equal(readFileSync(calls, 'utf8').split('\n').filter(line => line.startsWith('start Leitura')).length, 2);
+  rmSync(path.join(folder, 'laudo.md'));
+  const second = await queue(['[UX] claude', path.join(directory, 'papel.md'), ux, '11:1'], env);
+  assert.equal(second.status, 0, second.output);
+  const parts = readFileSync(calls, 'utf8').split('\n').filter(line => line.startsWith('start Leitura'));
+  assert.equal(parts.length, 3, 'only the last part is sent again');
+});
+
+test('generating the message removes older reports of the folder', t => {
+  const directory = temp(t);
+  round(directory);
+  writeFileSync(path.join(directory, 'laudo.md'), 'velho');
+  writeFileSync(path.join(directory, 'laudo-parte-1.md'), 'velho');
+  generate(directory);
+  assert.ok(!existsSync(path.join(directory, 'laudo.md')));
+  assert.ok(!existsSync(path.join(directory, 'laudo-parte-1.md')));
+});
+
+test('seal commands quote the gate path, and too many siblings fail clearly', t => {
+  const directory = temp(t);
+  round(directory);
+  const [[, text]] = generate(directory, ['--root', '/a b']);
+  assert.match(text, /node "\/a b\/\.claude\/pipeline\/core\/pipeline-gate\.mjs" stamp screen/);
+  const result = spawnSync(process.execPath, [MESSAGE, '--dir', directory, '--pr', '1', '--branch', 'b', '--sha', 's', '--round', '1',
+    '--root', '/r', '--screens', 'a-list', '--max-images', '1'], { encoding: 'utf8' });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /leave no room under --max-images 1/);
+});
+
+test('--section copies an extra PR body heading verbatim', t => {
+  const directory = temp(t);
+  round(directory);
+  const body = path.join(directory, 'body.md');
+  writeFileSync(body, '## Melhorias de UX adiadas\n\n- ícone maior\n');
+  const [[, text]] = generate(directory, ['--pr-body', body, '--section', 'Melhorias de UX adiadas']);
+  assert.match(text, /seção "Melhorias de UX adiadas"[^\n]*\n- ícone maior/);
 });

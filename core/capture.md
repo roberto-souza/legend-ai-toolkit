@@ -102,11 +102,11 @@ Seletor de medida que não acha elemento não reprova o PR: o cenário sai `FALH
 
 ## Saída
 
-Tudo em `{out}`. A ferramenta apaga antes só o que ela mesma grava (os PNG, `capturas.md`, `medidas.json` e `irmas/`), nunca outra `rodada-<k>/` nem o `cenarios.json`.
+Tudo em `{out}`. A ferramenta apaga antes só o que ela mesma grava (os PNG, `capturas.md`, `medidas.json` e `irmas/`), nunca outra `rodada-<k>/`, o `cenarios.json`, o `dados-criados.md` nem os arquivos da leitura da UX.
 
 - **PNG:** um por cenário, em `{out}/<id>.png`.
 - **Ordem:** o `medidas.json` é o último arquivo que a ferramenta grava, de uma vez, depois dos PNG e do `capturas.md`: o sentinela do maestro trata o `medidas.json` novo como entrega do pedido.
-- **`capturas.md`:** uma linha por cenário, no formato de `.claude/skills/pipeline-maestro/roles/executor.md`, seção "Pedido de capturas", passo 12, mais `## Fora do script` com os itens de `outOfScript`. Cenário cuja ação não se cumpre (o elemento não aparece no prazo) grava o que a tela mostra e marca a linha `FALHA DO SCRIPT: <o que esperava>`.
+- **`capturas.md`:** uma linha por cenário, no formato de `.claude/skills/pipeline-maestro/roles/executor.md`, seção "Pedido de capturas", passo 12 (o campo da evidência leva o `expected` do cenário), mais `## Fora do script` com os itens de `outOfScript`. Cenário cuja ação não se cumpre (o elemento não aparece no prazo) grava o que a tela mostra e marca a linha `FALHA DO SCRIPT: <o que esperava>`.
 - **`medidas.json`:**
 
 ```json
