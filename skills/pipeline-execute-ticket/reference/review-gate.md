@@ -1,6 +1,6 @@
 # O gate de revisão
 
-Motivos dos passos de `.claude/skills/pipeline-execute-ticket/SKILL.md`, seção "Fase 5 — Gate de revisão, antes de existir PR" e das subseções dela. Nenhuma ação nova mora aqui.
+Motivos dos passos de `.claude/skills/pipeline-execute-ticket/SKILL.md`, seção "Fase 5 — Gate de revisão, antes de existir PR" e das subseções dela. As seções de passos continuam os passos que a skill manda ler; fora delas, nenhuma ação nova mora aqui.
 
 ## Contexto limpo
 
@@ -101,3 +101,12 @@ Passos do passo 2 da "Revisão delta (correção depois do PR)" de `.claude/skil
    - 1ª e 2ª volta da tela → correção como hoje. 3ª volta da mesma tela → pare de remendar: desenhe o mockup HTML da tela corrigida como Artifact (sem Artifact: o fallback de `.claude/skills/pipeline-write-ticket/SKILL.md`, seção "Fase 2 — Perguntar o que só o usuário sabe"), obtenha a aprovação do humano (sob o maestro, `TRAVADO: <motivo>` com o link) e só então mande a correção, com o mockup no brief; o link e a data da aprovação vão também ao `## Decisions` do PR, como no passo 8 da Fase 2.
    - Mockup aprovado → as voltas seguintes da tela se corrigem contra ele; não há segundo mockup, salvo pedido do humano.
    - Detalhe: `.claude/skills/pipeline-execute-ticket/reference/review-gate.md`, seção "Retrabalho de tela".
+
+## Revisão delta: passos
+
+Continuação dos passos 1 e 2 de `.claude/skills/pipeline-execute-ticket/SKILL.md`, seção "Revisão delta (correção depois do PR)".
+
+3. Cabeça selada: a cabeça do PR antes do push (`gh pr view <pr> --json headRefOid --jq .headRefOid`), com `pipeline/review` em `success` (`gh api repos/<repo>/commits/<sha>/status`); range `<cabeça selada>..HEAD`, ou `<parent>...HEAD` se ela não tem selo de revisão.
+4. Lance um `pipeline-reviewer` novo na primeira rodada da correção, com spec, motivo e range, como nos passos 2 a 7 de `.claude/skills/pipeline-execute-ticket/SKILL.md`, seção "Fase 5 — Gate de revisão, antes de existir PR" (`model: sonnet` se o delta tem menos de 80 linhas e o gatilho não dispara sobre ele; senão o modelo do passo 2 da Fase 5, consultado sobre o `<parent>...HEAD` do ticket, nunca o delta); da rodada 2 em diante, `SendMessage` ao mesmo, com o range `<Reviewed head da rodada anterior da correção>..HEAD` e os achados triados (`.claude/skills/pipeline-review-diff/SKILL.md`, seção "O que você recebe"). Avalie o gatilho de segurança sobre o delta.
+5. Mesma triagem (`.claude/skills/pipeline-execute-ticket/SKILL.md`, seção "A triagem"); **teto de 3 rodadas por correção** → BLOCKER válido em pé na terceira: pare, escale e não dê push.
+6. Aprovado → `.claude/skills/pipeline-execute-ticket/SKILL.md`, seção "Fase 6 — Validação e PR" (gate, push, selo `review` na cabeça nova). Rebase de pilha derruba os selos das branches acima.

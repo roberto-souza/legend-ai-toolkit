@@ -30,7 +30,7 @@ const GATED = [
   ['skills/pipeline-maestro/reference/captura.md', 'Varredura pelo diff'],
   ['skills/pipeline-maestro/reference/validacao-tela.md', 'Passos com a ferramenta'],
   ['skills/pipeline-maestro/reference/validacao-ux.md', 'Leitura única'],
-  ['skills/pipeline-maestro/SKILL.md', 'Validação PR a PR'],
+  ['skills/pipeline-maestro/reference/validacao-tela.md', 'Validação PR a PR'],
   ['core/ux-reference.md', 'Uma leitura, dois laudos'],
   ['skills/pipeline-write-ticket/reference/corpo-do-ticket.md', 'Critério de tela como cenário'],
 ];
